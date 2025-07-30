@@ -12,6 +12,7 @@ interface QuickAddEpisodeProps {
   workId: string;
   workTitle: string;
   workType: "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲";
+  currentEpisodes: Episode[];
   onEpisodeAdded: (episode: Episode) => void;
   onClose: () => void;
 }
@@ -20,17 +21,34 @@ export default function QuickAddEpisode({
   workId,
   workTitle,
   workType,
+  currentEpisodes,
   onEpisodeAdded,
   onClose,
 }: QuickAddEpisodeProps) {
+  // 計算下一集數
+  const getNextEpisodeNumber = () => {
+    if (currentEpisodes.length === 0) return 1;
+
+    const currentSeason = currentEpisodes[0]?.season || 1;
+    const currentSeasonEpisodes = currentEpisodes.filter(
+      (ep) => ep.season === currentSeason
+    );
+
+    if (currentSeasonEpisodes.length === 0) return 1;
+
+    const maxNumber = Math.max(...currentSeasonEpisodes.map((ep) => ep.number));
+    return maxNumber + 1;
+  };
+
   const [episodeData, setEpisodeData] = useState({
-    number: 1,
+    number: getNextEpisodeNumber(),
     title: "",
     description: "",
     type: "episode" as const,
-    season: 1,
+    season: currentEpisodes.length > 0 ? currentEpisodes[0]?.season || 1 : 1,
     note: "",
   });
+  const [batchCount, setBatchCount] = useState(1);
 
   const getEpisodeTypeLabel = (type: string) => {
     switch (type) {
@@ -75,19 +93,30 @@ export default function QuickAddEpisode({
   const handleAddEpisode = () => {
     if (!episodeData.number) return;
 
-    const episode: Episode = {
-      id: generateEpisodeId(),
-      number: episodeData.number,
-      title: episodeData.title || undefined,
-      description: episodeData.description || undefined,
-      type: episodeData.type,
-      season: episodeData.season,
-      watched: true,
-      date_watched: new Date().toISOString(),
-      note: episodeData.note || undefined,
-    };
+    const episodes: Episode[] = [];
 
-    onEpisodeAdded(episode);
+    for (let i = 0; i < batchCount; i++) {
+      const episode: Episode = {
+        id: generateEpisodeId(),
+        number: episodeData.number + i,
+        title: episodeData.title
+          ? `${episodeData.title} ${i > 0 ? `(${i + 1})` : ""}`
+          : undefined,
+        description: episodeData.description || undefined,
+        type: episodeData.type,
+        season: episodeData.season,
+        watched: true,
+        date_watched: new Date().toISOString(),
+        note: episodeData.note || undefined,
+      };
+      episodes.push(episode);
+    }
+
+    // 批量新增所有集數
+    episodes.forEach((episode) => {
+      onEpisodeAdded(episode);
+    });
+
     onClose();
   };
 
@@ -104,7 +133,7 @@ export default function QuickAddEpisode({
           <p className="text-sm text-gray-600">為「{workTitle}」新增集數</p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-600">季數</label>
               <Input
@@ -131,6 +160,23 @@ export default function QuickAddEpisode({
                     ...episodeData,
                     number: parseInt(e.target.value) || 1,
                   })
+                }
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-600">
+                新增數量
+              </label>
+              <Input
+                type="number"
+                min="1"
+                max="10"
+                value={batchCount}
+                onChange={(e) =>
+                  setBatchCount(
+                    Math.max(1, Math.min(10, parseInt(e.target.value) || 1))
+                  )
                 }
                 className="mt-1"
               />
@@ -197,7 +243,7 @@ export default function QuickAddEpisode({
           <div className="flex space-x-2">
             <Button onClick={handleAddEpisode} className="flex-1">
               <Check className="w-4 h-4 mr-1" />
-              新增集數
+              新增 {batchCount} 集
             </Button>
             <Button variant="outline" onClick={onClose} className="flex-1">
               取消

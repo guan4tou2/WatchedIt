@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import PlatformInfo from "@/components/PlatformInfo";
 import { pwaService } from "@/lib/pwa";
 import Link from "next/link";
-import { ArrowRight, Play, Check, Eye, Plus } from "lucide-react";
+import { ArrowRight, Play, Check, Eye, Plus, Settings } from "lucide-react";
 import QuickAddEpisode from "@/components/QuickAddEpisode";
 import { Episode } from "@/types";
 
@@ -60,6 +60,9 @@ export default function HomePage() {
     });
 
     updateWork(work.id, { episodes: updatedEpisodes });
+  };
+
+  const handleQuickAddClose = () => {
     setQuickAddEpisode(null);
   };
 
@@ -85,7 +88,15 @@ export default function HomePage() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">看過了</h1>
-        <Button>新增作品</Button>
+        <div className="flex items-center space-x-2">
+          <Link href="/settings">
+            <Button variant="outline" size="sm">
+              <Settings className="w-4 h-4 mr-1" />
+              設定
+            </Button>
+          </Link>
+          <Button>新增作品</Button>
+        </div>
       </div>
 
       {/* 平台資訊 */}
@@ -136,31 +147,6 @@ export default function HomePage() {
             </CardContent>
           </Card>
         </div>
-      )}
-
-      {/* 集數統計 */}
-      {stats?.episode_stats && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>集數統計</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {stats.episode_stats.watched_episodes}
-                </div>
-                <div className="text-sm text-gray-600">已觀看集數</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-600">
-                  {stats.episode_stats.total_episodes}
-                </div>
-                <div className="text-sm text-gray-600">總集數</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       )}
 
       {/* 作品列表 */}
@@ -219,18 +205,6 @@ export default function HomePage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {/* 集數顯示 */}
-                    {totalEpisodes > 0 && (
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between text-sm mb-1">
-                          <span className="text-gray-600">集數</span>
-                          <span className="font-medium">
-                            {watchedCount}/{totalEpisodes}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
                     {work.rating && (
                       <div className="flex items-center space-x-1 mb-2">
                         <span className="text-sm text-gray-600">評分:</span>
@@ -281,20 +255,15 @@ export default function HomePage() {
 
                     {/* 狀態指示器 */}
                     <div className="flex items-center mt-2">
-                      {totalEpisodes > 0 && watchedCount === totalEpisodes ? (
+                      {totalEpisodes > 0 ? (
                         <div className="flex items-center text-green-600 text-sm">
                           <Check className="w-3 h-3 mr-1" />
-                          已完成
-                        </div>
-                      ) : watchedCount > 0 ? (
-                        <div className="flex items-center text-blue-600 text-sm">
-                          <Eye className="w-3 h-3 mr-1" />
-                          進行中
+                          已記錄 {totalEpisodes} 集
                         </div>
                       ) : (
                         <div className="flex items-center text-gray-500 text-sm">
                           <span className="w-3 h-3 mr-1">○</span>
-                          未開始
+                          未記錄集數
                         </div>
                       )}
                     </div>
@@ -312,8 +281,11 @@ export default function HomePage() {
           workId={quickAddEpisode.workId}
           workTitle={quickAddEpisode.workTitle}
           workType={quickAddEpisode.workType}
+          currentEpisodes={
+            works.find((w) => w.id === quickAddEpisode.workId)?.episodes || []
+          }
           onEpisodeAdded={handleEpisodeAdded}
-          onClose={() => setQuickAddEpisode(null)}
+          onClose={handleQuickAddClose}
         />
       )}
     </div>

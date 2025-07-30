@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Episode } from "@/types";
-import { Plus, Eye, EyeOff, Edit, Trash2, Check } from "lucide-react";
+import { Plus, Edit, Trash2, Check } from "lucide-react";
 
 interface EpisodeManagerProps {
   episodes: Episode[];
@@ -116,21 +116,6 @@ export default function EpisodeManager({
     onEpisodesChange(updatedEpisodes);
   };
 
-  const handleToggleWatched = (episodeId: string) => {
-    const updatedEpisodes = episodes.map((ep) =>
-      ep.id === episodeId
-        ? {
-            ...ep,
-            watched: !ep.watched,
-            date_watched: !ep.watched ? new Date().toISOString() : undefined,
-          }
-        : ep
-    );
-    onEpisodesChange(updatedEpisodes);
-  };
-
-  const getWatchedCount = () => episodes.filter((ep) => ep.watched).length;
-
   return (
     <Card className="w-full">
       <CardHeader>
@@ -138,7 +123,7 @@ export default function EpisodeManager({
           <CardTitle className="text-lg">集數管理</CardTitle>
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-600">
-              已觀看: {getWatchedCount()}/{episodes.length}
+              已記錄: {episodes.length} 集
             </span>
             {!disabled && (
               <Button size="sm" onClick={() => setIsAdding(true)}>
@@ -275,18 +260,6 @@ export default function EpisodeManager({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center space-x-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleToggleWatched(episode.id)}
-                          disabled={disabled}
-                        >
-                          {episode.watched ? (
-                            <Eye className="w-4 h-4 text-green-600" />
-                          ) : (
-                            <EyeOff className="w-4 h-4 text-gray-400" />
-                          )}
-                        </Button>
                         <div className="text-center">
                           <div className="font-semibold">
                             第{episode.season}季 第{episode.number}集
@@ -333,14 +306,6 @@ export default function EpisodeManager({
                         <div className="text-xs text-gray-500">
                           備註: {episode.note}
                         </div>
-                      )}
-                    </div>
-                  )}
-                  {episode.watched && episode.date_watched && (
-                    <div className="mt-1 text-xs text-green-600">
-                      觀看於:{" "}
-                      {new Date(episode.date_watched).toLocaleDateString(
-                        "zh-TW"
                       )}
                     </div>
                   )}

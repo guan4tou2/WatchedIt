@@ -230,25 +230,10 @@ export default function WorkDetailPage() {
             <CardContent className="space-y-4">
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-600">
-                  {watchedCount}
+                  {totalEpisodes}
                 </div>
-                <div className="text-sm text-gray-600">已觀看集數</div>
+                <div className="text-sm text-gray-600">已記錄集數</div>
               </div>
-
-              {totalEpisodes > 0 && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>完成度</span>
-                    <span>{completionRate}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${completionRate}%` }}
-                    />
-                  </div>
-                </div>
-              )}
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="text-center">
