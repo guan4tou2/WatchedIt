@@ -5,7 +5,7 @@ import {
   WorkList,
   Tag,
   Stats,
-  EpisodeProgress,
+  Episode,
 } from "@/types";
 
 // 本地儲存鍵名
@@ -50,12 +50,7 @@ export const workStorage = {
       date_added: getCurrentTimestamp(),
       date_updated: null,
       tags: [],
-      progress: workData.progress || {
-        current: 0,
-        total: undefined,
-        special: 0,
-        season: 1,
-      },
+      episodes: workData.episodes || [],
     };
 
     works.push(newWork);
@@ -165,14 +160,14 @@ export const workStorage = {
       yearStats[year] = (yearStats[year] || 0) + 1;
     });
 
-    // 進度統計
+    // 集數統計
     let totalEpisodes = 0;
     let watchedEpisodes = 0;
 
     works.forEach((work) => {
-      if (work.progress) {
-        totalEpisodes += work.progress.total || 0;
-        watchedEpisodes += work.progress.current || 0;
+      if (work.episodes) {
+        totalEpisodes += work.episodes.length;
+        watchedEpisodes += work.episodes.filter((ep) => ep.watched).length;
       }
     });
 
@@ -186,7 +181,7 @@ export const workStorage = {
       type_stats: typeStats,
       status_stats: statusStats,
       year_stats: yearStats,
-      progress_stats: {
+      episode_stats: {
         total_episodes: totalEpisodes,
         watched_episodes: watchedEpisodes,
         completion_rate: completionRate,
@@ -260,13 +255,37 @@ export const initializeSampleData = () => {
       rating: 5,
       review: "經典神作！",
       source: "AniList",
-      progress: {
-        current: 25,
-        total: 25,
-        special: 2,
-        season: 1,
-        episode_type: "episode",
-      },
+      episodes: [
+        {
+          id: "ep-1",
+          number: 1,
+          title: "致2000年後的你",
+          description: "艾連·葉卡在夢中看到未來",
+          type: "episode",
+          season: 1,
+          watched: true,
+          date_watched: "2023-01-15T00:00:00.000Z",
+        },
+        {
+          id: "ep-2",
+          number: 2,
+          title: "那一天",
+          description: "巨人入侵希干希納區",
+          type: "episode",
+          season: 1,
+          watched: true,
+          date_watched: "2023-01-15T00:00:00.000Z",
+        },
+        {
+          id: "ep-special",
+          number: 1,
+          title: "無悔的選擇",
+          description: "里維兵長的外傳",
+          type: "special",
+          season: 1,
+          watched: false,
+        },
+      ],
     });
 
     workStorage.create({
@@ -276,13 +295,37 @@ export const initializeSampleData = () => {
       year: 2019,
       rating: 4,
       source: "AniList",
-      progress: {
-        current: 8,
-        total: 26,
-        special: 0,
-        season: 1,
-        episode_type: "episode",
-      },
+      episodes: [
+        {
+          id: "ep-1",
+          number: 1,
+          title: "殘酷",
+          description: "竈門炭治郎的家人被鬼襲擊",
+          type: "episode",
+          season: 1,
+          watched: true,
+          date_watched: "2023-02-01T00:00:00.000Z",
+        },
+        {
+          id: "ep-2",
+          number: 2,
+          title: "培育者 鱗瀧左近次",
+          description: "炭治郎開始學習呼吸法",
+          type: "episode",
+          season: 1,
+          watched: true,
+          date_watched: "2023-02-01T00:00:00.000Z",
+        },
+        {
+          id: "ep-3",
+          number: 3,
+          title: "鬼舞辻無慘",
+          description: "炭治郎遇到鬼舞辻無慘",
+          type: "episode",
+          season: 1,
+          watched: false,
+        },
+      ],
     });
 
     workStorage.create({
@@ -293,13 +336,28 @@ export const initializeSampleData = () => {
       rating: 5,
       review: "魔法世界的開始",
       source: "手動新增",
-      progress: {
-        current: 17,
-        total: 17,
-        special: 0,
-        season: 1,
-        episode_type: "chapter",
-      },
+      episodes: [
+        {
+          id: "ch-1",
+          number: 1,
+          title: "活下來的男孩",
+          description: "哈利波特被送到德思禮家",
+          type: "chapter",
+          season: 1,
+          watched: true,
+          date_watched: "2023-03-01T00:00:00.000Z",
+        },
+        {
+          id: "ch-2",
+          number: 2,
+          title: "消失的玻璃",
+          description: "哈利發現自己的魔法能力",
+          type: "chapter",
+          season: 1,
+          watched: true,
+          date_watched: "2023-03-01T00:00:00.000Z",
+        },
+      ],
     });
   }
 

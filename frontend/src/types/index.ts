@@ -5,7 +5,7 @@ export interface Work {
   type: "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲";
   status: "進行中" | "已完成" | "暫停" | "放棄";
   year?: number;
-  progress?: EpisodeProgress;
+  episodes: Episode[];
   rating?: number;
   review?: string;
   note?: string;
@@ -17,13 +17,17 @@ export interface Work {
   date_updated?: string;
 }
 
-// 集數進度
-export interface EpisodeProgress {
-  current: number;
-  total?: number;
-  special?: number; // 特別篇/OVA/電影版等
-  season?: number; // 季數
-  episode_type?: "episode" | "chapter" | "volume" | "movie";
+// 集數
+export interface Episode {
+  id: string;
+  number: number; // 集數
+  title?: string; // 標題
+  description?: string; // 描述
+  type: "episode" | "special" | "ova" | "movie" | "chapter"; // 類型
+  season: number; // 季數
+  watched: boolean; // 是否已觀看
+  date_watched?: string; // 觀看日期
+  note?: string; // 備註
 }
 
 // 作品建立
@@ -32,7 +36,7 @@ export interface WorkCreate {
   type: Work["type"];
   status: Work["status"];
   year?: number;
-  progress?: EpisodeProgress;
+  episodes?: Episode[];
   rating?: number;
   review?: string;
   note?: string;
@@ -48,7 +52,7 @@ export interface WorkUpdate {
   type?: Work["type"];
   status?: Work["status"];
   year?: number;
-  progress?: EpisodeProgress;
+  episodes?: Episode[];
   rating?: number;
   review?: string;
   note?: string;
@@ -79,7 +83,7 @@ export interface Stats {
   type_stats: Record<string, number>;
   status_stats: Record<string, number>;
   year_stats: Record<string, number>;
-  progress_stats: {
+  episode_stats: {
     total_episodes: number;
     watched_episodes: number;
     completion_rate: number;

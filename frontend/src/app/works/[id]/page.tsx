@@ -5,9 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Work, EpisodeProgress } from "@/types";
+import { Work, Episode } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
-import EpisodeProgressComponent from "@/components/EpisodeProgress";
+import EpisodeManager from "@/components/EpisodeManager";
 import { ArrowLeft, Edit, Trash2, Star, Calendar, Tag } from "lucide-react";
 
 export default function WorkDetailPage() {
@@ -24,17 +24,17 @@ export default function WorkDetailPage() {
     }
   }, [params.id, getWork]);
 
-  const handleProgressChange = (progress: EpisodeProgress) => {
+  const handleEpisodesChange = (episodes: Episode[]) => {
     if (!work) return;
 
     const updatedWork = {
       ...work,
-      progress,
+      episodes,
       date_updated: new Date().toISOString(),
     };
 
     setWork(updatedWork);
-    updateWork(work.id, { progress });
+    updateWork(work.id, { episodes });
   };
 
   const handleDelete = async () => {
@@ -43,24 +43,6 @@ export default function WorkDetailPage() {
     if (confirm("確定要刪除這個作品嗎？")) {
       await deleteWork(work.id);
       router.push("/");
-    }
-  };
-
-  const getEpisodeLabel = (type: string) => {
-    switch (type) {
-      case "動畫":
-      case "電視劇":
-        return "集";
-      case "小說":
-        return "章";
-      case "漫畫":
-        return "話";
-      case "遊戲":
-        return "章節";
-      case "電影":
-        return "部";
-      default:
-        return "集";
     }
   };
 
@@ -80,11 +62,11 @@ export default function WorkDetailPage() {
     );
   }
 
-  const episodeLabel = getEpisodeLabel(work.type);
+  const episodes = work.episodes || [];
+  const watchedCount = episodes.filter((ep) => ep.watched).length;
+  const totalEpisodes = episodes.length;
   const completionRate =
-    work.progress?.total && work.progress.current !== undefined
-      ? Math.round((work.progress.current / work.progress.total) * 100)
-      : 0;
+    totalEpisodes > 0 ? Math.round((watchedCount / totalEpisodes) * 100) : 0;
 
   return (
     <div className="container mx-auto p-6">
@@ -229,10 +211,10 @@ export default function WorkDetailPage() {
             </CardContent>
           </Card>
 
-          {/* 進度管理 */}
-          <EpisodeProgressComponent
-            progress={work.progress}
-            onProgressChange={handleProgressChange}
+          {/* 集數管理 */}
+          <EpisodeManager
+            episodes={episodes}
+            onEpisodesChange={handleEpisodesChange}
             type={work.type}
             disabled={!isEditing}
           />
@@ -240,22 +222,20 @@ export default function WorkDetailPage() {
 
         {/* 側邊欄 */}
         <div className="space-y-6">
-          {/* 進度摘要 */}
+          {/* 集數摘要 */}
           <Card>
             <CardHeader>
-              <CardTitle>進度摘要</CardTitle>
+              <CardTitle>集數摘要</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-600">
-                  {work.progress?.current || 0}
+                  {watchedCount}
                 </div>
-                <div className="text-sm text-gray-600">
-                  已觀看{episodeLabel}
-                </div>
+                <div className="text-sm text-gray-600">已觀看集數</div>
               </div>
 
-              {work.progress?.total && work.progress.current !== undefined && (
+              {totalEpisodes > 0 && (
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>完成度</span>
@@ -272,18 +252,38 @@ export default function WorkDetailPage() {
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="text-center">
-                  <div className="font-semibold">
-                    {work.progress?.total || "?"}
-                  </div>
-                  <div className="text-gray-600">總{episodeLabel}</div>
+                  <div className="font-semibold">{totalEpisodes}</div>
+                  <div className="text-gray-600">總集數</div>
                 </div>
                 <div className="text-center">
                   <div className="font-semibold">
-                    {work.progress?.season || 1}
+                    {episodes.length > 0
+                      ? Math.max(...episodes.map((ep) => ep.season), 1)
+                      : 1}
                   </div>
                   <div className="text-gray-600">季數</div>
                 </div>
               </div>
+
+              {/* 集數類型統計 */}
+              {episodes.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">集數類型</div>
+                  <div className="space-y-1">
+                    {Object.entries(
+                      episodes.reduce((acc, ep) => {
+                        acc[ep.type] = (acc[ep.type] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>)
+                    ).map(([type, count]) => (
+                      <div key={type} className="flex justify-between text-xs">
+                        <span className="capitalize">{type}</span>
+                        <span>{count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
