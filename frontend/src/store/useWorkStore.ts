@@ -1,176 +1,237 @@
 import { create } from "zustand";
 import { Work, WorkCreate, WorkUpdate, WorkList, Tag, Stats } from "@/types";
-import { apiClient } from "@/lib/api";
+import {
+  workStorage,
+  tagStorage,
+  initializeSampleData,
+} from "@/lib/localStorage";
 
 interface WorkStore {
+  // 狀態
   works: Work[];
   tags: Tag[];
   stats: Stats | null;
   loading: boolean;
   error: string | null;
 
-  // 作品相關
-  fetchWorks: (params?: any) => Promise<void>;
-  fetchWork: (id: string) => Promise<Work | null>;
-  createWork: (work: WorkCreate) => Promise<void>;
-  updateWork: (id: string, work: WorkUpdate) => Promise<void>;
-  deleteWork: (id: string) => Promise<void>;
+  // 作品相關操作
+  fetchWorks: (params?: {
+    page?: number;
+    size?: number;
+    title?: string;
+    type?: string;
+    status?: string;
+    year?: number;
+    tag_ids?: number[];
+  }) => Promise<WorkList>;
+  createWork: (work: WorkCreate) => Promise<Work>;
+  updateWork: (id: string, work: WorkUpdate) => Promise<Work | null>;
+  deleteWork: (id: string) => Promise<boolean>;
+  getWork: (id: string) => Work | null;
 
-  // 標籤相關
-  fetchTags: () => Promise<void>;
-  createTag: (tag: { name: string; color: string }) => Promise<void>;
+  // 標籤相關操作
+  fetchTags: () => Promise<Tag[]>;
+  createTag: (tag: { name: string; color: string }) => Promise<Tag>;
   updateTag: (
     id: number,
     tag: { name?: string; color?: string }
-  ) => Promise<void>;
-  deleteTag: (id: number) => Promise<void>;
+  ) => Promise<Tag | null>;
+  deleteTag: (id: number) => Promise<boolean>;
 
-  // 統計相關
-  fetchStats: () => Promise<void>;
+  // 統計相關操作
+  fetchStats: () => Promise<Stats>;
 
-  // 工具方法
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-  clearError: () => void;
+  // 初始化
+  initialize: () => void;
 }
 
 export const useWorkStore = create<WorkStore>((set, get) => ({
+  // 初始狀態
   works: [],
   tags: [],
   stats: null,
   loading: false,
   error: null,
 
-  setLoading: (loading) => set({ loading }),
-  setError: (error) => set({ error }),
-  clearError: () => set({ error: null }),
+  // 初始化
+  initialize: () => {
+    initializeSampleData();
+    const works = workStorage.getAll();
+    const tags = tagStorage.getAll();
+    const stats = workStorage.getStats();
 
+    set({ works, tags, stats });
+  },
+
+  // 作品相關操作
   fetchWorks: async (params) => {
+    set({ loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
-      const workList = await apiClient.getWorks(params);
-      set({ works: workList.works });
+      const result = workStorage.getList(params);
+      set({ works: result.works, loading: false });
+      return result;
     } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : "取得作品列表失敗",
-      });
-    } finally {
-      set({ loading: false });
+      const errorMessage =
+        error instanceof Error ? error.message : "取得作品列表失敗";
+      set({ error: errorMessage, loading: false });
+      throw error;
     }
   },
 
-  fetchWork: async (id) => {
+  createWork: async (workData) => {
+    set({ loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
-      const work = await apiClient.getWork(id);
-      return work;
+      const newWork = workStorage.create(workData);
+      const works = workStorage.getAll();
+      const stats = workStorage.getStats();
+
+      set({ works, stats, loading: false });
+      return newWork;
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : "取得作品失敗" });
-      return null;
-    } finally {
-      set({ loading: false });
+      const errorMessage =
+        error instanceof Error ? error.message : "新增作品失敗";
+      set({ error: errorMessage, loading: false });
+      throw error;
     }
   },
 
-  createWork: async (work) => {
-    try {
-      set({ loading: true, error: null });
-      await apiClient.createWork(work);
-      // 重新取得作品列表
-      await get().fetchWorks();
-    } catch (error) {
-      set({ error: error instanceof Error ? error.message : "建立作品失敗" });
-    } finally {
-      set({ loading: false });
-    }
-  },
+  updateWork: async (id, workData) => {
+    set({ loading: true, error: null });
 
-  updateWork: async (id, work) => {
     try {
-      set({ loading: true, error: null });
-      await apiClient.updateWork(id, work);
-      // 重新取得作品列表
-      await get().fetchWorks();
+      const updatedWork = workStorage.update(id, workData);
+      if (!updatedWork) {
+        throw new Error("作品不存在");
+      }
+
+      const works = workStorage.getAll();
+      const stats = workStorage.getStats();
+
+      set({ works, stats, loading: false });
+      return updatedWork;
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : "更新作品失敗" });
-    } finally {
-      set({ loading: false });
+      const errorMessage =
+        error instanceof Error ? error.message : "更新作品失敗";
+      set({ error: errorMessage, loading: false });
+      throw error;
     }
   },
 
   deleteWork: async (id) => {
+    set({ loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
-      await apiClient.deleteWork(id);
-      // 重新取得作品列表
-      await get().fetchWorks();
+      const success = workStorage.delete(id);
+      if (!success) {
+        throw new Error("作品不存在");
+      }
+
+      const works = workStorage.getAll();
+      const stats = workStorage.getStats();
+
+      set({ works, stats, loading: false });
+      return true;
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : "刪除作品失敗" });
-    } finally {
-      set({ loading: false });
+      const errorMessage =
+        error instanceof Error ? error.message : "刪除作品失敗";
+      set({ error: errorMessage, loading: false });
+      throw error;
     }
   },
 
+  getWork: (id) => {
+    const works = workStorage.getAll();
+    return works.find((w) => w.id === id) || null;
+  },
+
+  // 標籤相關操作
   fetchTags: async () => {
+    set({ loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
-      const tags = await apiClient.getTags();
-      set({ tags });
+      const tags = tagStorage.getAll();
+      set({ tags, loading: false });
+      return tags;
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : "取得標籤失敗" });
-    } finally {
-      set({ loading: false });
+      const errorMessage =
+        error instanceof Error ? error.message : "取得標籤列表失敗";
+      set({ error: errorMessage, loading: false });
+      throw error;
     }
   },
 
-  createTag: async (tag) => {
+  createTag: async (tagData) => {
+    set({ loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
-      await apiClient.createTag(tag);
-      // 重新取得標籤列表
-      await get().fetchTags();
+      const newTag = tagStorage.create(tagData);
+      const tags = tagStorage.getAll();
+
+      set({ tags, loading: false });
+      return newTag;
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : "建立標籤失敗" });
-    } finally {
-      set({ loading: false });
+      const errorMessage =
+        error instanceof Error ? error.message : "新增標籤失敗";
+      set({ error: errorMessage, loading: false });
+      throw error;
     }
   },
 
-  updateTag: async (id, tag) => {
+  updateTag: async (id, tagData) => {
+    set({ loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
-      await apiClient.updateTag(id, tag);
-      // 重新取得標籤列表
-      await get().fetchTags();
+      const updatedTag = tagStorage.update(id, tagData);
+      if (!updatedTag) {
+        throw new Error("標籤不存在");
+      }
+
+      const tags = tagStorage.getAll();
+      set({ tags, loading: false });
+      return updatedTag;
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : "更新標籤失敗" });
-    } finally {
-      set({ loading: false });
+      const errorMessage =
+        error instanceof Error ? error.message : "更新標籤失敗";
+      set({ error: errorMessage, loading: false });
+      throw error;
     }
   },
 
   deleteTag: async (id) => {
+    set({ loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
-      await apiClient.deleteTag(id);
-      // 重新取得標籤列表
-      await get().fetchTags();
+      const success = tagStorage.delete(id);
+      if (!success) {
+        throw new Error("標籤不存在");
+      }
+
+      const tags = tagStorage.getAll();
+      set({ tags, loading: false });
+      return true;
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : "刪除標籤失敗" });
-    } finally {
-      set({ loading: false });
+      const errorMessage =
+        error instanceof Error ? error.message : "刪除標籤失敗";
+      set({ error: errorMessage, loading: false });
+      throw error;
     }
   },
 
+  // 統計相關操作
   fetchStats: async () => {
+    set({ loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
-      const stats = await apiClient.getStats();
-      set({ stats });
+      const stats = workStorage.getStats();
+      set({ stats, loading: false });
+      return stats;
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : "取得統計失敗" });
-    } finally {
-      set({ loading: false });
+      const errorMessage =
+        error instanceof Error ? error.message : "取得統計數據失敗";
+      set({ error: errorMessage, loading: false });
+      throw error;
     }
   },
 }));

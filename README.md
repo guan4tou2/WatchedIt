@@ -1,161 +1,251 @@
-# WatchedIt - 看過了
+# 🎬 WatchedIt - 看過了
 
-一個自用的作品記錄 Web App，支援動畫、小說、漫畫、電影、電視劇與自定義類型。
+一個自架的媒體追蹤 Web App，幫助你記錄和管理看過的動畫、電影、電視劇、小說等作品。
 
-## 功能特色
+## ✨ 功能特色
 
-- 📚 **多類型支援**：動畫、小說、漫畫、電影、電視劇、自定義類型
-- ⭐ **評分系統**：1-5 星評分
-- 🏷️ **標籤管理**：預設標籤 + 自訂標籤
-- 🔍 **自動補完**：整合 AniList API 搜尋動畫
-- 📊 **統計分析**：年度統計、類型統計
-- 🔔 **提醒功能**：可設定 Web 通知提醒
-- 📱 **響應式設計**：支援桌機、平板、手機
-- 🌙 **主題切換**：深色/淺色主題
-- 💾 **資料備份**：JSON/CSV 格式匯出還原
+- 📺 **多媒體支援**: 動畫、電影、電視劇、小說等
+- ⭐ **評分系統**: 1-5 星評分
+- 🏷️ **標籤管理**: 自定義標籤分類
+- 📊 **統計分析**: 年度統計、類型分析
+- 🔍 **智能搜尋**: AniList API 自動完成
+- 📱 **響應式設計**: 支援桌面和行動裝置
+- 💾 **本地儲存**: 數據儲存在瀏覽器本地
+- 🌐 **跨平台支援**: PWA 技術，支援所有平台
 
-## 技術架構
+## 📱 跨平台支援
 
-### 後端
-- **Python FastAPI**
-- **SQLite 資料庫**
-- **uv** 套件管理
-- **Docker** 容器化
+### ✅ 支援平台
+- **Android**: Chrome, Samsung Internet, Firefox
+- **iOS**: Safari, Chrome
+- **Windows**: Edge, Chrome, Firefox
+- **macOS**: Safari, Chrome, Firefox
+- **Linux**: Chrome, Firefox
+- **Web**: 所有現代瀏覽器
+
+### 🎯 PWA 功能
+- ✅ **離線使用**: 無網路也能正常使用
+- ✅ **安裝到主畫面**: 像原生應用程式一樣
+- ✅ **推送通知**: 重要提醒即時通知
+- ✅ **背景同步**: 自動同步數據
+- ✅ **原生體驗**: 流暢的應用程式體驗
+
+## 🛠️ 技術架構
 
 ### 前端
-- **Next.js 14**
-- **React 18**
-- **TypeScript**
-- **Tailwind CSS**
-- **Shadcn UI**
-- **Zustand** 狀態管理
+- **框架**: Next.js 14 + React 18
+- **語言**: TypeScript
+- **樣式**: Tailwind CSS + Shadcn UI
+- **狀態管理**: Zustand
+- **圖標**: Lucide React
+- **PWA**: Service Worker + Manifest
 
-## 快速開始
+### 後端 (可選)
+- **框架**: FastAPI
+- **語言**: Python 3.11+
+- **資料庫**: SQLite
+- **ORM**: SQLAlchemy
+- **驗證**: Pydantic
 
-### 使用 Docker Compose（推薦）
+### 開發工具
+- **包管理**: uv (Python) + npm (Node.js)
+- **容器化**: Docker + docker-compose
 
-```bash
-# 克隆專案
-git clone <repository-url>
-cd WatchedIt
+## 🚀 快速開始
 
-# 啟動服務
-docker-compose up -d
+### 方式一：純前端模式（推薦）
 
-# 訪問應用程式
-# 前端: http://localhost:3000
-# 後端 API: http://localhost:8000
-# API 文件: http://localhost:8000/docs
-```
-
-### 本地開發
-
-#### 後端
+使用瀏覽器本地儲存，無需後端服務：
 
 ```bash
-cd backend
-
-# 使用 uv 安裝依賴
-uv pip install -r requirements.txt
-
-# 啟動開發伺服器
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-#### 前端
-
-```bash
+# 1. 安裝依賴
 cd frontend
-
-# 安裝依賴
 npm install
 
-# 啟動開發伺服器
+# 2. 啟動開發伺服器
 npm run dev
 ```
 
-## API 文件
+訪問 http://localhost:3000 即可使用！
 
-啟動後端服務後，可訪問：
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+### 方式二：完整模式（含後端）
 
-## 主要 API 端點
+```bash
+# 1. 啟動後端
+cd backend
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-### 作品管理
-- `GET /works` - 取得作品列表
-- `POST /works` - 建立新作品
-- `GET /works/{id}` - 取得單一作品
-- `PUT /works/{id}` - 更新作品
-- `DELETE /works/{id}` - 刪除作品
-- `GET /works/stats/overview` - 取得統計資訊
+# 2. 啟動前端
+cd frontend
+npm run dev
+```
 
-### 標籤管理
-- `GET /tags` - 取得所有標籤
-- `POST /tags` - 建立新標籤
-- `PUT /tags/{id}` - 更新標籤
-- `DELETE /tags/{id}` - 刪除標籤
+### 方式三：使用 Docker
 
-### 搜尋功能
-- `GET /search/anime` - 搜尋動畫（AniList API）
-- `GET /search/suggestions` - 取得搜尋建議
+```bash
+# 一鍵啟動所有服務
+docker-compose up -d
+```
 
-## 資料結構
+## 📱 安裝到設備
 
-### 作品 (Work)
-```json
-{
-  "id": "uuid",
-  "title": "作品名稱",
-  "type": "動畫",
-  "status": "進行中",
-  "year": 2024,
-  "progress": {
-    "episode": 8,
-    "total_episode": 12
-  },
-  "rating": 4,
-  "review": "短評",
-  "tags": ["冒險", "奇幻"],
-  "reminder_enabled": true,
-  "reminder_frequency": "weekly"
+### Android
+1. 使用 Chrome 瀏覽器訪問應用
+2. 點擊瀏覽器選單中的「安裝應用程式」
+3. 確認安裝，應用程式會出現在主畫面
+
+### iOS
+1. 使用 Safari 瀏覽器訪問應用
+2. 點擊分享按鈕
+3. 選擇「添加到主畫面」
+4. 應用程式會出現在主畫面
+
+### Windows
+1. 使用 Edge 瀏覽器訪問應用
+2. 點擊地址欄旁的安裝按鈕
+3. 確認安裝，應用程式會出現在開始選單
+
+### macOS
+1. 使用 Safari 瀏覽器訪問應用
+2. 點擊分享按鈕
+3. 選擇「添加到 Dock」
+4. 應用程式會出現在 Dock
+
+## 📱 使用方式
+
+### 主頁面
+- 查看統計數據
+- 瀏覽最近作品
+- 快速新增作品
+- 查看平台資訊
+
+### 測試頁面
+- **本地儲存測試**: http://localhost:3000/local-test
+- **API 測試**: http://localhost:3000/test
+
+## 🔧 開發指南
+
+### 本地儲存模式
+- 數據儲存在瀏覽器的 localStorage
+- 支援離線使用
+- 數據持久化在本地
+
+### API 模式
+- 數據儲存在 SQLite 資料庫
+- 支援多用戶
+- 可部署到伺服器
+
+### PWA 開發
+- Service Worker 處理離線功能
+- Manifest 文件定義應用程式屬性
+- 平台檢測自動適配
+
+### 數據結構
+
+#### 作品 (Work)
+```typescript
+interface Work {
+  id: string
+  title: string
+  type: '動畫' | '電影' | '電視劇' | '小說'
+  status: '進行中' | '已完成' | '暫停' | '放棄'
+  year?: number
+  progress?: number
+  rating?: number
+  review?: string
+  note?: string
+  source?: string
+  reminder_enabled: boolean
+  reminder_frequency?: string
+  tags: Tag[]
+  date_added: string
+  date_updated?: string
 }
 ```
 
-## 開發指南
-
-### 新增功能
-1. 在 `backend/app/models/` 新增資料模型
-2. 在 `backend/app/schemas/` 新增 Pydantic 模型
-3. 在 `backend/app/services/` 新增業務邏輯
-4. 在 `backend/app/api/` 新增 API 路由
-5. 在 `frontend/src/components/` 新增 UI 組件
-
-### 資料庫遷移
-```bash
-# 建立遷移檔案
-alembic revision --autogenerate -m "描述"
-
-# 執行遷移
-alembic upgrade head
+#### 標籤 (Tag)
+```typescript
+interface Tag {
+  id: number
+  name: string
+  color: string
+}
 ```
 
-## 部署
+## 📊 API 端點
 
-### 生產環境
+### 作品相關
+- `GET /works` - 取得作品列表
+- `POST /works` - 新增作品
+- `GET /works/{id}` - 取得單一作品
+- `PUT /works/{id}` - 更新作品
+- `DELETE /works/{id}` - 刪除作品
+- `GET /works/stats/overview` - 取得統計數據
+
+### 標籤相關
+- `GET /tags` - 取得標籤列表
+- `POST /tags` - 新增標籤
+- `PUT /tags/{id}` - 更新標籤
+- `DELETE /tags/{id}` - 刪除標籤
+
+### 搜尋相關
+- `GET /search/anime?q={query}` - 搜尋動畫
+- `GET /search/suggestions?q={query}` - 取得建議
+
+## 🎯 下一步計劃
+
+- [ ] 新增作品表單
+- [ ] 作品詳情頁面
+- [ ] 編輯功能
+- [ ] 搜尋和篩選
+- [ ] 數據匯出/匯入
+- [ ] 主題切換
+- [ ] 雲端同步
+- [ ] 多用戶支援
+
+## 📝 開發筆記
+
+### 本地儲存優勢
+- 無需後端服務
+- 快速啟動
+- 離線使用
+- 數據隱私
+
+### 後端 API 優勢
+- 多設備同步
+- 數據備份
+- 多用戶支援
+- 進階功能
+
+### PWA 優勢
+- 跨平台相容
+- 原生應用體驗
+- 離線功能
+- 自動更新
+
+## 🚀 部署
+
+詳細的跨平台部署指南請參考 [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+### 快速部署
 ```bash
-# 建立生產映像
-docker-compose -f docker-compose.prod.yml up -d
+# Vercel (推薦)
+npm i -g vercel
+vercel --prod
+
+# Netlify
+npm run build
+# 上傳 out 目錄到 Netlify
+
+# GitHub Pages
+npm run export
+# 上傳 out 目錄到 GitHub Pages
 ```
 
-### 環境變數
-- `NEXT_PUBLIC_API_URL`: 前端 API 基礎 URL
-- `DATABASE_URL`: 資料庫連接字串
-
-## 授權
-
-MIT License
-
-## 貢獻
+## 🤝 貢獻
 
 歡迎提交 Issue 和 Pull Request！
+
+## 📄 授權
+
+MIT License
