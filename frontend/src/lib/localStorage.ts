@@ -1,4 +1,12 @@
-import { Work, WorkCreate, WorkUpdate, WorkList, Tag, Stats } from "@/types";
+import {
+  Work,
+  WorkCreate,
+  WorkUpdate,
+  WorkList,
+  Tag,
+  Stats,
+  EpisodeProgress,
+} from "@/types";
 
 // 本地儲存鍵名
 const STORAGE_KEYS = {
@@ -42,6 +50,12 @@ export const workStorage = {
       date_added: getCurrentTimestamp(),
       date_updated: null,
       tags: [],
+      progress: workData.progress || {
+        current: 0,
+        total: undefined,
+        special: 0,
+        season: 1,
+      },
     };
 
     works.push(newWork);
@@ -151,11 +165,32 @@ export const workStorage = {
       yearStats[year] = (yearStats[year] || 0) + 1;
     });
 
+    // 進度統計
+    let totalEpisodes = 0;
+    let watchedEpisodes = 0;
+
+    works.forEach((work) => {
+      if (work.progress) {
+        totalEpisodes += work.progress.total || 0;
+        watchedEpisodes += work.progress.current || 0;
+      }
+    });
+
+    const completionRate =
+      totalEpisodes > 0
+        ? Math.round((watchedEpisodes / totalEpisodes) * 100)
+        : 0;
+
     return {
       total_works: works.length,
       type_stats: typeStats,
       status_stats: statusStats,
       year_stats: yearStats,
+      progress_stats: {
+        total_episodes: totalEpisodes,
+        watched_episodes: watchedEpisodes,
+        completion_rate: completionRate,
+      },
     };
   },
 };
@@ -225,6 +260,13 @@ export const initializeSampleData = () => {
       rating: 5,
       review: "經典神作！",
       source: "AniList",
+      progress: {
+        current: 25,
+        total: 25,
+        special: 2,
+        season: 1,
+        episode_type: "episode",
+      },
     });
 
     workStorage.create({
@@ -234,6 +276,30 @@ export const initializeSampleData = () => {
       year: 2019,
       rating: 4,
       source: "AniList",
+      progress: {
+        current: 8,
+        total: 26,
+        special: 0,
+        season: 1,
+        episode_type: "episode",
+      },
+    });
+
+    workStorage.create({
+      title: "哈利波特與魔法石",
+      type: "小說",
+      status: "已完成",
+      year: 1997,
+      rating: 5,
+      review: "魔法世界的開始",
+      source: "手動新增",
+      progress: {
+        current: 17,
+        total: 17,
+        special: 0,
+        season: 1,
+        episode_type: "chapter",
+      },
     });
   }
 
@@ -242,5 +308,7 @@ export const initializeSampleData = () => {
     tagStorage.create({ name: "神作", color: "#FF6B6B" });
     tagStorage.create({ name: "熱血", color: "#4ECDC4" });
     tagStorage.create({ name: "劇情", color: "#45B7D1" });
+    tagStorage.create({ name: "魔法", color: "#96CEB4" });
+    tagStorage.create({ name: "冒險", color: "#FFEAA7" });
   }
 };

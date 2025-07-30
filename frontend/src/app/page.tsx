@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import PlatformInfo from "@/components/PlatformInfo";
 import { pwaService } from "@/lib/pwa";
+import Link from "next/link";
+import { ArrowRight, Play, Check } from "lucide-react";
 
 export default function HomePage() {
   const { works, stats, loading, error, initialize, fetchWorks, fetchStats } =
@@ -53,7 +55,7 @@ export default function HomePage() {
 
       {/* 統計卡片 */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">總作品數</CardTitle>
@@ -95,7 +97,49 @@ export default function HomePage() {
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">完成度</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {stats.progress_stats?.completion_rate || 0}%
+              </div>
+            </CardContent>
+          </Card>
         </div>
+      )}
+
+      {/* 進度統計 */}
+      {stats?.progress_stats && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>進度統計</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {stats.progress_stats.watched_episodes}
+                </div>
+                <div className="text-sm text-gray-600">已觀看集數</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-600">
+                  {stats.progress_stats.total_episodes}
+                </div>
+                <div className="text-sm text-gray-600">總集數</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {stats.progress_stats.completion_rate}%
+                </div>
+                <div className="text-sm text-gray-600">完成率</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* 作品列表 */}
@@ -108,64 +152,126 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {works.slice(0, 6).map((work) => (
-              <Card key={work.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-lg">{work.title}</CardTitle>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <span>{work.type}</span>
-                    <span>•</span>
-                    <span>{work.status}</span>
-                    {work.year && (
-                      <>
-                        <span>•</span>
-                        <span>{work.year}</span>
-                      </>
+              <Link key={work.id} href={`/works/${work.id}`}>
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{work.title}</CardTitle>
+                      <ArrowRight className="w-4 h-4 text-gray-400" />
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <span>{work.type}</span>
+                      <span>•</span>
+                      <span>{work.status}</span>
+                      {work.year && (
+                        <>
+                          <span>•</span>
+                          <span>{work.year}</span>
+                        </>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {/* 進度顯示 */}
+                    {work.progress && (
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-gray-600">進度</span>
+                          <span className="font-medium">
+                            {work.progress.current}
+                            {work.progress.total && `/${work.progress.total}`}
+                          </span>
+                        </div>
+                        {work.progress.total &&
+                          work.progress.current !== undefined && (
+                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                              <div
+                                className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                                style={{
+                                  width: `${Math.round(
+                                    (work.progress.current /
+                                      work.progress.total) *
+                                      100
+                                  )}%`,
+                                }}
+                              />
+                            </div>
+                          )}
+                      </div>
                     )}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {work.rating && (
-                    <div className="flex items-center space-x-1 mb-2">
-                      <span className="text-sm text-gray-600">評分:</span>
-                      <div className="flex">
-                        {[1, 2, 3, 4, 5].map((star) => (
+
+                    {work.rating && (
+                      <div className="flex items-center space-x-1 mb-2">
+                        <span className="text-sm text-gray-600">評分:</span>
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span
+                              key={star}
+                              className={`text-lg ${
+                                star <= work.rating!
+                                  ? "text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                            >
+                              ★
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {work.review && (
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {work.review}
+                      </p>
+                    )}
+
+                    {work.tags && work.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {work.tags.slice(0, 3).map((tag) => (
                           <span
-                            key={star}
-                            className={`text-lg ${
-                              star <= work.rating!
-                                ? "text-yellow-400"
-                                : "text-gray-300"
-                            }`}
+                            key={tag.id}
+                            className="px-2 py-1 text-xs rounded"
+                            style={{
+                              backgroundColor: tag.color + "20",
+                              color: tag.color,
+                            }}
                           >
-                            ★
+                            {tag.name}
                           </span>
                         ))}
+                        {work.tags.length > 3 && (
+                          <span className="px-2 py-1 text-xs text-gray-500">
+                            +{work.tags.length - 3}
+                          </span>
+                        )}
                       </div>
+                    )}
+
+                    {/* 狀態指示器 */}
+                    <div className="flex items-center mt-2">
+                      {work.progress?.current === work.progress?.total &&
+                      work.progress.total ? (
+                        <div className="flex items-center text-green-600 text-sm">
+                          <Check className="w-3 h-3 mr-1" />
+                          已完成
+                        </div>
+                      ) : work.progress?.current &&
+                        work.progress.current > 0 ? (
+                        <div className="flex items-center text-blue-600 text-sm">
+                          <Play className="w-3 h-3 mr-1" />
+                          進行中
+                        </div>
+                      ) : (
+                        <div className="flex items-center text-gray-500 text-sm">
+                          <span className="w-3 h-3 mr-1">○</span>
+                          未開始
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {work.review && (
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {work.review}
-                    </p>
-                  )}
-                  {work.tags && work.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {work.tags.map((tag) => (
-                        <span
-                          key={tag.id}
-                          className="px-2 py-1 text-xs rounded"
-                          style={{
-                            backgroundColor: tag.color + "20",
-                            color: tag.color,
-                          }}
-                        >
-                          {tag.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         )}
