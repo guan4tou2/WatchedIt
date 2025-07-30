@@ -132,27 +132,23 @@ class WorkService:
 
     def get_stats(self) -> Dict[str, Any]:
         """取得統計資訊"""
+        from sqlalchemy import func
+
         total_works = self.db.query(Work).count()
 
         # 按類型統計
         type_stats = (
-            self.db.query(Work.type, self.db.func.count(Work.id))
-            .group_by(Work.type)
-            .all()
+            self.db.query(Work.type, func.count(Work.id)).group_by(Work.type).all()
         )
 
         # 按狀態統計
         status_stats = (
-            self.db.query(Work.status, self.db.func.count(Work.id))
-            .group_by(Work.status)
-            .all()
+            self.db.query(Work.status, func.count(Work.id)).group_by(Work.status).all()
         )
 
         # 按年份統計
         year_stats = (
-            self.db.query(Work.year, self.db.func.count(Work.id))
-            .group_by(Work.year)
-            .all()
+            self.db.query(Work.year, func.count(Work.id)).group_by(Work.year).all()
         )
 
         return {

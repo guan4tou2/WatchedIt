@@ -22,19 +22,30 @@ class ApiClient {
     options?: RequestInit
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-        ...options?.headers,
-      },
-      ...options,
-    });
+    console.log(`API 請求: ${url}`);
 
-    if (!response.ok) {
-      throw new Error(`API 錯誤: ${response.status}`);
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+          ...options?.headers,
+        },
+        ...options,
+      });
+
+      console.log(`API 響應: ${response.status} ${response.statusText}`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`API 錯誤: ${response.status} - ${errorText}`);
+        throw new Error(`API 錯誤: ${response.status} - ${errorText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error(`API 請求失敗: ${url}`, error);
+      throw error;
     }
-
-    return response.json();
   }
 
   // 作品相關 API

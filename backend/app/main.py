@@ -2,8 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api import search_router, tags_router, works_router
-from .db.database import engine
-from .db.models import Base
+from .db.database import Base, engine
 
 # 建立資料表
 Base.metadata.create_all(bind=engine)
