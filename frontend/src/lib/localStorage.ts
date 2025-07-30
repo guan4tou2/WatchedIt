@@ -47,8 +47,9 @@ export const workStorage = {
     const newWork: Work = {
       id: generateId(),
       ...workData,
+      reminder_enabled: workData.reminder_enabled ?? false,
       date_added: getCurrentTimestamp(),
-      date_updated: null,
+      date_updated: undefined,
       tags: [],
       episodes: workData.episodes || [],
     };

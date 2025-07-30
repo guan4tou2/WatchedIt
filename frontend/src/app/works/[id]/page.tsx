@@ -18,11 +18,11 @@ export default function WorkDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    if (params.id) {
+    if (params?.id) {
       const workData = getWork(params.id as string);
       setWork(workData);
     }
-  }, [params.id, getWork]);
+  }, [params?.id, getWork]);
 
   const handleEpisodesChange = (episodes: Episode[]) => {
     if (!work) return;

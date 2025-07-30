@@ -1,17 +1,32 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useWorkStore } from "@/store/useWorkStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import PlatformInfo from "@/components/PlatformInfo";
 import { pwaService } from "@/lib/pwa";
 import Link from "next/link";
-import { ArrowRight, Play, Check, Eye } from "lucide-react";
+import { ArrowRight, Play, Check, Eye, Plus } from "lucide-react";
+import QuickAddEpisode from "@/components/QuickAddEpisode";
+import { Episode } from "@/types";
 
 export default function HomePage() {
-  const { works, stats, loading, error, initialize, fetchWorks, fetchStats } =
-    useWorkStore();
+  const {
+    works,
+    stats,
+    loading,
+    error,
+    initialize,
+    fetchWorks,
+    fetchStats,
+    updateWork,
+  } = useWorkStore();
+  const [quickAddEpisode, setQuickAddEpisode] = useState<{
+    workId: string;
+    workTitle: string;
+    workType: "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲";
+  } | null>(null);
 
   useEffect(() => {
     // 初始化本地儲存
@@ -24,6 +39,29 @@ export default function HomePage() {
     // 註冊 PWA 服務
     pwaService.registerServiceWorker();
   }, [initialize, fetchWorks, fetchStats]);
+
+  const handleQuickAddEpisode = (
+    workId: string,
+    workTitle: string,
+    workType: "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲"
+  ) => {
+    setQuickAddEpisode({ workId, workTitle, workType });
+  };
+
+  const handleEpisodeAdded = (episode: Episode) => {
+    if (!quickAddEpisode) return;
+
+    const work = works.find((w) => w.id === quickAddEpisode.workId);
+    if (!work) return;
+
+    const updatedEpisodes = [...(work.episodes || []), episode].sort((a, b) => {
+      if (a.season !== b.season) return a.season - b.season;
+      return a.number - b.number;
+    });
+
+    updateWork(work.id, { episodes: updatedEpisodes });
+    setQuickAddEpisode(null);
+  };
 
   if (loading) {
     return (
@@ -97,17 +135,6 @@ export default function HomePage() {
               </div>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">完成度</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {stats.episode_stats?.completion_rate || 0}%
-              </div>
-            </CardContent>
-          </Card>
         </div>
       )}
 
@@ -118,7 +145,7 @@ export default function HomePage() {
             <CardTitle>集數統計</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">
                   {stats.episode_stats.watched_episodes}
@@ -130,12 +157,6 @@ export default function HomePage() {
                   {stats.episode_stats.total_episodes}
                 </div>
                 <div className="text-sm text-gray-600">總集數</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {stats.episode_stats.completion_rate}%
-                </div>
-                <div className="text-sm text-gray-600">完成率</div>
               </div>
             </div>
           </CardContent>
@@ -155,127 +176,146 @@ export default function HomePage() {
               const episodes = work.episodes || [];
               const watchedCount = episodes.filter((ep) => ep.watched).length;
               const totalEpisodes = episodes.length;
-              const completionRate =
-                totalEpisodes > 0
-                  ? Math.round((watchedCount / totalEpisodes) * 100)
-                  : 0;
 
               return (
-                <Link key={work.id} href={`/works/${work.id}`}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{work.title}</CardTitle>
-                        <ArrowRight className="w-4 h-4 text-gray-400" />
+                <Card
+                  key={work.id}
+                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => (window.location.href = `/works/${work.id}`)}
+                >
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{work.title}</CardTitle>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleQuickAddEpisode(
+                              work.id,
+                              work.title,
+                              work.type
+                            );
+                          }}
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          新增集數
+                        </Button>
+                        <ArrowRight className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                       </div>
-                      <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <span>{work.type}</span>
-                        <span>•</span>
-                        <span>{work.status}</span>
-                        {work.year && (
-                          <>
-                            <span>•</span>
-                            <span>{work.year}</span>
-                          </>
-                        )}
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <span>{work.type}</span>
+                      <span>•</span>
+                      <span>{work.status}</span>
+                      {work.year && (
+                        <>
+                          <span>•</span>
+                          <span>{work.year}</span>
+                        </>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {/* 集數顯示 */}
+                    {totalEpisodes > 0 && (
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-gray-600">集數</span>
+                          <span className="font-medium">
+                            {watchedCount}/{totalEpisodes}
+                          </span>
+                        </div>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      {/* 集數顯示 */}
-                      {totalEpisodes > 0 && (
-                        <div className="mb-3">
-                          <div className="flex items-center justify-between text-sm mb-1">
-                            <span className="text-gray-600">集數</span>
-                            <span className="font-medium">
-                              {watchedCount}/{totalEpisodes}
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-1.5">
-                            <div
-                              className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
-                              style={{
-                                width: `${completionRate}%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
+                    )}
 
-                      {work.rating && (
-                        <div className="flex items-center space-x-1 mb-2">
-                          <span className="text-sm text-gray-600">評分:</span>
-                          <div className="flex">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <span
-                                key={star}
-                                className={`text-lg ${
-                                  star <= work.rating!
-                                    ? "text-yellow-400"
-                                    : "text-gray-300"
-                                }`}
-                              >
-                                ★
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {work.review && (
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                          {work.review}
-                        </p>
-                      )}
-
-                      {work.tags && work.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {work.tags.slice(0, 3).map((tag) => (
+                    {work.rating && (
+                      <div className="flex items-center space-x-1 mb-2">
+                        <span className="text-sm text-gray-600">評分:</span>
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((star) => (
                             <span
-                              key={tag.id}
-                              className="px-2 py-1 text-xs rounded"
-                              style={{
-                                backgroundColor: tag.color + "20",
-                                color: tag.color,
-                              }}
+                              key={star}
+                              className={`text-lg ${
+                                star <= work.rating!
+                                  ? "text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
                             >
-                              {tag.name}
+                              ★
                             </span>
                           ))}
-                          {work.tags.length > 3 && (
-                            <span className="px-2 py-1 text-xs text-gray-500">
-                              +{work.tags.length - 3}
-                            </span>
-                          )}
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {/* 狀態指示器 */}
-                      <div className="flex items-center mt-2">
-                        {totalEpisodes > 0 && watchedCount === totalEpisodes ? (
-                          <div className="flex items-center text-green-600 text-sm">
-                            <Check className="w-3 h-3 mr-1" />
-                            已完成
-                          </div>
-                        ) : watchedCount > 0 ? (
-                          <div className="flex items-center text-blue-600 text-sm">
-                            <Eye className="w-3 h-3 mr-1" />
-                            進行中
-                          </div>
-                        ) : (
-                          <div className="flex items-center text-gray-500 text-sm">
-                            <span className="w-3 h-3 mr-1">○</span>
-                            未開始
-                          </div>
+                    {work.review && (
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {work.review}
+                      </p>
+                    )}
+
+                    {work.tags && work.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {work.tags.slice(0, 3).map((tag) => (
+                          <span
+                            key={tag.id}
+                            className="px-2 py-1 text-xs rounded"
+                            style={{
+                              backgroundColor: tag.color + "20",
+                              color: tag.color,
+                            }}
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                        {work.tags.length > 3 && (
+                          <span className="px-2 py-1 text-xs text-gray-500">
+                            +{work.tags.length - 3}
+                          </span>
                         )}
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                    )}
+
+                    {/* 狀態指示器 */}
+                    <div className="flex items-center mt-2">
+                      {totalEpisodes > 0 && watchedCount === totalEpisodes ? (
+                        <div className="flex items-center text-green-600 text-sm">
+                          <Check className="w-3 h-3 mr-1" />
+                          已完成
+                        </div>
+                      ) : watchedCount > 0 ? (
+                        <div className="flex items-center text-blue-600 text-sm">
+                          <Eye className="w-3 h-3 mr-1" />
+                          進行中
+                        </div>
+                      ) : (
+                        <div className="flex items-center text-gray-500 text-sm">
+                          <span className="w-3 h-3 mr-1">○</span>
+                          未開始
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
         )}
       </div>
+
+      {/* 快速新增集數對話框 */}
+      {quickAddEpisode && (
+        <QuickAddEpisode
+          workId={quickAddEpisode.workId}
+          workTitle={quickAddEpisode.workTitle}
+          workType={quickAddEpisode.workType}
+          onEpisodeAdded={handleEpisodeAdded}
+          onClose={() => setQuickAddEpisode(null)}
+        />
+      )}
     </div>
   );
 }
