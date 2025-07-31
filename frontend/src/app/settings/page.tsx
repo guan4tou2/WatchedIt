@@ -13,6 +13,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useWorkStore } from "@/store/useWorkStore";
 import { cloudStorage, CloudConfig } from "@/lib/cloudStorage";
 import { dbUtils } from "@/lib/indexedDB";
+import { pwaService } from "@/lib/pwa";
 import Logo from "@/components/Logo";
 import Link from "next/link";
 import {
@@ -34,6 +35,12 @@ import {
   ArrowRight,
   Clock,
   ArrowLeft,
+  Smartphone,
+  Globe,
+  Bell,
+  Shield,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 
 interface Settings {
@@ -47,6 +54,9 @@ interface Settings {
   language: "zh-TW" | "en-US";
   dataBackup: boolean;
   dataBackupInterval: number;
+  pwaNotifications: boolean;
+  pwaAutoUpdate: boolean;
+  pwaOfflineMode: boolean;
 }
 
 export default function SettingsPage() {
@@ -62,15 +72,30 @@ export default function SettingsPage() {
     language: "zh-TW",
     dataBackup: true,
     dataBackupInterval: 7,
+    pwaNotifications: true,
+    pwaAutoUpdate: true,
+    pwaOfflineMode: true,
   });
 
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, systemTheme } = useTheme();
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  // PWA 相關狀態
+  const [pwaInfo, setPwaInfo] = useState({
+    isPWA: false,
+    isMobile: false,
+    isIOS: false,
+    isAndroid: false,
+    isDesktop: false,
+    canInstall: false,
+    isInstalled: false,
+    notificationPermission: "default" as NotificationPermission,
+  });
 
   useEffect(() => {
     // 載入設定
@@ -84,7 +109,22 @@ export default function SettingsPage() {
     } catch (error) {
       console.error("載入設定失敗:", error);
     }
+
+    // 初始化 PWA 信息
+    updatePWAInfo();
   }, []);
+
+  const updatePWAInfo = () => {
+    if (typeof window !== "undefined") {
+      const platformInfo = pwaService.getPlatformInfo();
+      setPwaInfo({
+        ...platformInfo,
+        canInstall: false, // 將在 beforeinstallprompt 事件中更新
+        isInstalled: platformInfo.isPWA,
+        notificationPermission: Notification.permission,
+      });
+    }
+  };
 
   const saveSettings = () => {
     try {
@@ -317,6 +357,49 @@ export default function SettingsPage() {
     return cloudStorage.shouldSync();
   };
 
+  // PWA 相關功能
+  const requestNotificationPermission = async () => {
+    try {
+      const permission = await pwaService.requestNotificationPermission();
+      updatePWAInfo();
+
+      if (permission) {
+        setMessage({ type: "success", text: "通知權限已啟用" });
+      } else {
+        setMessage({ type: "error", text: "通知權限被拒絕" });
+      }
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      setMessage({ type: "error", text: "請求通知權限失敗" });
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  const checkForUpdate = async () => {
+    try {
+      const hasUpdate = await pwaService.checkForUpdate();
+      if (hasUpdate) {
+        setMessage({ type: "success", text: "檢查更新完成" });
+      } else {
+        setMessage({ type: "error", text: "無法檢查更新" });
+      }
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      setMessage({ type: "error", text: "檢查更新失敗" });
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  const getInstallInstructions = () => {
+    if (pwaInfo.isIOS) {
+      return "點擊 Safari 的分享按鈕，選擇「加入主畫面」";
+    } else if (pwaInfo.isAndroid) {
+      return "點擊瀏覽器選單，選擇「安裝應用程式」";
+    } else {
+      return "點擊瀏覽器地址欄旁的安裝圖示";
+    }
+  };
+
   return (
     <div className="container mx-auto p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
@@ -388,6 +471,33 @@ export default function SettingsPage() {
                 </div>
               </div>
 
+              {/* 系統主題信息 */}
+              {theme === "auto" && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Monitor className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800">
+                      自動模式
+                    </span>
+                  </div>
+                  <div className="text-xs text-blue-600 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span>系統主題:</span>
+                      <Badge variant="outline" className="text-xs">
+                        {systemTheme === "dark" ? "深色" : "淺色"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>當前應用:</span>
+                      <Badge variant="default" className="text-xs">
+                        {systemTheme === "dark" ? "深色" : "淺色"}
+                      </Badge>
+                    </div>
+                    <p className="text-xs mt-2">系統主題變化時會自動切換</p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <Label htmlFor="language">語言</Label>
                 <select
@@ -404,6 +514,141 @@ export default function SettingsPage() {
                   <option value="zh-TW">繁體中文</option>
                   <option value="en-US">English</option>
                 </select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* PWA 設定 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Smartphone className="w-5 h-5" />
+                <span>PWA 設定</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* PWA 狀態 */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">PWA 狀態</span>
+                  <Badge variant={pwaInfo.isPWA ? "default" : "secondary"}>
+                    {pwaInfo.isPWA ? "已安裝" : "未安裝"}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">平台</span>
+                  <Badge variant="outline">
+                    {pwaInfo.isIOS
+                      ? "iOS"
+                      : pwaInfo.isAndroid
+                      ? "Android"
+                      : "桌面"}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">通知權限</span>
+                  <Badge
+                    variant={
+                      pwaInfo.notificationPermission === "granted"
+                        ? "default"
+                        : pwaInfo.notificationPermission === "denied"
+                        ? "destructive"
+                        : "secondary"
+                    }
+                  >
+                    {pwaInfo.notificationPermission === "granted"
+                      ? "已授權"
+                      : pwaInfo.notificationPermission === "denied"
+                      ? "已拒絕"
+                      : "未設定"}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* PWA 功能設定 */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="pwaNotifications">PWA 通知</Label>
+                  <Switch
+                    id="pwaNotifications"
+                    checked={settings.pwaNotifications}
+                    onCheckedChange={(checked) =>
+                      setSettings({ ...settings, pwaNotifications: checked })
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="pwaAutoUpdate">自動更新</Label>
+                  <Switch
+                    id="pwaAutoUpdate"
+                    checked={settings.pwaAutoUpdate}
+                    onCheckedChange={(checked) =>
+                      setSettings({ ...settings, pwaAutoUpdate: checked })
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="pwaOfflineMode">離線模式</Label>
+                  <Switch
+                    id="pwaOfflineMode"
+                    checked={settings.pwaOfflineMode}
+                    onCheckedChange={(checked) =>
+                      setSettings({ ...settings, pwaOfflineMode: checked })
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* PWA 操作按鈕 */}
+              <div className="space-y-2">
+                {!pwaInfo.isPWA && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Download className="w-4 h-4 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-800">
+                        安裝 PWA
+                      </span>
+                    </div>
+                    <p className="text-xs text-blue-600 mb-2">
+                      {getInstallInstructions()}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={requestNotificationPermission}
+                    disabled={pwaInfo.notificationPermission === "granted"}
+                  >
+                    <Bell className="w-4 h-4 mr-2" />
+                    請求通知權限
+                  </Button>
+
+                  <Button variant="outline" size="sm" onClick={checkForUpdate}>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    檢查更新
+                  </Button>
+                </div>
+
+                <div className="flex items-center space-x-2 text-xs text-gray-600">
+                  {pwaInfo.isPWA ? (
+                    <>
+                      <Globe className="w-4 h-4" />
+                      <span>PWA 模式運行中</span>
+                    </>
+                  ) : (
+                    <>
+                      <Wifi className="w-4 h-4" />
+                      <span>瀏覽器模式</span>
+                    </>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

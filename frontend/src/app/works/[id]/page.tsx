@@ -27,12 +27,24 @@ export default function WorkDetailPage() {
   const [work, setWork] = useState<Work | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (params?.id) {
-      const workData = getWork(params.id as string);
-      setWork(workData);
-    }
+    const loadWork = async () => {
+      if (params?.id) {
+        setIsLoading(true);
+        try {
+          const workData = await getWork(params.id as string);
+          setWork(workData);
+        } catch (error) {
+          console.error("載入作品失敗:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadWork();
   }, [params?.id, getWork]);
 
   const handleEpisodesChange = (episodes: Episode[]) => {
@@ -71,18 +83,31 @@ export default function WorkDetailPage() {
     }
   };
 
-  if (loading) {
+  if (loading || isLoading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center">載入中...</div>
+      <div className="container mx-auto p-4 sm:p-6">
+        <div className="flex items-center justify-center min-h-[200px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="text-gray-600">載入中...</div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!work) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center">作品不存在</div>
+      <div className="container mx-auto p-4 sm:p-6">
+        <div className="flex items-center justify-center min-h-[200px]">
+          <div className="text-center">
+            <div className="text-gray-600 mb-4">作品不存在</div>
+            <Button variant="outline" onClick={() => router.push("/")}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回首頁
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -94,15 +119,15 @@ export default function WorkDetailPage() {
     totalEpisodes > 0 ? Math.round((watchedCount / totalEpisodes) * 100) : 0;
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-4 sm:p-6">
       {/* 導航欄 */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
         <div className="flex items-center space-x-4">
           <Button variant="outline" size="sm" onClick={() => router.back()}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             返回
           </Button>
-          <h1 className="text-2xl font-bold">{work.title}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">{work.title}</h1>
         </div>
         <div className="flex items-center space-x-2">
           <Button
@@ -117,13 +142,13 @@ export default function WorkDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* 主要資訊 */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* 基本資訊 */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                 <CardTitle>基本資訊</CardTitle>
                 <Button
                   variant="outline"
@@ -136,7 +161,7 @@ export default function WorkDetailPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-600">
                     類型
@@ -263,7 +288,7 @@ export default function WorkDetailPage() {
         </div>
 
         {/* 側邊欄 */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* 集數摘要 */}
           <Card>
             <CardHeader>
@@ -271,7 +296,7 @@ export default function WorkDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">
+                <div className="text-2xl sm:text-3xl font-bold text-blue-600">
                   {totalEpisodes}
                 </div>
                 <div className="text-sm text-gray-600">已記錄集數</div>

@@ -101,50 +101,31 @@ export default function EpisodeManager({
   };
 
   const generateEpisodeId = () => {
-    return (
-      "episode-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9)
-    );
+    return `ep-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   };
 
   const handleAddEpisode = () => {
-    if (!newEpisode.number) return;
-
-    // 檢查是否已存在相同季數和集數的集數
-    const existingEpisode = episodes.find(
-      (ep) => ep.season === newEpisode.season && ep.number === newEpisode.number
-    );
-
-    if (existingEpisode) {
-      alert(`第${newEpisode.season}季第${newEpisode.number}集已存在！`);
-      return;
-    }
+    if (newEpisode.number < 1) return;
 
     const episode: Episode = {
       id: generateEpisodeId(),
-      number: newEpisode.number,
-      title: newEpisode.title || undefined,
-      description: newEpisode.description || undefined,
-      type: newEpisode.type,
-      season: newEpisode.season,
-      watched: true, // 手動新增預設為已看
-      date_watched: new Date().toISOString(), // 設置觀看日期
-      note: newEpisode.note || undefined,
+      ...newEpisode,
+      watched: false,
     };
 
-    const updatedEpisodes = [...episodes, episode].sort((a, b) => {
-      if (a.season !== b.season) return a.season - b.season;
-      return a.number - b.number;
-    });
-
+    const updatedEpisodes = [...episodes, episode];
     onEpisodesChange(updatedEpisodes);
+
+    // 重置表單
     setNewEpisode({
-      number: 1,
+      number: newEpisode.number + 1,
       title: "",
       description: "",
-      type: "episode",
-      season: 1,
+      type: defaultEpisodeType,
+      season: newEpisode.season,
       note: "",
     });
+
     setIsAdding(false);
   };
 
@@ -162,40 +143,42 @@ export default function EpisodeManager({
   };
 
   const handleToggleWatched = (episodeId: string) => {
-    const updatedEpisodes = episodes.map((ep) => {
-      if (ep.id === episodeId) {
-        return {
-          ...ep,
-          watched: !ep.watched,
-          date_watched: !ep.watched ? new Date().toISOString() : undefined,
-        };
-      }
-      return ep;
-    });
+    const updatedEpisodes = episodes.map((ep) =>
+      ep.id === episodeId
+        ? {
+            ...ep,
+            watched: !ep.watched,
+            date_watched: !ep.watched ? new Date().toISOString() : undefined,
+          }
+        : ep
+    );
     onEpisodesChange(updatedEpisodes);
   };
 
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">集數管理</CardTitle>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">
-              已記錄: {episodes.length} 集
-            </span>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+          <CardTitle>集數管理</CardTitle>
+          <div className="flex space-x-2">
             {onToggleEditing && (
-              <Button variant="outline" size="sm" onClick={onToggleEditing}>
-                <Edit className="w-4 h-4 mr-2" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onToggleEditing}
+                disabled={disabled}
+              >
                 {isEditing ? "完成編輯" : "編輯集數"}
               </Button>
             )}
-            {!disabled && (
-              <Button size="sm" onClick={() => setIsAdding(true)}>
-                <Plus className="w-4 h-4 mr-1" />
-                新增集數
-              </Button>
-            )}
+            <Button
+              size="sm"
+              onClick={() => setIsAdding(!isAdding)}
+              disabled={disabled}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              新增集數
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -204,7 +187,7 @@ export default function EpisodeManager({
         {isAdding && (
           <Card className="border-2 border-dashed border-blue-200">
             <CardContent className="pt-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium">集數</label>
                   <Input
@@ -265,7 +248,7 @@ export default function EpisodeManager({
                     placeholder="集數標題"
                   />
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-1 sm:col-span-2">
                   <label className="text-sm font-medium">描述 (選填)</label>
                   <Input
                     value={newEpisode.description}
@@ -278,7 +261,7 @@ export default function EpisodeManager({
                     placeholder="集數描述"
                   />
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-1 sm:col-span-2">
                   <label className="text-sm font-medium">備註 (選填)</label>
                   <Input
                     value={newEpisode.note}
@@ -292,7 +275,7 @@ export default function EpisodeManager({
                   />
                 </div>
               </div>
-              <div className="flex space-x-2 mt-3">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-3">
                 <Button size="sm" onClick={handleAddEpisode}>
                   <Check className="w-4 h-4 mr-1" />
                   新增
@@ -320,15 +303,15 @@ export default function EpisodeManager({
               <div key={episode.id}>
                 <Card className="hover:shadow-sm transition-shadow">
                   <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center space-x-2">
-                          <div className="text-center">
-                            <div className="font-semibold">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+                          <div className="text-center sm:text-left">
+                            <div className="font-semibold text-sm sm:text-base">
                               第{episode.season}季 第{episode.number}集
                             </div>
                             {episode.title && (
-                              <div className="text-sm text-gray-600">
+                              <div className="text-xs sm:text-sm text-gray-600">
                                 {episode.title}
                               </div>
                             )}
@@ -391,7 +374,7 @@ export default function EpisodeManager({
                 {editingEpisode && editingEpisode.id === episode.id && (
                   <Card className="mt-2 border-2 border-dashed border-blue-200">
                     <CardContent className="pt-4">
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <label className="text-sm font-medium">集數</label>
                           <Input
@@ -452,7 +435,7 @@ export default function EpisodeManager({
                             placeholder="集數標題"
                           />
                         </div>
-                        <div className="col-span-2">
+                        <div className="col-span-1 sm:col-span-2">
                           <label className="text-sm font-medium">描述</label>
                           <Input
                             value={editingEpisode.description || ""}
@@ -465,7 +448,7 @@ export default function EpisodeManager({
                             placeholder="集數描述"
                           />
                         </div>
-                        <div className="col-span-2">
+                        <div className="col-span-1 sm:col-span-2">
                           <label className="text-sm font-medium">備註</label>
                           <Input
                             value={editingEpisode.note || ""}
@@ -479,7 +462,7 @@ export default function EpisodeManager({
                           />
                         </div>
                       </div>
-                      <div className="flex space-x-2 mt-3">
+                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-3">
                         <Button
                           size="sm"
                           onClick={() => handleUpdateEpisode(editingEpisode)}
