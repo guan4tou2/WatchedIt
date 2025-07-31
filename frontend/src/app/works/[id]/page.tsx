@@ -108,22 +108,6 @@ export default function WorkDetailPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowEditForm(true)}
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            編輯作品
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            {isEditing ? "完成編輯" : "編輯集數"}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
             onClick={handleDelete}
             className="text-red-600 hover:text-red-700"
           >
@@ -139,7 +123,17 @@ export default function WorkDetailPage() {
           {/* 基本資訊 */}
           <Card>
             <CardHeader>
-              <CardTitle>基本資訊</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>基本資訊</CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowEditForm(!showEditForm)}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  {showEditForm ? "取消編輯" : "編輯作品"}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -241,6 +235,19 @@ export default function WorkDetailPage() {
                   </div>
                 </div>
               )}
+
+              {/* 編輯作品表單 */}
+              {showEditForm && work && (
+                <div className="mt-6 p-4 border-2 border-dashed border-blue-200 rounded-lg">
+                  <WorkEditForm
+                    work={work}
+                    onSave={handleWorkUpdate}
+                    onCancel={() => setShowEditForm(false)}
+                    isOpen={true}
+                    inline={true}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -250,6 +257,8 @@ export default function WorkDetailPage() {
             onEpisodesChange={handleEpisodesChange}
             type={work.type}
             disabled={!isEditing}
+            isEditing={isEditing}
+            onToggleEditing={() => setIsEditing(!isEditing)}
           />
         </div>
 
@@ -329,16 +338,6 @@ export default function WorkDetailPage() {
           </Card>
         </div>
       </div>
-
-      {/* 編輯作品表單 */}
-      {work && (
-        <WorkEditForm
-          work={work}
-          onSave={handleWorkUpdate}
-          onCancel={() => setShowEditForm(false)}
-          isOpen={showEditForm}
-        />
-      )}
     </div>
   );
 }

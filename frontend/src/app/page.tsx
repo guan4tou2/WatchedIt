@@ -238,6 +238,21 @@ export default function HomePage() {
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">集數完成率</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {stats.episode_stats.completion_rate}%
+              </div>
+              <div className="text-xs text-gray-600">
+                {stats.episode_stats.watched_episodes}/
+                {stats.episode_stats.total_episodes} 集
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 

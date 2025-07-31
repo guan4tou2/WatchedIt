@@ -4,7 +4,6 @@ import "./globals.css";
 import PWAInstall from "@/components/PWAInstall";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { pwaService } from "@/lib/pwa";
-import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -47,12 +46,10 @@ export default function RootLayout({
   return (
     <html lang="zh-TW" suppressHydrationWarning>
       <body className={inter.className}>
-        <Suspense fallback={null}>
-          <ThemeProvider>
-            {children}
-            <PWAInstall />
-          </ThemeProvider>
-        </Suspense>
+        <ThemeProvider>
+          {children}
+          <PWAInstall />
+        </ThemeProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `

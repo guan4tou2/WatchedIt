@@ -15,6 +15,8 @@ interface EpisodeManagerProps {
   onEpisodesChange: (episodes: Episode[]) => void;
   type: string;
   disabled?: boolean;
+  isEditing?: boolean;
+  onToggleEditing?: () => void;
 }
 
 export default function EpisodeManager({
@@ -22,6 +24,8 @@ export default function EpisodeManager({
   onEpisodesChange,
   type,
   disabled = false,
+  isEditing = false,
+  onToggleEditing,
 }: EpisodeManagerProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [editingEpisode, setEditingEpisode] = useState<Episode | null>(null);
@@ -122,7 +126,8 @@ export default function EpisodeManager({
       description: newEpisode.description || undefined,
       type: newEpisode.type,
       season: newEpisode.season,
-      watched: false,
+      watched: true, // 手動新增預設為已看
+      date_watched: new Date().toISOString(), // 設置觀看日期
       note: newEpisode.note || undefined,
     };
 
@@ -156,6 +161,20 @@ export default function EpisodeManager({
     onEpisodesChange(updatedEpisodes);
   };
 
+  const handleToggleWatched = (episodeId: string) => {
+    const updatedEpisodes = episodes.map((ep) => {
+      if (ep.id === episodeId) {
+        return {
+          ...ep,
+          watched: !ep.watched,
+          date_watched: !ep.watched ? new Date().toISOString() : undefined,
+        };
+      }
+      return ep;
+    });
+    onEpisodesChange(updatedEpisodes);
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -165,6 +184,12 @@ export default function EpisodeManager({
             <span className="text-sm text-gray-600">
               已記錄: {episodes.length} 集
             </span>
+            {onToggleEditing && (
+              <Button variant="outline" size="sm" onClick={onToggleEditing}>
+                <Edit className="w-4 h-4 mr-2" />
+                {isEditing ? "完成編輯" : "編輯集數"}
+              </Button>
+            )}
             {!disabled && (
               <Button size="sm" onClick={() => setIsAdding(true)}>
                 <Plus className="w-4 h-4 mr-1" />
@@ -292,180 +317,191 @@ export default function EpisodeManager({
             </div>
           ) : (
             episodes.map((episode) => (
-              <Card
-                key={episode.id}
-                className="hover:shadow-sm transition-shadow"
-              >
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center space-x-2">
-                        <div className="text-center">
-                          <div className="font-semibold">
-                            第{episode.season}季 第{episode.number}集
-                          </div>
-                          {episode.title && (
-                            <div className="text-sm text-gray-600">
-                              {episode.title}
+              <div key={episode.id}>
+                <Card className="hover:shadow-sm transition-shadow">
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="text-center">
+                            <div className="font-semibold">
+                              第{episode.season}季 第{episode.number}集
                             </div>
-                          )}
+                            {episode.title && (
+                              <div className="text-sm text-gray-600">
+                                {episode.title}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <Badge className={getEpisodeTypeColor(episode.type)}>
+                          {getEpisodeTypeLabel(episode.type)}
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant={episode.watched ? "default" : "outline"}
+                          onClick={() => handleToggleWatched(episode.id)}
+                          className={
+                            episode.watched
+                              ? "bg-green-600 hover:bg-green-700"
+                              : ""
+                          }
+                        >
+                          {episode.watched ? "✅ 已看" : "⬜ 未看"}
+                        </Button>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        {!disabled && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingEpisode(episode)}
+                            >
+                              <Edit className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDeleteEpisode(episode.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    {(episode.description || episode.note) && (
+                      <div className="mt-2 text-sm text-gray-600">
+                        {episode.description && (
+                          <div className="mb-1">{episode.description}</div>
+                        )}
+                        {episode.note && (
+                          <div className="text-xs text-gray-500">
+                            備註: {episode.note}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* 編輯集數表單 - 顯示在當前編輯的集數下方 */}
+                {editingEpisode && editingEpisode.id === episode.id && (
+                  <Card className="mt-2 border-2 border-dashed border-blue-200">
+                    <CardContent className="pt-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-sm font-medium">集數</label>
+                          <Input
+                            type="number"
+                            min="1"
+                            value={editingEpisode.number}
+                            onChange={(e) =>
+                              setEditingEpisode({
+                                ...editingEpisode,
+                                number: parseInt(e.target.value) || 1,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">季數</label>
+                          <Input
+                            type="number"
+                            min="1"
+                            value={editingEpisode.season}
+                            onChange={(e) =>
+                              setEditingEpisode({
+                                ...editingEpisode,
+                                season: parseInt(e.target.value) || 1,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">類型</label>
+                          <select
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            value={editingEpisode.type}
+                            onChange={(e) =>
+                              setEditingEpisode({
+                                ...editingEpisode,
+                                type: e.target.value as any,
+                              })
+                            }
+                          >
+                            {availableEpisodeTypes.map((episodeType) => (
+                              <option key={episodeType} value={episodeType}>
+                                {getEpisodeTypeLabel(episodeType)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">標題</label>
+                          <Input
+                            value={editingEpisode.title || ""}
+                            onChange={(e) =>
+                              setEditingEpisode({
+                                ...editingEpisode,
+                                title: e.target.value || undefined,
+                              })
+                            }
+                            placeholder="集數標題"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-sm font-medium">描述</label>
+                          <Input
+                            value={editingEpisode.description || ""}
+                            onChange={(e) =>
+                              setEditingEpisode({
+                                ...editingEpisode,
+                                description: e.target.value || undefined,
+                              })
+                            }
+                            placeholder="集數描述"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-sm font-medium">備註</label>
+                          <Input
+                            value={editingEpisode.note || ""}
+                            onChange={(e) =>
+                              setEditingEpisode({
+                                ...editingEpisode,
+                                note: e.target.value || undefined,
+                              })
+                            }
+                            placeholder="個人備註"
+                          />
                         </div>
                       </div>
-                      <Badge className={getEpisodeTypeColor(episode.type)}>
-                        {getEpisodeTypeLabel(episode.type)}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      {!disabled && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setEditingEpisode(episode)}
-                          >
-                            <Edit className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDeleteEpisode(episode.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  {(episode.description || episode.note) && (
-                    <div className="mt-2 text-sm text-gray-600">
-                      {episode.description && (
-                        <div className="mb-1">{episode.description}</div>
-                      )}
-                      {episode.note && (
-                        <div className="text-xs text-gray-500">
-                          備註: {episode.note}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                      <div className="flex space-x-2 mt-3">
+                        <Button
+                          size="sm"
+                          onClick={() => handleUpdateEpisode(editingEpisode)}
+                        >
+                          <Check className="w-4 h-4 mr-1" />
+                          更新
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingEpisode(null)}
+                        >
+                          取消
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             ))
           )}
         </div>
-
-        {/* 編輯集數對話框 */}
-        {editingEpisode && (
-          <Card className="border-2 border-dashed border-blue-200">
-            <CardContent className="pt-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium">集數</label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={editingEpisode.number}
-                    onChange={(e) =>
-                      setEditingEpisode({
-                        ...editingEpisode,
-                        number: parseInt(e.target.value) || 1,
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">季數</label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={editingEpisode.season}
-                    onChange={(e) =>
-                      setEditingEpisode({
-                        ...editingEpisode,
-                        season: parseInt(e.target.value) || 1,
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">類型</label>
-                  <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    value={editingEpisode.type}
-                    onChange={(e) =>
-                      setEditingEpisode({
-                        ...editingEpisode,
-                        type: e.target.value as any,
-                      })
-                    }
-                  >
-                    {availableEpisodeTypes.map((episodeType) => (
-                      <option key={episodeType} value={episodeType}>
-                        {getEpisodeTypeLabel(episodeType)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">標題</label>
-                  <Input
-                    value={editingEpisode.title || ""}
-                    onChange={(e) =>
-                      setEditingEpisode({
-                        ...editingEpisode,
-                        title: e.target.value || undefined,
-                      })
-                    }
-                    placeholder="集數標題"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="text-sm font-medium">描述</label>
-                  <Input
-                    value={editingEpisode.description || ""}
-                    onChange={(e) =>
-                      setEditingEpisode({
-                        ...editingEpisode,
-                        description: e.target.value || undefined,
-                      })
-                    }
-                    placeholder="集數描述"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="text-sm font-medium">備註</label>
-                  <Input
-                    value={editingEpisode.note || ""}
-                    onChange={(e) =>
-                      setEditingEpisode({
-                        ...editingEpisode,
-                        note: e.target.value || undefined,
-                      })
-                    }
-                    placeholder="個人備註"
-                  />
-                </div>
-              </div>
-              <div className="flex space-x-2 mt-3">
-                <Button
-                  size="sm"
-                  onClick={() => handleUpdateEpisode(editingEpisode)}
-                >
-                  <Check className="w-4 h-4 mr-1" />
-                  更新
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setEditingEpisode(null)}
-                >
-                  取消
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </CardContent>
     </Card>
   );

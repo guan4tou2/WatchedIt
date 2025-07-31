@@ -71,7 +71,11 @@ export function ThemeProvider({
     setTheme,
     resolvedTheme: mounted ? resolvedTheme : "light",
   };
-
+  // mounted 尚未 true 時，不渲染 children，避免 hydration mismatch 與 context undefined
+  if (!mounted) {
+    return null;
+  }
+  // 確保在 SSR 期間也能提供有效的 context
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
