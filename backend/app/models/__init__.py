@@ -1,4 +1,5 @@
+from .cloud_backup import CloudBackup
 from .tag import Tag
 from .work import Work
 
-__all__ = ["Work", "Tag"]
+__all__ = ["Work", "Tag", "CloudBackup"]

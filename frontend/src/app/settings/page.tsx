@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import WorkTypeManager from "@/components/WorkTypeManager";
 import CustomEpisodeTypeManager from "@/components/CustomEpisodeTypeManager";
 import { useTheme } from "@/components/ThemeProvider";
+import { useWorkStore } from "@/store/useWorkStore";
+import { cloudStorage, CloudConfig } from "@/lib/cloudStorage";
 import Link from "next/link";
 import {
   Database,
@@ -28,11 +30,14 @@ import {
   Monitor,
   Tag,
   ArrowRight,
+  Clock,
+  ArrowLeft,
 } from "lucide-react";
 
 interface Settings {
   storageMode: "local" | "cloud";
   cloudEndpoint: string;
+  cloudApiKey: string;
   autoSync: boolean;
   syncInterval: number;
   notifications: boolean;
@@ -43,9 +48,11 @@ interface Settings {
 }
 
 export default function SettingsPage() {
+  const { works, tags, updateWorks, updateTags } = useWorkStore();
   const [settings, setSettings] = useState<Settings>({
     storageMode: "local",
     cloudEndpoint: "",
+    cloudApiKey: "",
     autoSync: false,
     syncInterval: 30,
     notifications: true,
@@ -66,9 +73,11 @@ export default function SettingsPage() {
   useEffect(() => {
     // 載入設定
     try {
-      const savedSettings = localStorage.getItem("watchedit_settings");
-      if (savedSettings) {
-        setSettings(JSON.parse(savedSettings));
+      if (typeof window !== "undefined") {
+        const savedSettings = localStorage.getItem("watchedit_settings");
+        if (savedSettings) {
+          setSettings(JSON.parse(savedSettings));
+        }
       }
     } catch (error) {
       console.error("載入設定失敗:", error);
@@ -77,7 +86,19 @@ export default function SettingsPage() {
 
   const saveSettings = () => {
     try {
-      localStorage.setItem("watchedit_settings", JSON.stringify(settings));
+      if (typeof window !== "undefined") {
+        localStorage.setItem("watchedit_settings", JSON.stringify(settings));
+      }
+
+      // 如果切換到雲端模式，設定雲端配置
+      if (settings.storageMode === "cloud" && settings.cloudEndpoint) {
+        const cloudConfig: CloudConfig = {
+          endpoint: settings.cloudEndpoint,
+          apiKey: settings.cloudApiKey || undefined,
+        };
+        cloudStorage.setConfig(cloudConfig);
+      }
+
       setMessage({ type: "success", text: "設定已儲存" });
       setTimeout(() => setMessage(null), 3000);
     } catch (error) {
@@ -90,12 +111,9 @@ export default function SettingsPage() {
   const exportData = () => {
     setIsLoading(true);
     try {
-      const works = localStorage.getItem("watchedit_works");
-      const tags = localStorage.getItem("watchedit_tags");
-
       const data = {
-        works: works ? JSON.parse(works) : [],
-        tags: tags ? JSON.parse(tags) : [],
+        works,
+        tags,
         exportDate: new Date().toISOString(),
         version: "1.0.0",
       };
@@ -138,13 +156,13 @@ export default function SettingsPage() {
           try {
             const data = JSON.parse(e.target?.result as string);
 
-            if (data.works) {
+            if (data.works && typeof window !== "undefined") {
               localStorage.setItem(
                 "watchedit_works",
                 JSON.stringify(data.works)
               );
             }
-            if (data.tags) {
+            if (data.tags && typeof window !== "undefined") {
               localStorage.setItem("watchedit_tags", JSON.stringify(data.tags));
             }
 
@@ -167,28 +185,146 @@ export default function SettingsPage() {
 
   const clearData = () => {
     if (confirm("確定要清除所有資料嗎？此操作無法復原！")) {
-      localStorage.removeItem("watchedit_works");
-      localStorage.removeItem("watchedit_tags");
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("watchedit_works");
+        localStorage.removeItem("watchedit_tags");
+      }
       setMessage({ type: "success", text: "資料已清除" });
       setTimeout(() => setMessage(null), 3000);
       window.location.reload();
     }
   };
 
-  const testCloudConnection = () => {
-    setIsLoading(true);
-    // 模擬測試雲端連接
-    setTimeout(() => {
-      setIsLoading(false);
-      setMessage({ type: "success", text: "雲端連接測試成功" });
+  const testCloudConnection = async () => {
+    if (!settings.cloudEndpoint) {
+      setMessage({ type: "error", text: "請先輸入雲端端點" });
       setTimeout(() => setMessage(null), 3000);
-    }, 2000);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await cloudStorage.testConnection(settings.cloudEndpoint);
+
+      if (result.success) {
+        // 測試成功時自動儲存設定
+        const updatedSettings = {
+          ...settings,
+          storageMode: "cloud" as const,
+        };
+        setSettings(updatedSettings);
+
+        // 設定雲端配置
+        const cloudConfig: CloudConfig = {
+          endpoint: settings.cloudEndpoint,
+          apiKey: settings.cloudApiKey || undefined,
+        };
+        cloudStorage.setConfig(cloudConfig);
+
+        // 儲存設定到 localStorage
+        if (typeof window !== "undefined") {
+          localStorage.setItem(
+            "watchedit_settings",
+            JSON.stringify(updatedSettings)
+          );
+        }
+
+        setMessage({ type: "success", text: "連接測試成功，端點已自動儲存" });
+      } else {
+        setMessage({ type: "error", text: result.message });
+      }
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      setMessage({ type: "error", text: "連接測試失敗" });
+      setTimeout(() => setMessage(null), 3000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const syncToCloud = async () => {
+    if (!settings.cloudEndpoint) {
+      setMessage({ type: "error", text: "請先設定雲端端點" });
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // 使用 uploadData 直接上傳數據到雲端
+      const result = await cloudStorage.uploadData(works, tags);
+
+      if (result.success) {
+        // 設定最後同步時間
+        cloudStorage.setLastSyncTime();
+
+        setMessage({ type: "success", text: "數據已成功上傳到雲端" });
+      } else {
+        setMessage({ type: "error", text: result.message });
+      }
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      setMessage({ type: "error", text: "同步失敗" });
+      setTimeout(() => setMessage(null), 3000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const downloadFromCloud = async () => {
+    if (!settings.cloudEndpoint) {
+      setMessage({ type: "error", text: "請先設定雲端端點" });
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await cloudStorage.downloadData();
+
+      if (result.success && result.data) {
+        // 更新本地數據
+        updateWorks(result.data.works);
+        updateTags(result.data.tags);
+        cloudStorage.setLastSyncTime();
+
+        setMessage({ type: "success", text: result.message });
+      } else {
+        setMessage({ type: "error", text: result.message });
+      }
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      setMessage({ type: "error", text: "下載失敗" });
+      setTimeout(() => setMessage(null), 3000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getLastSyncTime = () => {
+    const lastSync = cloudStorage.getLastSyncTime();
+    if (!lastSync) return "從未同步";
+
+    const date = new Date(lastSync);
+    return date.toLocaleString("zh-TW");
+  };
+
+  const shouldSync = () => {
+    return cloudStorage.shouldSync();
   };
 
   return (
     <div className="container mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">設定</h1>
+        <div className="flex items-center space-x-4">
+          <Link href="/">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回主頁
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold">設定</h1>
+        </div>
         <Button onClick={saveSettings}>
           <Save className="w-4 h-4 mr-2" />
           儲存設定
@@ -300,32 +436,89 @@ export default function SettingsPage() {
               </div>
 
               {settings.storageMode === "cloud" && (
-                <div className="space-y-2">
-                  <Label htmlFor="cloudEndpoint">雲端端點</Label>
-                  <Input
-                    id="cloudEndpoint"
-                    value={settings.cloudEndpoint}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        cloudEndpoint: e.target.value,
-                      })
-                    }
-                    placeholder="https://your-server.com/api"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={testCloudConnection}
-                    disabled={isLoading}
-                  >
-                    <RefreshCw
-                      className={`w-4 h-4 mr-2 ${
-                        isLoading ? "animate-spin" : ""
-                      }`}
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="cloudEndpoint">雲端端點</Label>
+                    <Input
+                      id="cloudEndpoint"
+                      value={settings.cloudEndpoint}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          cloudEndpoint: e.target.value,
+                        })
+                      }
+                      placeholder="https://your-server.com/api"
+                      className="mt-1"
                     />
-                    測試連接
-                  </Button>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="cloudApiKey">API 金鑰 (可選)</Label>
+                    <Input
+                      id="cloudApiKey"
+                      type="password"
+                      value={settings.cloudApiKey}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          cloudApiKey: e.target.value,
+                        })
+                      }
+                      placeholder="輸入 API 金鑰"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={testCloudConnection}
+                      disabled={isLoading}
+                    >
+                      <RefreshCw
+                        className={`w-4 h-4 mr-2 ${
+                          isLoading ? "animate-spin" : ""
+                        }`}
+                      />
+                      測試連接
+                    </Button>
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={syncToCloud}
+                      disabled={isLoading}
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      同步到雲端
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={downloadFromCloud}
+                      disabled={isLoading}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      從雲端下載
+                    </Button>
+                  </div>
+
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-4 h-4" />
+                      <span>最後同步: {getLastSyncTime()}</span>
+                    </div>
+                    {shouldSync() && (
+                      <div className="flex items-center space-x-2 text-orange-600">
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>建議進行同步</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

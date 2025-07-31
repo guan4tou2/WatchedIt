@@ -24,6 +24,7 @@ import QuickAddEpisode from "@/components/QuickAddEpisode";
 import AniListSearch from "@/components/AniListSearch";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Episode, WorkCreate } from "@/types";
+import CloudSyncStatus from "@/components/CloudSyncStatus";
 
 export default function HomePage() {
   const {
@@ -234,7 +235,7 @@ export default function HomePage() {
 
       {/* 統計卡片 */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">總作品數</CardTitle>
@@ -273,21 +274,6 @@ export default function HomePage() {
             <CardContent>
               <div className="text-2xl font-bold">
                 {stats.status_stats["已完成"] || 0}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">集數完成率</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {stats.episode_stats.completion_rate}%
-              </div>
-              <div className="text-xs text-gray-600">
-                {stats.episode_stats.watched_episodes}/
-                {stats.episode_stats.total_episodes} 集
               </div>
             </CardContent>
           </Card>
@@ -561,6 +547,9 @@ export default function HomePage() {
         onClose={() => setShowAniListSearch(false)}
         isOpen={showAniListSearch}
       />
+
+      {/* 雲端同步狀態 */}
+      <CloudSyncStatus />
     </div>
   );
 }

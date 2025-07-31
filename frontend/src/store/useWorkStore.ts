@@ -28,6 +28,7 @@ interface WorkStore {
   updateWork: (id: string, work: WorkUpdate) => Promise<Work | null>;
   deleteWork: (id: string) => Promise<boolean>;
   getWork: (id: string) => Work | null;
+  updateWorks: (works: Work[]) => void;
 
   // 標籤相關操作
   fetchTags: () => Promise<Tag[]>;
@@ -169,6 +170,16 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
   getWork: (id) => {
     const works = workStorage.getAll();
     return works.find((w) => w.id === id) || null;
+  },
+
+  updateWorks: (works) => {
+    try {
+      // 更新本地儲存
+      workStorage.setAll(works);
+      set({ works });
+    } catch (error) {
+      console.error("更新作品失敗:", error);
+    }
   },
 
   // 標籤相關操作

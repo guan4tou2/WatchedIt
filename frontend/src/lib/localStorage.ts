@@ -41,7 +41,16 @@ export const workStorage = {
     }
   },
 
-  // 檢查作品是否已存在
+  // 設定所有作品
+  setAll(works: Work[]): void {
+    try {
+      localStorage.setItem(STORAGE_KEYS.WORKS, JSON.stringify(works));
+    } catch (error) {
+      console.error("儲存作品數據失敗:", error);
+    }
+  },
+
+  // 根據標題查找作品
   findByTitle(title: string): Work | null {
     const works = this.getAll();
     return works.find((work) => work.title === title) || null;
