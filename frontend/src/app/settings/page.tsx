@@ -13,6 +13,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useWorkStore } from "@/store/useWorkStore";
 import { cloudStorage, CloudConfig } from "@/lib/cloudStorage";
 import { dbUtils } from "@/lib/indexedDB";
+import Logo from "@/components/Logo";
 import Link from "next/link";
 import {
   Database,
@@ -317,18 +318,13 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="container mx-auto p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
         <div className="flex items-center space-x-4">
-          <Link href="/">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              返回主頁
-            </Button>
-          </Link>
-          <h1 className="text-3xl font-bold">設定</h1>
+          <Logo showText={false} />
+          <h1 className="text-2xl sm:text-3xl font-bold">設定</h1>
         </div>
-        <Button onClick={saveSettings}>
+        <Button onClick={saveSettings} className="w-full sm:w-auto">
           <Save className="w-4 h-4 mr-2" />
           儲存設定
         </Button>
@@ -347,11 +343,11 @@ export default function SettingsPage() {
           ) : (
             <AlertTriangle className="w-4 h-4" />
           )}
-          <span>{message.text}</span>
+          <span className="text-sm">{message.text}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* 基本設定 */}
         <div className="space-y-6">
           <Card>

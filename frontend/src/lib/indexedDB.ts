@@ -502,14 +502,14 @@ export const initializeSampleData = async () => {
     const tags = await tagStorage.getAll();
 
     if (works.length === 0) {
-      // 新增示例作品
+      // 動畫類型 - 進擊的巨人
       await workStorage.create({
         title: "進擊的巨人",
         type: "動畫",
         status: "已完成",
         year: 2013,
         rating: 5,
-        review: "經典神作！",
+        review: "經典神作！劇情緊湊，角色塑造深刻，音樂震撼人心。",
         source: "AniList",
         episodes: [
           {
@@ -544,39 +544,64 @@ export const initializeSampleData = async () => {
         ],
       });
 
+      // 電影類型 - 星際效應
       await workStorage.create({
-        title: "鬼滅之刃",
-        type: "動畫",
-        status: "進行中",
-        year: 2019,
+        title: "星際效應",
+        type: "電影",
+        status: "已完成",
+        year: 2014,
+        rating: 5,
+        review: "諾蘭的科幻傑作，結合了硬科幻與人文情感，視覺效果震撼。",
+        source: "手動新增",
+        episodes: [
+          {
+            id: "movie-1",
+            number: 1,
+            title: "星際效應",
+            description: "人類為了尋找新的家園而展開的星際旅程",
+            type: "movie",
+            season: 1,
+            watched: true,
+            date_watched: "2023-02-10T00:00:00.000Z",
+          },
+        ],
+      });
+
+      // 電視劇類型 - 權力遊戲
+      await workStorage.create({
+        title: "權力遊戲",
+        type: "電視劇",
+        status: "已完成",
+        year: 2011,
         rating: 4,
-        source: "AniList",
+        review: "史詩級奇幻劇集，政治鬥爭與奇幻元素完美結合。",
+        source: "手動新增",
         episodes: [
           {
             id: "ep-1",
             number: 1,
-            title: "殘酷",
-            description: "竈門炭治郎的家人被鬼襲擊",
+            title: "凜冬將至",
+            description: "史塔克家族發現冰原狼幼崽",
             type: "episode",
             season: 1,
             watched: true,
-            date_watched: "2023-02-01T00:00:00.000Z",
+            date_watched: "2023-03-05T00:00:00.000Z",
           },
           {
             id: "ep-2",
             number: 2,
-            title: "培育者 鱗瀧左近次",
-            description: "炭治郎開始學習呼吸法",
+            title: "國王大道",
+            description: "艾德·史塔克前往君臨城",
             type: "episode",
             season: 1,
             watched: true,
-            date_watched: "2023-02-01T00:00:00.000Z",
+            date_watched: "2023-03-05T00:00:00.000Z",
           },
           {
             id: "ep-3",
             number: 3,
-            title: "鬼舞辻無慘",
-            description: "炭治郎遇到鬼舞辻無慘",
+            title: "雪諾，私生子",
+            description: "瓊恩·雪諾加入守夜人",
             type: "episode",
             season: 1,
             watched: false,
@@ -584,13 +609,14 @@ export const initializeSampleData = async () => {
         ],
       });
 
+      // 小說類型 - 哈利波特與魔法石
       await workStorage.create({
         title: "哈利波特與魔法石",
         type: "小說",
         status: "已完成",
         year: 1997,
         rating: 5,
-        review: "魔法世界的開始",
+        review: "魔法世界的開始，J.K.羅琳的奇幻傑作。",
         source: "手動新增",
         episodes: [
           {
@@ -613,6 +639,100 @@ export const initializeSampleData = async () => {
             watched: true,
             date_watched: "2023-03-01T00:00:00.000Z",
           },
+          {
+            id: "ch-3",
+            number: 3,
+            title: "來自霍格華茲的信",
+            description: "哈利收到霍格華茲的入學通知",
+            type: "chapter",
+            season: 1,
+            watched: false,
+          },
+        ],
+      });
+
+      // 漫畫類型 - 鬼滅之刃
+      await workStorage.create({
+        title: "鬼滅之刃",
+        type: "漫畫",
+        status: "進行中",
+        year: 2016,
+        rating: 4,
+        review: "熱血戰鬥漫畫，畫風精美，劇情緊湊。",
+        source: "手動新增",
+        episodes: [
+          {
+            id: "ch-1",
+            number: 1,
+            title: "殘酷",
+            description: "竈門炭治郎的家人被鬼襲擊",
+            type: "chapter",
+            season: 1,
+            watched: true,
+            date_watched: "2023-04-01T00:00:00.000Z",
+          },
+          {
+            id: "ch-2",
+            number: 2,
+            title: "培育者 鱗瀧左近次",
+            description: "炭治郎開始學習呼吸法",
+            type: "chapter",
+            season: 1,
+            watched: true,
+            date_watched: "2023-04-01T00:00:00.000Z",
+          },
+          {
+            id: "ch-3",
+            number: 3,
+            title: "鬼舞辻無慘",
+            description: "炭治郎遇到鬼舞辻無慘",
+            type: "chapter",
+            season: 1,
+            watched: false,
+          },
+        ],
+      });
+
+      // 遊戲類型 - 薩爾達傳說：曠野之息
+      await workStorage.create({
+        title: "薩爾達傳說：曠野之息",
+        type: "遊戲",
+        status: "已完成",
+        year: 2017,
+        rating: 5,
+        review: "開放世界遊戲的典範，自由度極高，探索樂趣無窮。",
+        source: "手動新增",
+        episodes: [
+          {
+            id: "quest-1",
+            number: 1,
+            title: "初始台地",
+            description: "林克在初始台地醒來，開始冒險",
+            type: "chapter",
+            season: 1,
+            watched: true,
+            date_watched: "2023-05-01T00:00:00.000Z",
+          },
+          {
+            id: "quest-2",
+            number: 2,
+            title: "四神獸",
+            description: "解放四神獸，恢復海拉魯的和平",
+            type: "chapter",
+            season: 1,
+            watched: true,
+            date_watched: "2023-05-15T00:00:00.000Z",
+          },
+          {
+            id: "quest-3",
+            number: 3,
+            title: "最終決戰",
+            description: "與災厄加農的最終決戰",
+            type: "chapter",
+            season: 1,
+            watched: true,
+            date_watched: "2023-06-01T00:00:00.000Z",
+          },
         ],
       });
     }
@@ -624,6 +744,9 @@ export const initializeSampleData = async () => {
       await tagStorage.create({ name: "劇情", color: "#45B7D1" });
       await tagStorage.create({ name: "魔法", color: "#96CEB4" });
       await tagStorage.create({ name: "冒險", color: "#FFEAA7" });
+      await tagStorage.create({ name: "科幻", color: "#A8E6CF" });
+      await tagStorage.create({ name: "奇幻", color: "#FFB3BA" });
+      await tagStorage.create({ name: "動作", color: "#FFD93D" });
     }
   } catch (error) {
     console.error("初始化示例數據失敗:", error);

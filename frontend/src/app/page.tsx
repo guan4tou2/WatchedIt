@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import PlatformInfo from "@/components/PlatformInfo";
+import Logo from "@/components/Logo";
 import { pwaService } from "@/lib/pwa";
 import {
   checkMigrationNeeded,
@@ -26,6 +27,7 @@ import {
   X,
   Database,
   AlertTriangle,
+  Menu,
 } from "lucide-react";
 import QuickAddEpisode from "@/components/QuickAddEpisode";
 import AniListSearch from "@/components/AniListSearch";
@@ -66,6 +68,9 @@ export default function HomePage() {
     hasIndexedDBData: boolean;
   } | null>(null);
   const [isMigrating, setIsMigrating] = useState(false);
+
+  // 移動端選單狀態
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useEffect(() => {
     // 檢查是否需要數據遷移
@@ -258,10 +263,13 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-4 sm:p-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">看過了</h1>
-        <div className="flex items-center space-x-2">
+        <Logo />
+
+        {/* 桌面端按鈕 */}
+        <div className="hidden md:flex items-center space-x-2">
           <ThemeToggle />
           <Button
             variant="outline"
@@ -284,29 +292,78 @@ export default function HomePage() {
             </Button>
           </Link>
         </div>
+
+        {/* 移動端選單按鈕 */}
+        <div className="md:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+          >
+            <Menu className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
+
+      {/* 移動端選單 */}
+      {showMobileMenu && (
+        <div className="md:hidden mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg border shadow-lg">
+          <div className="flex flex-col space-y-2">
+            <ThemeToggle />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setShowAniListSearch(true);
+                setShowMobileMenu(false);
+              }}
+            >
+              <Search className="w-4 h-4 mr-1" />
+              搜尋動畫
+            </Button>
+            <Link href="/settings">
+              <Button variant="outline" size="sm" className="w-full">
+                <Settings className="w-4 h-4 mr-1" />
+                設定
+              </Button>
+            </Link>
+            <Link href="/works/new">
+              <Button className="w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                新增作品
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* 平台資訊 */}
       <PlatformInfo />
 
       {/* 統計卡片 */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">總作品數</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">
+                總作品數
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.total_works}</div>
+              <div className="text-lg sm:text-2xl font-bold">
+                {stats.total_works}
+              </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">動畫</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">
+                動畫
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-lg sm:text-2xl font-bold">
                 {stats.type_stats["動畫"] || 0}
               </div>
             </CardContent>
@@ -314,10 +371,12 @@ export default function HomePage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">進行中</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">
+                進行中
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-lg sm:text-2xl font-bold">
                 {stats.status_stats["進行中"] || 0}
               </div>
             </CardContent>
@@ -325,10 +384,12 @@ export default function HomePage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">已完成</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">
+                已完成
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-lg sm:text-2xl font-bold">
                 {stats.status_stats["已完成"] || 0}
               </div>
             </CardContent>
@@ -339,7 +400,7 @@ export default function HomePage() {
       {/* 搜尋和篩選 */}
       <div className="mb-6 space-y-4">
         {/* 搜尋欄 */}
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
@@ -349,27 +410,30 @@ export default function HomePage() {
               className="pl-10"
             />
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter className="w-4 h-4 mr-2" />
-            篩選
-          </Button>
-          {(searchTerm || selectedType || selectedStatus || selectedYear) && (
-            <Button variant="outline" size="sm" onClick={clearFilters}>
-              <X className="w-4 h-4 mr-2" />
-              清除
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex-1 sm:flex-none"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">篩選</span>
             </Button>
-          )}
+            {(searchTerm || selectedType || selectedStatus || selectedYear) && (
+              <Button variant="outline" size="sm" onClick={clearFilters}>
+                <X className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">清除</span>
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* 篩選選項 */}
         {showFilters && (
           <Card>
             <CardContent className="pt-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* 類型篩選 */}
                 <div>
                   <label className="text-sm font-medium text-gray-600">
@@ -378,7 +442,7 @@ export default function HomePage() {
                   <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="w-full mt-1 p-2 border rounded-md"
+                    className="w-full mt-1 p-2 border rounded-md text-sm"
                   >
                     <option value="">全部類型</option>
                     {availableTypes.map((type) => (
@@ -397,7 +461,7 @@ export default function HomePage() {
                   <select
                     value={selectedStatus}
                     onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="w-full mt-1 p-2 border rounded-md"
+                    className="w-full mt-1 p-2 border rounded-md text-sm"
                   >
                     <option value="">全部狀態</option>
                     {availableStatuses.map((status) => (
@@ -416,7 +480,7 @@ export default function HomePage() {
                   <select
                     value={selectedYear}
                     onChange={(e) => setSelectedYear(e.target.value)}
-                    className="w-full mt-1 p-2 border rounded-md"
+                    className="w-full mt-1 p-2 border rounded-md text-sm"
                   >
                     <option value="">全部年份</option>
                     {availableYears.map((year) => (
@@ -427,11 +491,17 @@ export default function HomePage() {
                   </select>
                 </div>
 
-                {/* 結果統計 */}
+                {/* 快速操作 */}
                 <div className="flex items-end">
-                  <div className="text-sm text-gray-600">
-                    顯示 {filteredWorks.length} / {works.length} 個作品
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="w-full"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    清除篩選
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -441,15 +511,17 @@ export default function HomePage() {
 
       {/* 數據遷移提示 */}
       {migrationStatus?.needsMigration && (
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6 flex items-center">
-          <AlertTriangle className="w-5 h-5 mr-2" />
-          發現舊版數據，建議進行數據遷移。
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6 flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0">
+          <div className="flex items-center">
+            <AlertTriangle className="w-5 h-5 mr-2 flex-shrink-0" />
+            <span className="text-sm">發現舊版數據，建議進行數據遷移。</span>
+          </div>
           <Button
             variant="outline"
             size="sm"
             onClick={handleMigration}
             disabled={isMigrating}
-            className="ml-4"
+            className="flex-shrink-0"
           >
             {isMigrating ? "遷移中..." : "立即遷移"}
           </Button>
@@ -458,8 +530,8 @@ export default function HomePage() {
 
       {/* 作品列表 */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+          <h2 className="text-lg sm:text-xl font-semibold">
             {searchTerm || selectedType || selectedStatus || selectedYear
               ? "搜尋結果"
               : "最近作品"}
@@ -478,7 +550,7 @@ export default function HomePage() {
               : "沒有找到符合條件的作品"}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {filteredWorks.slice(0, 6).map((work) => {
               const episodes = work.episodes || [];
               const watchedCount = episodes.filter((ep) => ep.watched).length;
@@ -490,9 +562,11 @@ export default function HomePage() {
                   className="hover:shadow-lg transition-shadow cursor-pointer"
                   onClick={() => (window.location.href = `/works/${work.id}`)}
                 >
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{work.title}</CardTitle>
+                  <CardHeader className="pb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-2 sm:space-y-0">
+                      <CardTitle className="text-base sm:text-lg line-clamp-2">
+                        {work.title}
+                      </CardTitle>
                       <div className="flex items-center space-x-2">
                         <Button
                           size="sm"
@@ -506,14 +580,16 @@ export default function HomePage() {
                               work.type
                             );
                           }}
+                          className="text-xs sm:text-sm"
                         >
-                          <Plus className="w-4 h-4 mr-1" />
-                          新增集數
+                          <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                          <span className="hidden sm:inline">新增集數</span>
+                          <span className="sm:hidden">新增</span>
                         </Button>
                         <ArrowRight className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="flex flex-wrap items-center space-x-2 text-xs sm:text-sm text-gray-600">
                       <span>{work.type}</span>
                       <span>•</span>
                       <span>{work.status}</span>
@@ -525,17 +601,17 @@ export default function HomePage() {
                       )}
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-0">
+                    {/* 評分 */}
                     {work.rating && (
                       <div className="flex items-center space-x-1 mb-2">
-                        <span className="text-sm text-gray-600">評分:</span>
                         <div className="flex">
-                          {[1, 2, 3, 4, 5].map((star) => (
+                          {[...Array(5)].map((_, i) => (
                             <span
-                              key={star}
-                              className={`text-lg ${
-                                star <= work.rating!
-                                  ? "text-yellow-400"
+                              key={i}
+                              className={`text-sm ${
+                                i < work.rating!
+                                  ? "text-yellow-500"
                                   : "text-gray-300"
                               }`}
                             >
@@ -543,43 +619,62 @@ export default function HomePage() {
                             </span>
                           ))}
                         </div>
+                        <span className="text-xs text-gray-500">
+                          {work.rating}/5
+                        </span>
                       </div>
                     )}
 
-                    {work.review && (
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {work.review}
-                      </p>
+                    {/* 集數進度 */}
+                    {totalEpisodes > 0 && (
+                      <div className="mb-2">
+                        <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                          <span>集數進度</span>
+                          <span>
+                            {watchedCount}/{totalEpisodes}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style={{
+                              width: `${(watchedCount / totalEpisodes) * 100}%`,
+                            }}
+                          ></div>
+                        </div>
+                      </div>
                     )}
 
+                    {/* 標籤 */}
                     {work.tags && work.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
+                      <div className="flex flex-wrap gap-1">
                         {work.tags.slice(0, 3).map((tag) => (
-                          <span
+                          <Badge
                             key={tag.id}
-                            className="px-2 py-1 text-xs rounded"
+                            variant="secondary"
+                            className="text-xs"
                             style={{
-                              backgroundColor: tag.color + "20",
+                              backgroundColor: `${tag.color}20`,
                               color: tag.color,
                             }}
                           >
                             {tag.name}
-                          </span>
+                          </Badge>
                         ))}
                         {work.tags.length > 3 && (
-                          <span className="px-2 py-1 text-xs text-gray-500">
+                          <Badge variant="secondary" className="text-xs">
                             +{work.tags.length - 3}
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     )}
 
-                    {totalEpisodes > 0 && (
-                      <div className="flex items-center justify-between mt-2 text-sm text-gray-600">
-                        <span>集數進度</span>
-                        <span>
-                          {watchedCount}/{totalEpisodes} 集
-                        </span>
+                    {/* 評論預覽 */}
+                    {work.review && (
+                      <div className="mt-2">
+                        <p className="text-xs text-gray-600 line-clamp-2">
+                          {work.review}
+                        </p>
                       </div>
                     )}
                   </CardContent>
@@ -593,7 +688,8 @@ export default function HomePage() {
         {filteredWorks.length > 6 && (
           <div className="text-center">
             <Button variant="outline">
-              查看更多作品 ({filteredWorks.length - 6} 個)
+              查看更多作品
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
         )}

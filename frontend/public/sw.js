@@ -1,50 +1,84 @@
-const CACHE_NAME = "watchedit-v1";
+const CACHE_NAME = "watchedit-v2";
+const STATIC_CACHE = "watchedit-static-v2";
+const DYNAMIC_CACHE = "watchedit-dynamic-v2";
+
 const urlsToCache = [
   "/",
   "/manifest.json",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
+  "/icons/icon-72x72.png",
+  "/icons/icon-96x96.png",
+  "/icons/icon-128x128.png",
+  "/icons/icon-144x144.png",
+  "/icons/icon-152x152.png",
+  "/icons/icon-384x384.png",
 ];
 
 // 安裝 Service Worker
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("Opened cache");
+    caches.open(STATIC_CACHE).then((cache) => {
+      console.log("Opened static cache");
       return cache.addAll(urlsToCache);
     })
   );
+  self.skipWaiting();
 });
 
 // 攔截網路請求
 self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // 只處理同源請求
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // 靜態資源使用快取優先策略
+  if (request.destination === "image" || request.destination === "font") {
+    event.respondWith(
+      caches.match(request).then((response) => {
+        return (
+          response ||
+          fetch(request).then((fetchResponse) => {
+            return caches.open(DYNAMIC_CACHE).then((cache) => {
+              cache.put(request, fetchResponse.clone());
+              return fetchResponse;
+            });
+          })
+        );
+      })
+    );
+    return;
+  }
+
+  // 其他請求使用網路優先策略
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // 如果快取中有回應，則返回快取的回應
-      if (response) {
-        return response;
-      }
-
-      // 否則從網路獲取
-      return fetch(event.request).then((response) => {
-        // 檢查是否為有效的回應
-        if (!response || response.status !== 200 || response.type !== "basic") {
-          return response;
-        }
-
-        // 複製回應
-        const responseToCache = response.clone();
-
-        // 只快取同源的請求，避免 chrome-extension 等錯誤
-        if (event.request.url.startsWith(self.location.origin)) {
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
+    fetch(request)
+      .then((response) => {
+        // 只快取成功的回應
+        if (response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseClone);
           });
         }
-
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        // 網路失敗時返回快取
+        return caches.match(request).then((response) => {
+          if (response) {
+            return response;
+          }
+          // 如果沒有快取，返回離線頁面
+          if (request.destination === "document") {
+            return caches.match("/");
+          }
+        });
+      })
   );
 });
 
@@ -54,7 +88,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
             console.log("Deleting old cache:", cacheName);
             return caches.delete(cacheName);
           }
@@ -62,6 +96,7 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
+  self.clients.claim();
 });
 
 // 處理背景同步
@@ -94,6 +129,8 @@ self.addEventListener("push", (event) => {
         icon: "/icons/icon-72x72.png",
       },
     ],
+    requireInteraction: true,
+    tag: "watchedit-notification",
   };
 
   event.waitUntil(
@@ -106,7 +143,20 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   if (event.action === "explore") {
-    event.waitUntil(clients.openWindow("/"));
+    event.waitUntil(
+      clients.matchAll({ type: "window" }).then((clientList) => {
+        // 如果已經有開啟的視窗，聚焦到該視窗
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && "focus" in client) {
+            return client.focus();
+          }
+        }
+        // 否則開啟新視窗
+        if (clients.openWindow) {
+          return clients.openWindow("/");
+        }
+      })
+    );
   }
 });
 
@@ -115,7 +165,17 @@ async function doBackgroundSync() {
   try {
     // 這裡可以實現離線數據同步
     console.log("Background sync completed");
+
+    // 可以添加數據同步邏輯
+    // 例如：同步 IndexedDB 數據到雲端
   } catch (error) {
     console.error("Background sync failed:", error);
   }
 }
+
+// 處理訊息
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
