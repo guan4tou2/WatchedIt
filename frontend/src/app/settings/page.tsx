@@ -417,8 +417,8 @@ export default function SettingsPage() {
         <div
           className={`mb-4 p-4 rounded-md flex items-center space-x-2 ${
             message.type === "success"
-              ? "bg-green-100 text-green-800 border border-green-200"
-              : "bg-red-100 text-red-800 border border-red-200"
+              ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800"
+              : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
           }`}
         >
           {message.type === "success" ? (
@@ -473,14 +473,14 @@ export default function SettingsPage() {
 
               {/* 系統主題信息 */}
               {theme === "auto" && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
                   <div className="flex items-center space-x-2 mb-2">
-                    <Monitor className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-800">
+                    <Monitor className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
                       自動模式
                     </span>
                   </div>
-                  <div className="text-xs text-blue-600 space-y-1">
+                  <div className="text-xs text-blue-600 dark:text-blue-300 space-y-1">
                     <div className="flex items-center justify-between">
                       <span>系統主題:</span>
                       <Badge variant="outline" className="text-xs">
@@ -509,7 +509,7 @@ export default function SettingsPage() {
                       language: e.target.value as "zh-TW" | "en-US",
                     })
                   }
-                  className="p-2 border rounded-md"
+                  className="p-2 border rounded-md dark:text-foreground/95 dark:bg-background/95"
                 >
                   <option value="zh-TW">繁體中文</option>
                   <option value="en-US">English</option>
@@ -606,14 +606,14 @@ export default function SettingsPage() {
               {/* PWA 操作按鈕 */}
               <div className="space-y-2">
                 {!pwaInfo.isPWA && (
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
                     <div className="flex items-center space-x-2 mb-2">
-                      <Download className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-800">
+                      <Download className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
                         安裝 PWA
                       </span>
                     </div>
-                    <p className="text-xs text-blue-600 mb-2">
+                    <p className="text-xs text-blue-600 dark:text-blue-300 mb-2">
                       {getInstallInstructions()}
                     </p>
                   </div>
@@ -636,7 +636,7 @@ export default function SettingsPage() {
                   </Button>
                 </div>
 
-                <div className="flex items-center space-x-2 text-xs text-gray-600">
+                <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                   {pwaInfo.isPWA ? (
                     <>
                       <Globe className="w-4 h-4" />
@@ -672,7 +672,7 @@ export default function SettingsPage() {
                       storageMode: e.target.value as "local" | "cloud",
                     })
                   }
-                  className="p-2 border rounded-md"
+                  className="p-2 border rounded-md dark:text-foreground/95 dark:bg-background/95"
                 >
                   <option value="local">本地儲存</option>
                   <option value="cloud">雲端同步</option>
@@ -751,13 +751,13 @@ export default function SettingsPage() {
                     </Button>
                   </div>
 
-                  <div className="text-sm text-gray-600 space-y-1">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                     <div className="flex items-center space-x-2">
                       <Clock className="w-4 h-4" />
                       <span>最後同步: {getLastSyncTime()}</span>
                     </div>
                     {shouldSync() && (
-                      <div className="flex items-center space-x-2 text-orange-600">
+                      <div className="flex items-center space-x-2 text-orange-600 dark:text-orange-400">
                         <AlertTriangle className="w-4 h-4" />
                         <span>建議進行同步</span>
                       </div>
@@ -792,7 +792,7 @@ export default function SettingsPage() {
                     }
                     min="1"
                     max="1440"
-                    className="w-20"
+                    className="w-20 dark:text-foreground/95"
                   />
                 </div>
               )}
@@ -833,7 +833,7 @@ export default function SettingsPage() {
                     }
                     min="1"
                     max="30"
-                    className="w-20"
+                    className="w-20 dark:text-foreground/95"
                   />
                 </div>
               )}
@@ -879,7 +879,7 @@ export default function SettingsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 管理作品標籤，可以新增、編輯和刪除標籤。
               </p>
               <Link href="/settings/tags">
@@ -933,7 +933,7 @@ export default function SettingsPage() {
                   }
                 />
               </div>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 啟用後會顯示瀏覽器通知，提醒您觀看進度。
               </p>
             </CardContent>

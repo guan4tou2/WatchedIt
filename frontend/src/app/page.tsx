@@ -350,7 +350,7 @@ export default function HomePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-lg sm:text-2xl font-bold">
+              <div className="text-lg sm:text-2xl font-bold text-foreground/90 dark:text-foreground/98">
                 {stats.total_works}
               </div>
             </CardContent>
@@ -363,7 +363,7 @@ export default function HomePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-lg sm:text-2xl font-bold">
+              <div className="text-lg sm:text-2xl font-bold text-foreground/90 dark:text-foreground/98">
                 {stats.type_stats["動畫"] || 0}
               </div>
             </CardContent>
@@ -376,7 +376,7 @@ export default function HomePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-lg sm:text-2xl font-bold">
+              <div className="text-lg sm:text-2xl font-bold text-foreground/90 dark:text-foreground/98">
                 {stats.status_stats["進行中"] || 0}
               </div>
             </CardContent>
@@ -390,10 +390,12 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-2xl font-bold text-blue-500/80 dark:text-blue-400/90">
                   {stats.status_stats["已完結"] || 0}
                 </div>
-                <div className="text-sm text-gray-600">已完結</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  已完結
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -405,7 +407,7 @@ export default function HomePage() {
         {/* 搜尋欄 */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
             <Input
               placeholder="搜尋作品標題、評論或備註..."
               value={searchTerm}
@@ -439,13 +441,13 @@ export default function HomePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* 類型篩選 */}
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     類型
                   </label>
                   <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="w-full mt-1 p-2 border rounded-md text-sm"
+                    className="w-full mt-1 p-2 border border-input/60 rounded-md text-sm bg-background/95 dark:text-foreground/95"
                   >
                     <option value="">全部類型</option>
                     {availableTypes.map((type) => (
@@ -458,13 +460,13 @@ export default function HomePage() {
 
                 {/* 狀態篩選 */}
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     狀態
                   </label>
                   <select
                     value={selectedStatus}
                     onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="w-full mt-1 p-2 border rounded-md text-sm"
+                    className="w-full mt-1 p-2 border border-input/60 rounded-md text-sm bg-background/95 dark:text-foreground/95"
                   >
                     <option value="">全部狀態</option>
                     {availableStatuses.map((status) => (
@@ -534,20 +536,20 @@ export default function HomePage() {
       {/* 作品列表 */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-          <h2 className="text-lg sm:text-xl font-semibold">
+          <h2 className="text-lg sm:text-xl font-semibold dark:text-foreground/98">
             {searchTerm || selectedType || selectedStatus || selectedYear
               ? "搜尋結果"
               : "最近作品"}
           </h2>
           {filteredWorks.length > 0 && (
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
               共 {filteredWorks.length} 個作品
             </div>
           )}
         </div>
 
         {filteredWorks.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             {works.length === 0
               ? "還沒有作品，開始新增你的第一個作品吧！"
               : "沒有找到符合條件的作品"}
@@ -589,10 +591,10 @@ export default function HomePage() {
                           <span className="hidden sm:inline">新增集數</span>
                           <span className="sm:hidden">新增</span>
                         </Button>
-                        <ArrowRight className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                        <ArrowRight className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" />
                       </div>
                     </div>
-                    <div className="flex flex-wrap items-center space-x-2 text-xs sm:text-sm text-gray-600">
+                    <div className="flex flex-wrap items-center space-x-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                       <span>{work.type}</span>
                       <span>•</span>
                       <span>{work.status}</span>
@@ -614,15 +616,15 @@ export default function HomePage() {
                               key={i}
                               className={`text-sm ${
                                 i < work.rating!
-                                  ? "text-yellow-500"
-                                  : "text-gray-300"
+                                  ? "text-yellow-500 dark:text-yellow-400"
+                                  : "text-gray-300 dark:text-gray-600"
                               }`}
                             >
                               ★
                             </span>
                           ))}
                         </div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
                           {work.rating}/5
                         </span>
                       </div>
@@ -631,15 +633,15 @@ export default function HomePage() {
                     {/* 集數進度 */}
                     {totalEpisodes > 0 && (
                       <div className="mb-2">
-                        <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
                           <span>集數進度</span>
                           <span>
                             {watchedCount}/{totalEpisodes}
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                           <div
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
                             style={{
                               width: `${(watchedCount / totalEpisodes) * 100}%`,
                             }}
@@ -675,7 +677,7 @@ export default function HomePage() {
                     {/* 評論預覽 */}
                     {work.review && (
                       <div className="mt-2">
-                        <p className="text-xs text-gray-600 line-clamp-2">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
                           {work.review}
                         </p>
                       </div>
