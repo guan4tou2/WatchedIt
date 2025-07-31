@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Work, WorkUpdate } from "@/types";
+import { Work, WorkUpdate, Tag } from "@/types";
+import { useWorkStore } from "@/store/useWorkStore";
+import TagSelector from "@/components/TagSelector";
 import { X, Save, Star } from "lucide-react";
 
 interface WorkEditFormProps {
@@ -24,6 +26,7 @@ export default function WorkEditForm({
   isOpen,
   inline = false,
 }: WorkEditFormProps) {
+  const { tags } = useWorkStore();
   const [formData, setFormData] = useState({
     title: work.title,
     type: work.type,
@@ -34,6 +37,8 @@ export default function WorkEditForm({
     note: work.note || "",
     source: work.source || "",
   });
+
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(work.tags || []);
 
   useEffect(() => {
     setFormData({
@@ -46,6 +51,7 @@ export default function WorkEditForm({
       note: work.note || "",
       source: work.source || "",
     });
+    setSelectedTags(work.tags || []);
   }, [work]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -62,6 +68,7 @@ export default function WorkEditForm({
       review: formData.review || undefined,
       note: formData.note || undefined,
       source: formData.source || undefined,
+      tags: selectedTags,
     };
 
     onSave(updatedWork);
@@ -149,6 +156,13 @@ export default function WorkEditForm({
         </div>
       </div>
 
+      {/* 標籤選擇 */}
+      <TagSelector
+        availableTags={tags}
+        selectedTags={selectedTags}
+        onTagsChange={setSelectedTags}
+      />
+
       {/* 評分 */}
       <div>
         <label className="text-sm font-medium text-gray-600">評分</label>
@@ -159,7 +173,7 @@ export default function WorkEditForm({
               type="button"
               onClick={() => handleRatingClick(rating)}
               className={`p-2 rounded-md transition-colors ${
-                parseInt(formData.rating.toString()) >= rating
+                parseInt(String(formData.rating || "0")) >= rating
                   ? "text-yellow-500 bg-yellow-50"
                   : "text-gray-400 hover:text-yellow-400"
               }`}
@@ -167,7 +181,7 @@ export default function WorkEditForm({
               <Star
                 className="w-5 h-5"
                 fill={
-                  parseInt(formData.rating.toString()) >= rating
+                  parseInt(String(formData.rating || "0")) >= rating
                     ? "currentColor"
                     : "none"
                 }
@@ -221,7 +235,7 @@ export default function WorkEditForm({
       <div className="flex space-x-2 pt-4">
         <Button type="submit" className="flex-1">
           <Save className="w-4 h-4 mr-2" />
-          儲存變更
+          儲存
         </Button>
         <Button
           type="button"
@@ -229,6 +243,7 @@ export default function WorkEditForm({
           onClick={onCancel}
           className="flex-1"
         >
+          <X className="w-4 h-4 mr-2" />
           取消
         </Button>
       </div>
@@ -240,18 +255,11 @@ export default function WorkEditForm({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>編輯作品</CardTitle>
-            <Button variant="ghost" size="sm" onClick={onCancel}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>{formContent}</CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>編輯作品</CardTitle>
+      </CardHeader>
+      <CardContent>{formContent}</CardContent>
+    </Card>
   );
 }

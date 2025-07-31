@@ -155,6 +155,7 @@ export interface WorkCreate {
   reminder_enabled?: boolean;
   reminder_frequency?: string;
   tag_ids?: number[];
+  tags?: Tag[];
 }
 
 // 作品更新
@@ -171,6 +172,7 @@ export interface WorkUpdate {
   reminder_enabled?: boolean;
   reminder_frequency?: string;
   tag_ids?: number[];
+  tags?: Tag[];
 }
 
 // 作品列表

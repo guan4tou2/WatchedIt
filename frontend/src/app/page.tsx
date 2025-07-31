@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useWorkStore } from "@/store/useWorkStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import PlatformInfo from "@/components/PlatformInfo";
 import { pwaService } from "@/lib/pwa";
 import Link from "next/link";
@@ -15,6 +17,8 @@ import {
   Plus,
   Settings,
   Search,
+  Filter,
+  X,
 } from "lucide-react";
 import QuickAddEpisode from "@/components/QuickAddEpisode";
 import AniListSearch from "@/components/AniListSearch";
@@ -39,6 +43,13 @@ export default function HomePage() {
     workType: string;
   } | null>(null);
   const [showAniListSearch, setShowAniListSearch] = useState(false);
+
+  // 搜尋和篩選狀態
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedType, setSelectedType] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     // 初始化本地儲存
@@ -103,25 +114,8 @@ export default function HomePage() {
         )
     );
 
-    // 顯示跳過的集數信息
-    const skippedEpisodes = episodes.filter((episode) =>
-      existingEpisodes.some(
-        (existing) =>
-          existing.season === episode.season &&
-          existing.number === episode.number
-      )
-    );
-
-    if (skippedEpisodes.length > 0) {
-      console.warn(
-        `跳過重複集數: ${skippedEpisodes
-          .map((ep) => `第${ep.season}季第${ep.number}集`)
-          .join(", ")}`
-      );
-    }
-
     if (newEpisodes.length === 0) {
-      console.warn("所有集數都已存在，沒有新增任何集數");
+      console.warn("所有集數都已存在");
       return;
     }
 
@@ -143,6 +137,50 @@ export default function HomePage() {
     // 這個函數現在只是一個空函數，因為實際的新增邏輯已經在組件內部處理
     // 保留它是為了向後相容性
   };
+
+  // 篩選作品
+  const filteredWorks = works.filter((work) => {
+    // 搜尋篩選
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesTitle = work.title.toLowerCase().includes(searchLower);
+      const matchesReview =
+        work.review?.toLowerCase().includes(searchLower) || false;
+      const matchesNote =
+        work.note?.toLowerCase().includes(searchLower) || false;
+      if (!matchesTitle && !matchesReview && !matchesNote) return false;
+    }
+
+    // 類型篩選
+    if (selectedType && work.type !== selectedType) return false;
+
+    // 狀態篩選
+    if (selectedStatus && work.status !== selectedStatus) return false;
+
+    // 年份篩選
+    if (selectedYear && work.year?.toString() !== selectedYear) return false;
+
+    return true;
+  });
+
+  // 清除所有篩選
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedType("");
+    setSelectedStatus("");
+    setSelectedYear("");
+  };
+
+  // 獲取可用的篩選選項
+  const availableTypes = Array.from(new Set(works.map((w) => w.type)));
+  const availableStatuses = Array.from(new Set(works.map((w) => w.status)));
+  const availableYears = Array.from(
+    new Set(
+      works
+        .map((w) => w.year)
+        .filter((year): year is number => year !== undefined)
+    )
+  ).sort((a, b) => b - a);
 
   if (loading) {
     return (
@@ -256,16 +294,133 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* 搜尋和篩選 */}
+      <div className="mb-6 space-y-4">
+        {/* 搜尋欄 */}
+        <div className="flex items-center space-x-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="搜尋作品標題、評論或備註..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Filter className="w-4 h-4 mr-2" />
+            篩選
+          </Button>
+          {(searchTerm || selectedType || selectedStatus || selectedYear) && (
+            <Button variant="outline" size="sm" onClick={clearFilters}>
+              <X className="w-4 h-4 mr-2" />
+              清除
+            </Button>
+          )}
+        </div>
+
+        {/* 篩選選項 */}
+        {showFilters && (
+          <Card>
+            <CardContent className="pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* 類型篩選 */}
+                <div>
+                  <label className="text-sm font-medium text-gray-600">
+                    類型
+                  </label>
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="w-full mt-1 p-2 border rounded-md"
+                  >
+                    <option value="">全部類型</option>
+                    {availableTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 狀態篩選 */}
+                <div>
+                  <label className="text-sm font-medium text-gray-600">
+                    狀態
+                  </label>
+                  <select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="w-full mt-1 p-2 border rounded-md"
+                  >
+                    <option value="">全部狀態</option>
+                    {availableStatuses.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 年份篩選 */}
+                <div>
+                  <label className="text-sm font-medium text-gray-600">
+                    年份
+                  </label>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                    className="w-full mt-1 p-2 border rounded-md"
+                  >
+                    <option value="">全部年份</option>
+                    {availableYears.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 結果統計 */}
+                <div className="flex items-end">
+                  <div className="text-sm text-gray-600">
+                    顯示 {filteredWorks.length} / {works.length} 個作品
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
       {/* 作品列表 */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">最近作品</h2>
-        {works.length === 0 ? (
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">
+            {searchTerm || selectedType || selectedStatus || selectedYear
+              ? "搜尋結果"
+              : "最近作品"}
+          </h2>
+          {filteredWorks.length > 0 && (
+            <div className="text-sm text-gray-600">
+              共 {filteredWorks.length} 個作品
+            </div>
+          )}
+        </div>
+
+        {filteredWorks.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            還沒有作品，開始新增你的第一個作品吧！
+            {works.length === 0
+              ? "還沒有作品，開始新增你的第一個作品吧！"
+              : "沒有找到符合條件的作品"}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {works.slice(0, 6).map((work) => {
+            {filteredWorks.slice(0, 6).map((work) => {
               const episodes = work.episodes || [];
               const watchedCount = episodes.filter((ep) => ep.watched).length;
               const totalEpisodes = episodes.length;
@@ -360,24 +515,27 @@ export default function HomePage() {
                       </div>
                     )}
 
-                    {/* 狀態指示器 */}
-                    <div className="flex items-center mt-2">
-                      {totalEpisodes > 0 ? (
-                        <div className="flex items-center text-green-600 text-sm">
-                          <Check className="w-3 h-3 mr-1" />
-                          已記錄 {totalEpisodes} 集
-                        </div>
-                      ) : (
-                        <div className="flex items-center text-gray-500 text-sm">
-                          <span className="w-3 h-3 mr-1">○</span>
-                          未記錄集數
-                        </div>
-                      )}
-                    </div>
+                    {totalEpisodes > 0 && (
+                      <div className="flex items-center justify-between mt-2 text-sm text-gray-600">
+                        <span>集數進度</span>
+                        <span>
+                          {watchedCount}/{totalEpisodes} 集
+                        </span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
             })}
+          </div>
+        )}
+
+        {/* 查看更多按鈕 */}
+        {filteredWorks.length > 6 && (
+          <div className="text-center">
+            <Button variant="outline">
+              查看更多作品 ({filteredWorks.length - 6} 個)
+            </Button>
           </div>
         )}
       </div>

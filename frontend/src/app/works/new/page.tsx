@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Work, WorkCreate } from "@/types";
+import { Work, WorkCreate, Tag } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
+import TagSelector from "@/components/TagSelector";
 import { ArrowLeft, Save, Star, Plus } from "lucide-react";
 
 export default function NewWorkPage() {
   const router = useRouter();
-  const { createWork } = useWorkStore();
+  const { createWork, tags } = useWorkStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -26,6 +27,8 @@ export default function NewWorkPage() {
     note: "",
     source: "",
   });
+
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +44,7 @@ export default function NewWorkPage() {
         review: formData.review || undefined,
         note: formData.note || undefined,
         source: formData.source || undefined,
+        tags: selectedTags,
         episodes: [],
       };
 
@@ -199,6 +203,13 @@ export default function NewWorkPage() {
                   </div>
                 </div>
 
+                {/* 標籤選擇 */}
+                <TagSelector
+                  availableTags={tags}
+                  selectedTags={selectedTags}
+                  onTagsChange={setSelectedTags}
+                />
+
                 {/* 評分 */}
                 <div>
                   <label className="text-sm font-medium text-gray-600">
@@ -329,6 +340,27 @@ export default function NewWorkPage() {
                 </div>
               )}
 
+              {selectedTags.length > 0 && (
+                <div>
+                  <div className="text-sm font-medium text-gray-600 mb-1">
+                    標籤:
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedTags.map((tag) => (
+                      <Badge
+                        key={tag.id}
+                        style={{
+                          backgroundColor: tag.color + "20",
+                          color: tag.color,
+                        }}
+                      >
+                        {tag.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {formData.rating && (
                 <div className="flex items-center text-sm">
                   <Star className="w-4 h-4 mr-1 text-yellow-500" />
@@ -379,6 +411,7 @@ export default function NewWorkPage() {
             </CardHeader>
             <CardContent className="text-xs text-gray-600 space-y-2">
               <div>• 標題和類型為必填項目</div>
+              <div>• 可以為作品添加多個標籤</div>
               <div>• 創建後可以立即添加集數</div>
               <div>• 可以稍後在作品詳情頁面編輯</div>
               <div>• 支援匯入/匯出資料</div>

@@ -52,8 +52,7 @@ export const workStorage = {
     const works = this.getAll();
     return (
       works.find(
-        (work) =>
-          work.note && work.note.includes(`來自 AniList (ID: ${aniListId})`)
+        (work) => work.note && work.note.includes(`AniList ID: ${aniListId}`)
       ) || null
     );
   },
@@ -218,6 +217,15 @@ export const tagStorage = {
     } catch (error) {
       console.error("讀取標籤數據失敗:", error);
       return [];
+    }
+  },
+
+  // 設定所有標籤
+  setAll(tags: Tag[]): void {
+    try {
+      localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(tags));
+    } catch (error) {
+      console.error("儲存標籤數據失敗:", error);
     }
   },
 

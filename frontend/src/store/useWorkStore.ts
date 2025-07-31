@@ -37,6 +37,7 @@ interface WorkStore {
     tag: { name?: string; color?: string }
   ) => Promise<Tag | null>;
   deleteTag: (id: number) => Promise<boolean>;
+  updateTags: (tags: Tag[]) => void;
 
   // 統計相關操作
   fetchStats: () => Promise<Stats>;
@@ -97,14 +98,10 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
 
       // 如果是來自 AniList 的作品，額外檢查 AniList ID
       if (workData.source === "AniList" && workData.note) {
-        const aniListIdMatch = workData.note.match(
-          /來自 AniList \(ID: (\d+)\)/
-        );
-
+        const aniListIdMatch = workData.note.match(/AniList ID: (\d+)/);
         if (aniListIdMatch) {
           const aniListId = parseInt(aniListIdMatch[1]);
           const existingByAniListId = workStorage.findByAniListId(aniListId);
-
           if (existingByAniListId) {
             throw new Error(`作品「${workData.title}」已存在於您的收藏中！`);
           }
@@ -244,6 +241,16 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
         error instanceof Error ? error.message : "刪除標籤失敗";
       set({ error: errorMessage, loading: false });
       throw error;
+    }
+  },
+
+  updateTags: (tags) => {
+    try {
+      // 更新本地儲存
+      tagStorage.setAll(tags);
+      set({ tags });
+    } catch (error) {
+      console.error("更新標籤失敗:", error);
     }
   },
 
