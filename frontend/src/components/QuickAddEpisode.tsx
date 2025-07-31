@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Episode } from "@/types";
+import { Episode, EpisodeType, CustomEpisodeType } from "@/types";
+import { workTypeEpisodeMappingStorage } from "@/lib/workTypeEpisodeMapping";
+import { customEpisodeTypeStorage } from "@/lib/customEpisodeTypes";
 import { Plus, X, Check } from "lucide-react";
 
 interface QuickAddEpisodeProps {
@@ -41,34 +43,64 @@ export default function QuickAddEpisode({
     return maxNumber + 1;
   };
 
+  const [availableEpisodeTypes, setAvailableEpisodeTypes] = useState<
+    EpisodeType[]
+  >(["episode"]);
+  const [defaultEpisodeType, setDefaultEpisodeType] =
+    useState<EpisodeType>("episode");
+  const [episodeTypeLabels, setEpisodeTypeLabels] = useState<
+    Record<string, string>
+  >({});
   const [episodeData, setEpisodeData] = useState({
     number: getNextEpisodeNumber(1),
     title: "",
     description: "",
-    type: "episode" as const,
+    type: "episode" as EpisodeType,
     season: currentEpisodes.length > 0 ? currentEpisodes[0]?.season || 1 : 1,
     note: "",
   });
   const [batchCount, setBatchCount] = useState(1);
 
-  const getEpisodeTypeLabel = (type: string) => {
-    switch (type) {
-      case "episode":
-        return "正篇";
-      case "special":
-        return "特別篇";
-      case "ova":
-        return "OVA";
-      case "movie":
-        return "電影";
-      case "chapter":
-        return "章節";
-      default:
-        return "正篇";
+  // 根據作品類型載入對應的集數類型
+  useEffect(() => {
+    try {
+      const episodeTypes =
+        workTypeEpisodeMappingStorage.getEpisodeTypesForWorkType(workType);
+      const defaultType =
+        workTypeEpisodeMappingStorage.getDefaultEpisodeTypeForWorkType(
+          workType
+        );
+
+      setAvailableEpisodeTypes(episodeTypes);
+      setDefaultEpisodeType(defaultType);
+
+      // 更新集數資料的預設類型
+      setEpisodeData((prev) => ({
+        ...prev,
+        type: defaultType,
+      }));
+
+      // 載入集數類型標籤
+      const labels = customEpisodeTypeStorage.getTypeLabels();
+      setEpisodeTypeLabels(labels);
+    } catch (error) {
+      console.error("載入集數類型失敗:", error);
+      setAvailableEpisodeTypes(["episode"]);
+      setDefaultEpisodeType("episode");
     }
+  }, [workType]);
+
+  const getEpisodeTypeLabel = (type: string) => {
+    return episodeTypeLabels[type] || type;
   };
 
   const getEpisodeTypeColor = (type: string) => {
+    const episodeType = customEpisodeTypeStorage.getByName(type);
+    if (episodeType) {
+      return `bg-[${episodeType.color}]/10 text-[${episodeType.color}]`;
+    }
+
+    // 預設顏色
     switch (type) {
       case "episode":
         return "bg-blue-100 text-blue-800";
@@ -219,7 +251,7 @@ export default function QuickAddEpisode({
           <div>
             <label className="text-sm font-medium text-gray-600">類型</label>
             <div className="flex flex-wrap gap-2 mt-1">
-              {["episode", "special", "ova", "movie", "chapter"].map((type) => (
+              {availableEpisodeTypes.map((type) => (
                 <Badge
                   key={type}
                   className={`cursor-pointer ${
@@ -228,7 +260,10 @@ export default function QuickAddEpisode({
                       : "bg-gray-100 text-gray-600"
                   }`}
                   onClick={() =>
-                    setEpisodeData({ ...episodeData, type: type as any })
+                    setEpisodeData({
+                      ...episodeData,
+                      type: type as EpisodeType,
+                    })
                   }
                 >
                   {getEpisodeTypeLabel(type)}

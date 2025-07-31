@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Episode } from "@/types";
+import { Episode, EpisodeType, CustomEpisodeType } from "@/types";
+import { workTypeEpisodeMappingStorage } from "@/lib/workTypeEpisodeMapping";
+import { customEpisodeTypeStorage } from "@/lib/customEpisodeTypes";
 import { Plus, Edit, Trash2, Check } from "lucide-react";
 
 interface EpisodeManagerProps {
@@ -23,33 +25,61 @@ export default function EpisodeManager({
 }: EpisodeManagerProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [editingEpisode, setEditingEpisode] = useState<Episode | null>(null);
+  const [availableEpisodeTypes, setAvailableEpisodeTypes] = useState<
+    EpisodeType[]
+  >(["episode"]);
+  const [defaultEpisodeType, setDefaultEpisodeType] =
+    useState<EpisodeType>("episode");
+  const [episodeTypeLabels, setEpisodeTypeLabels] = useState<
+    Record<string, string>
+  >({});
   const [newEpisode, setNewEpisode] = useState({
     number: 1,
     title: "",
     description: "",
-    type: "episode" as const,
+    type: "episode" as EpisodeType,
     season: 1,
     note: "",
   });
 
-  const getEpisodeTypeLabel = (type: string) => {
-    switch (type) {
-      case "episode":
-        return "正篇";
-      case "special":
-        return "特別篇";
-      case "ova":
-        return "OVA";
-      case "movie":
-        return "電影";
-      case "chapter":
-        return "章節";
-      default:
-        return "正篇";
+  // 根據作品類型載入對應的集數類型
+  useEffect(() => {
+    try {
+      const episodeTypes =
+        workTypeEpisodeMappingStorage.getEpisodeTypesForWorkType(type);
+      const defaultType =
+        workTypeEpisodeMappingStorage.getDefaultEpisodeTypeForWorkType(type);
+
+      setAvailableEpisodeTypes(episodeTypes);
+      setDefaultEpisodeType(defaultType);
+
+      // 更新新集數的預設類型
+      setNewEpisode((prev) => ({
+        ...prev,
+        type: defaultType,
+      }));
+
+      // 載入集數類型標籤
+      const labels = customEpisodeTypeStorage.getTypeLabels();
+      setEpisodeTypeLabels(labels);
+    } catch (error) {
+      console.error("載入集數類型失敗:", error);
+      setAvailableEpisodeTypes(["episode"]);
+      setDefaultEpisodeType("episode");
     }
+  }, [type]);
+
+  const getEpisodeTypeLabel = (type: string) => {
+    return episodeTypeLabels[type] || type;
   };
 
   const getEpisodeTypeColor = (type: string) => {
+    const episodeType = customEpisodeTypeStorage.getByName(type);
+    if (episodeType) {
+      return `bg-[${episodeType.color}]/10 text-[${episodeType.color}]`;
+    }
+
+    // 預設顏色
     switch (type) {
       case "episode":
         return "bg-blue-100 text-blue-800";
@@ -186,15 +216,15 @@ export default function EpisodeManager({
                     onChange={(e) =>
                       setNewEpisode({
                         ...newEpisode,
-                        type: e.target.value as any,
+                        type: e.target.value as EpisodeType,
                       })
                     }
                   >
-                    <option value="episode">正篇</option>
-                    <option value="special">特別篇</option>
-                    <option value="ova">OVA</option>
-                    <option value="movie">電影</option>
-                    <option value="chapter">章節</option>
+                    {availableEpisodeTypes.map((episodeType) => (
+                      <option key={episodeType} value={episodeType}>
+                        {getEpisodeTypeLabel(episodeType)}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -370,11 +400,11 @@ export default function EpisodeManager({
                       })
                     }
                   >
-                    <option value="episode">正篇</option>
-                    <option value="special">特別篇</option>
-                    <option value="ova">OVA</option>
-                    <option value="movie">電影</option>
-                    <option value="chapter">章節</option>
+                    {availableEpisodeTypes.map((episodeType) => (
+                      <option key={episodeType} value={episodeType}>
+                        {getEpisodeTypeLabel(episodeType)}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>

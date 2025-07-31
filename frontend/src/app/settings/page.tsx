@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import WorkTypeManager from "@/components/WorkTypeManager";
+import CustomEpisodeTypeManager from "@/components/CustomEpisodeTypeManager";
 import {
   Database,
   Cloud,
@@ -450,6 +451,19 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <WorkTypeManager />
+        </CardContent>
+      </Card>
+
+      {/* 自訂集數類型管理 */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Palette className="w-4 h-4 mr-2" />
+            自訂集數類型管理
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CustomEpisodeTypeManager />
         </CardContent>
       </Card>
 

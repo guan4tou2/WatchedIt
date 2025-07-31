@@ -1,35 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { workStorage } from "@/lib/localStorage";
 import EpisodeManager from "@/components/EpisodeManager";
 import { Episode } from "@/types";
 
+// 設定為動態渲染，避免服務器端渲染問題
+export const dynamic = "force-dynamic";
+
 export default function EpisodeTestPage() {
   const [testWorks, setTestWorks] = useState<any[]>([]);
+  const [isClient, setIsClient] = useState(false);
 
   const addTestWork = (type: string, episodes: Episode[]) => {
-    const work = workStorage.create({
-      title: `測試${type} - ${new Date().toLocaleTimeString()}`,
-      type: type as any,
-      status: "進行中",
-      year: 2024,
-      rating: 4,
-      episodes,
-      source: "測試新增",
-    });
+    if (typeof window === "undefined") return;
 
-    setTestWorks([...testWorks, work]);
+    try {
+      const work = workStorage.create({
+        title: `測試${type} - ${new Date().toLocaleTimeString()}`,
+        type: type as any,
+        status: "進行中",
+        year: 2024,
+        rating: 4,
+        episodes,
+        source: "測試新增",
+      });
+
+      setTestWorks([...testWorks, work]);
+    } catch (error) {
+      console.error("新增測試作品失敗:", error);
+    }
   };
 
   const clearTestWorks = () => {
-    // 清除測試作品
-    const works = workStorage.getAll();
-    const filteredWorks = works.filter((w) => !w.title.includes("測試"));
-    localStorage.setItem("watchedit_works", JSON.stringify(filteredWorks));
-    setTestWorks([]);
+    if (typeof window === "undefined") return;
+
+    try {
+      // 清除測試作品
+      const works = workStorage.getAll();
+      const filteredWorks = works.filter((w) => !w.title.includes("測試"));
+      localStorage.setItem("watchedit_works", JSON.stringify(filteredWorks));
+      setTestWorks([]);
+    } catch (error) {
+      console.error("清除測試作品失敗:", error);
+    }
   };
 
   const addSampleEpisodes = () => {
@@ -92,6 +108,19 @@ export default function EpisodeTestPage() {
 
     addTestWork("小說", episodes);
   };
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <div className="container mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-6">集數管理測試</h1>
+        <p>載入中...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
