@@ -75,6 +75,16 @@ export default function EpisodeManager({
   const handleAddEpisode = () => {
     if (!newEpisode.number) return;
 
+    // 檢查是否已存在相同季數和集數的集數
+    const existingEpisode = episodes.find(
+      (ep) => ep.season === newEpisode.season && ep.number === newEpisode.number
+    );
+
+    if (existingEpisode) {
+      alert(`第${newEpisode.season}季第${newEpisode.number}集已存在！`);
+      return;
+    }
+
     const episode: Episode = {
       id: generateEpisodeId(),
       number: newEpisode.number,

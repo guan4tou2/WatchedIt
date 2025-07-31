@@ -35,9 +35,12 @@ self.addEventListener("fetch", (event) => {
         // 複製回應
         const responseToCache = response.clone();
 
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
+        // 只快取同源的請求，避免 chrome-extension 等錯誤
+        if (event.request.url.startsWith(self.location.origin)) {
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
 
         return response;
       });

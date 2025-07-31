@@ -71,7 +71,8 @@ export default function HomePage() {
     );
 
     if (existingEpisode) {
-      // 如果集數已存在，跳過
+      // 如果集數已存在，顯示警告並跳過
+      console.warn(`集數已存在: 第${episode.season}季第${episode.number}集`);
       return;
     }
 
@@ -101,7 +102,27 @@ export default function HomePage() {
         )
     );
 
-    if (newEpisodes.length === 0) return;
+    // 顯示跳過的集數信息
+    const skippedEpisodes = episodes.filter((episode) =>
+      existingEpisodes.some(
+        (existing) =>
+          existing.season === episode.season &&
+          existing.number === episode.number
+      )
+    );
+
+    if (skippedEpisodes.length > 0) {
+      console.warn(
+        `跳過重複集數: ${skippedEpisodes
+          .map((ep) => `第${ep.season}季第${ep.number}集`)
+          .join(", ")}`
+      );
+    }
+
+    if (newEpisodes.length === 0) {
+      console.warn("所有集數都已存在，沒有新增任何集數");
+      return;
+    }
 
     const updatedEpisodes = [...existingEpisodes, ...newEpisodes].sort(
       (a, b) => {

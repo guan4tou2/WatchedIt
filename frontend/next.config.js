@@ -23,6 +23,10 @@ const nextConfig = {
     workerThreads: false,
     cpus: 1,
   },
+  // 解決 hydration 問題
+  reactStrictMode: false,
+  // 禁用服務器端渲染以解決 hydration 問題
+  output: 'standalone',
 };
 
 module.exports = nextConfig;

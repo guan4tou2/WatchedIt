@@ -28,22 +28,21 @@ export default function QuickAddEpisode({
   onClose,
 }: QuickAddEpisodeProps) {
   // 計算下一集數
-  const getNextEpisodeNumber = () => {
+  const getNextEpisodeNumber = (season: number = 1) => {
     if (currentEpisodes.length === 0) return 1;
 
-    const currentSeason = currentEpisodes[0]?.season || 1;
-    const currentSeasonEpisodes = currentEpisodes.filter(
-      (ep) => ep.season === currentSeason
-    );
+    // 篩選出指定季的所有集數
+    const seasonEpisodes = currentEpisodes.filter((ep) => ep.season === season);
 
-    if (currentSeasonEpisodes.length === 0) return 1;
+    if (seasonEpisodes.length === 0) return 1;
 
-    const maxNumber = Math.max(...currentSeasonEpisodes.map((ep) => ep.number));
+    // 找出該季的最大集數
+    const maxNumber = Math.max(...seasonEpisodes.map((ep) => ep.number));
     return maxNumber + 1;
   };
 
   const [episodeData, setEpisodeData] = useState({
-    number: getNextEpisodeNumber(),
+    number: getNextEpisodeNumber(1),
     title: "",
     description: "",
     type: "episode" as const,
@@ -148,12 +147,14 @@ export default function QuickAddEpisode({
                 type="number"
                 min="1"
                 value={episodeData.season}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const newSeason = parseInt(e.target.value) || 1;
                   setEpisodeData({
                     ...episodeData,
-                    season: parseInt(e.target.value) || 1,
-                  })
-                }
+                    season: newSeason,
+                    number: getNextEpisodeNumber(newSeason),
+                  });
+                }}
                 className="mt-1"
               />
             </div>

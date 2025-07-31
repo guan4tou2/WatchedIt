@@ -65,16 +65,25 @@ export default function AniListSearch({
     if (!selectedAnime) return;
 
     const workData: WorkCreate = {
-      title:
-        selectedAnime.title.romaji ||
-        selectedAnime.title.english ||
-        selectedAnime.title.native,
-      type: "動畫",
+      title: anilistService.getBestChineseTitle(selectedAnime.title),
+      type: anilistService.convertTypeToWorkType(selectedAnime.type),
       status: anilistService.convertStatus(selectedAnime.status),
       year: anilistService.getYear(selectedAnime.startDate),
       rating: anilistService.convertRating(selectedAnime.averageScore),
       review: anilistService.cleanDescription(selectedAnime.description),
-      note: `來自 AniList (ID: ${selectedAnime.id})`,
+      note: `來自 AniList (ID: ${selectedAnime.id})
+格式: ${anilistService.convertFormat(selectedAnime.format)}
+${
+  selectedAnime.season && selectedAnime.seasonYear
+    ? `播出時間: ${anilistService.convertSeason(selectedAnime.season)} ${
+        selectedAnime.seasonYear
+      }年`
+    : ""
+}
+其他標題: ${anilistService
+        .getAllTitles(selectedAnime.title)
+        .slice(1)
+        .join(", ")}`,
       source: "AniList",
       episodes: selectedAnime.episodes
         ? Array.from({ length: selectedAnime.episodes }, (_, i) => ({
@@ -122,6 +131,16 @@ export default function AniListSearch({
       default:
         return status;
     }
+  };
+
+  const getFormatText = (format: string) => {
+    return anilistService.convertFormat(format);
+  };
+
+  const getSeasonText = (season: string | null, year: number | null) => {
+    if (!season || !year) return "";
+    const seasonText = anilistService.convertSeason(season);
+    return `${year}年${seasonText}`;
   };
 
   if (!isOpen) return null;
@@ -191,12 +210,13 @@ export default function AniListSearch({
                     )}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-lg truncate">
-                        {anime.title.romaji || anime.title.english}
+                        {anilistService.getBestChineseTitle(anime.title)}
                       </h3>
-                      {anime.title.english &&
-                        anime.title.english !== anime.title.romaji && (
+                      {anime.title.chinese &&
+                        anime.title.romaji &&
+                        anime.title.chinese !== anime.title.romaji && (
                           <p className="text-sm text-gray-600 truncate">
-                            {anime.title.english}
+                            {anime.title.romaji}
                           </p>
                         )}
 
@@ -204,16 +224,21 @@ export default function AniListSearch({
                         <Badge className={getStatusColor(anime.status)}>
                           {getStatusText(anime.status)}
                         </Badge>
+                        {anime.format && (
+                          <Badge variant="outline" className="text-xs">
+                            {getFormatText(anime.format)}
+                          </Badge>
+                        )}
                         {anime.episodes && (
                           <Badge variant="outline" className="text-xs">
                             <Play className="w-3 h-3 mr-1" />
                             {anime.episodes} 集
                           </Badge>
                         )}
-                        {anime.seasonYear && (
+                        {anime.season && anime.seasonYear && (
                           <Badge variant="outline" className="text-xs">
                             <Calendar className="w-3 h-3 mr-1" />
-                            {anime.seasonYear}
+                            {getSeasonText(anime.season, anime.seasonYear)}
                           </Badge>
                         )}
                       </div>
@@ -255,7 +280,7 @@ export default function AniListSearch({
                 <p className="text-sm text-gray-600">
                   已選擇:{" "}
                   <span className="font-medium">
-                    {selectedAnime.title.romaji}
+                    {anilistService.getBestChineseTitle(selectedAnime.title)}
                   </span>
                 </p>
                 {selectedAnime.episodes && (
