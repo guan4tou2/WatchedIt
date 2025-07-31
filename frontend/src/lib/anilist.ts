@@ -309,55 +309,55 @@ class AniListService {
     return startDate.year || undefined;
   }
 
-  // 中文標題映射表
-  private chineseTitleMap: Record<string, string> = {
-    "Cowboy Bebop": "星際牛仔",
-    "Attack on Titan": "進擊的巨人",
-    "Demon Slayer": "鬼滅之刃",
-    "One Piece": "海賊王",
-    Naruto: "火影忍者",
-    "Dragon Ball": "七龍珠",
-    "Death Note": "死亡筆記本",
-    "Fullmetal Alchemist": "鋼之鍊金術師",
-    "Hunter x Hunter": "獵人",
-    "My Hero Academia": "我的英雄學院",
-    "Jujutsu Kaisen": "咒術迴戰",
-    "Spy x Family": "間諜家家酒",
-    "Chainsaw Man": "鏈鋸人",
-    "Demon Slayer: Kimetsu no Yaiba": "鬼滅之刃",
-    "One Punch Man": "一拳超人",
-    "Tokyo Ghoul": "東京喰種",
-    "Steins;Gate": "命運石之門",
-    "Code Geass": "反叛的魯路修",
-    "Neon Genesis Evangelion": "新世紀福音戰士",
-    "Ghost in the Shell": "攻殼機動隊",
-    Akira: "阿基拉",
-    "Spirited Away": "神隱少女",
-    "My Neighbor Totoro": "龍貓",
-    "Princess Mononoke": "魔法公主",
-    "Howl's Moving Castle": "霍爾的移動城堡",
-    "Castle in the Sky": "天空之城",
-    "Nausicaä of the Valley of the Wind": "風之谷",
-    "Kiki's Delivery Service": "魔女宅急便",
-    "Porco Rosso": "紅豬",
-    "The Wind Rises": "風起",
-    Ponyo: "崖上的波妞",
-    "The Tale of the Princess Kaguya": "輝耀姬物語",
-    "When Marnie Was There": "回憶中的瑪妮",
-    "The Secret World of Arrietty": "借物少女艾莉緹",
-    "From Up on Poppy Hill": "來自紅花坂",
-    "The Cat Returns": "貓的報恩",
-    "Whisper of the Heart": "心之谷",
-    "Only Yesterday": "兒時的點點滴滴",
-    "Grave of the Fireflies": "螢火蟲之墓",
-    "Pom Poko": "平成狸合戰",
-    "My Neighbors the Yamadas": "我的鄰居山田君",
-    "Tales from Earthsea": "地海戰記",
-    "The Borrower Arrietty": "借物少女艾莉緹",
-    "The Red Turtle": "紅龜",
-    "Earwig and the Witch": "安雅與魔女",
-    "How Do You Live?": "你想活出怎樣的人生",
-  };
+  // 簡體轉繁體中文
+  private convertToTraditional(text: string): string {
+    // 使用更通用的簡體轉繁體轉換
+    return text
+      .replace(/进/g, "進")
+      .replace(/击/g, "擊")
+      .replace(/灭/g, "滅")
+      .replace(/贼/g, "賊")
+      .replace(/龙/g, "龍")
+      .replace(/记/g, "記")
+      .replace(/学院/g, "學院")
+      .replace(/术/g, "術")
+      .replace(/回/g, "迴")
+      .replace(/战/g, "戰")
+      .replace(/谍/g, "諜")
+      .replace(/锯/g, "鋸")
+      .replace(/种/g, "種")
+      .replace(/命运/g, "命運")
+      .replace(/门/g, "門")
+      .replace(/鲁/g, "魯")
+      .replace(/世纪/g, "世紀")
+      .replace(/战士/g, "戰士")
+      .replace(/壳/g, "殼")
+      .replace(/机动/g, "機動")
+      .replace(/队/g, "隊")
+      .replace(/隐/g, "隱")
+      .replace(/猫/g, "貓")
+      .replace(/霍尔/g, "霍爾")
+      .replace(/移动/g, "移動")
+      .replace(/猪/g, "豬")
+      .replace(/辉/g, "輝")
+      .replace(/耀/g, "耀")
+      .replace(/回忆/g, "回憶")
+      .replace(/玛/g, "瑪")
+      .replace(/妮/g, "妮")
+      .replace(/缇/g, "緹")
+      .replace(/来自/g, "來自")
+      .replace(/红花/g, "紅花")
+      .replace(/报恩/g, "報恩")
+      .replace(/儿时/g, "兒時")
+      .replace(/点点滴滴/g, "點點滴滴")
+      .replace(/萤火虫/g, "螢火蟲")
+      .replace(/合战/g, "合戰")
+      .replace(/邻居/g, "鄰居")
+      .replace(/战记/g, "戰記")
+      .replace(/龟/g, "龜")
+      .replace(/魔女/g, "魔女")
+      .replace(/怎样/g, "怎樣");
+  }
 
   // 獲取最佳中文標題
   getBestChineseTitle(
@@ -374,14 +374,8 @@ class AniListService {
         (synonym) => /[\u4e00-\u9fff]/.test(synonym) && synonym.length > 0
       );
       if (chineseTitle) {
-        return chineseTitle;
+        return this.convertToTraditional(chineseTitle);
       }
-    }
-
-    // 嘗試從映射表中找到中文標題
-    const englishTitle = title.english || title.romaji;
-    if (englishTitle && this.chineseTitleMap[englishTitle]) {
-      return this.chineseTitleMap[englishTitle];
     }
 
     // 如果沒有中文標題，使用羅馬字

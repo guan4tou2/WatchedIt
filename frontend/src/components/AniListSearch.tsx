@@ -65,7 +65,10 @@ export default function AniListSearch({
     if (!selectedAnime) return;
 
     const workData: WorkCreate = {
-      title: anilistService.getBestChineseTitle(selectedAnime.title, selectedAnime.synonyms),
+      title: anilistService.getBestChineseTitle(
+        selectedAnime.title,
+        selectedAnime.synonyms
+      ),
       type: anilistService.convertTypeToWorkType(selectedAnime.type),
       status: anilistService.convertStatus(selectedAnime.status),
       year: anilistService.getYear(selectedAnime.startDate),
@@ -210,15 +213,16 @@ ${
                     )}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-lg truncate">
-                        {anilistService.getBestChineseTitle(anime.title)}
-                      </h3>
-                      {anime.title.chinese &&
-                        anime.title.romaji &&
-                        anime.title.chinese !== anime.title.romaji && (
-                          <p className="text-sm text-gray-600 truncate">
-                            {anime.title.romaji}
-                          </p>
+                        {anilistService.getBestChineseTitle(
+                          anime.title,
+                          anime.synonyms
                         )}
+                      </h3>
+                      {anime.title.romaji && (
+                        <p className="text-sm text-gray-600 truncate">
+                          {anime.title.romaji}
+                        </p>
+                      )}
 
                       <div className="flex items-center space-x-2 mt-2">
                         <Badge className={getStatusColor(anime.status)}>
@@ -280,7 +284,10 @@ ${
                 <p className="text-sm text-gray-600">
                   已選擇:{" "}
                   <span className="font-medium">
-                    {anilistService.getBestChineseTitle(selectedAnime.title)}
+                    {anilistService.getBestChineseTitle(
+                      selectedAnime.title,
+                      selectedAnime.synonyms
+                    )}
                   </span>
                 </p>
                 {selectedAnime.episodes && (
