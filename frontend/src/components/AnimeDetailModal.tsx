@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AniListMedia, anilistService } from "@/lib/anilist";
 import { WorkCreate } from "@/types";
+import { useWorkStore } from "@/store/useWorkStore";
 import {
   X,
   Star,
@@ -32,17 +34,25 @@ export default function AnimeDetailModal({
   onClose,
   onSelectAnime,
 }: AnimeDetailModalProps) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [duplicateMessage, setDuplicateMessage] = useState<string | null>(null);
+  const { createWork } = useWorkStore();
+
   if (!isOpen || !anime) return null;
 
-  const handleConfirmSelection = () => {
-    const workData: WorkCreate = {
-      title: anilistService.getBestChineseTitle(anime.title, anime.synonyms),
-      type: anilistService.convertTypeToWorkType(anime.type),
-      status: anilistService.convertStatus(anime.status),
-      year: anilistService.getYear(anime.startDate),
-      rating: anilistService.convertRating(anime.averageScore),
-      review: anilistService.cleanDescription(anime.description),
-      note: `來自 AniList (ID: ${anime.id})
+  const handleConfirmSelection = async () => {
+    setIsAdding(true);
+    setDuplicateMessage(null);
+
+    try {
+      const workData: WorkCreate = {
+        title: anilistService.getBestChineseTitle(anime.title, anime.synonyms),
+        type: anilistService.convertTypeToWorkType(anime.type),
+        status: anilistService.convertStatus(anime.status),
+        year: anilistService.getYear(anime.startDate),
+        rating: anilistService.convertRating(anime.averageScore),
+        review: anilistService.cleanDescription(anime.description),
+        note: `來自 AniList (ID: ${anime.id})
 格式: ${anilistService.convertFormat(anime.format)}
 ${
   anime.season && anime.seasonYear
@@ -52,23 +62,40 @@ ${
     : ""
 }
 其他標題: ${anilistService
-        .getAllTitles(anime.title, anime.synonyms)
-        .slice(1)
-        .join(", ")}`,
-      source: "AniList",
-      episodes: anime.episodes
-        ? Array.from({ length: anime.episodes }, (_, i) => ({
-            id: `ep-${anime.id}-${i + 1}`,
-            number: i + 1,
-            type: "episode" as const,
-            season: 1,
-            watched: false,
-          }))
-        : [],
-    };
+          .getAllTitles(anime.title, anime.synonyms)
+          .slice(1)
+          .join(", ")}`,
+        source: "AniList",
+        episodes: anime.episodes
+          ? Array.from({ length: anime.episodes }, (_, i) => ({
+              id: `ep-${anime.id}-${i + 1}`,
+              number: i + 1,
+              type: "episode" as const,
+              season: 1,
+              watched: false,
+            }))
+          : [],
+      };
 
-    onSelectAnime(workData);
-    onClose();
+      // 新增作品（store 會自動檢查重複）
+      const newWork = createWork(workData);
+
+      // 只有在成功新增後才關閉彈窗
+      onClose();
+
+      // 顯示成功訊息（可選）
+      console.log("成功新增作品:", newWork.title);
+    } catch (error) {
+      console.error("新增作品失敗:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "新增作品時發生錯誤，請稍後再試。";
+      setDuplicateMessage(errorMessage);
+      // 不關閉彈窗，讓用戶看到錯誤訊息
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -321,6 +348,12 @@ ${
 
         {/* 底部操作按鈕 */}
         <div className="border-t p-4 bg-gray-50">
+          {duplicateMessage && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {duplicateMessage}
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
               <p>
@@ -342,9 +375,18 @@ ${
               <Button variant="outline" onClick={onClose}>
                 取消
               </Button>
-              <Button onClick={handleConfirmSelection}>
-                <Plus className="w-4 h-4 mr-2" />
-                新增作品
+              <Button onClick={handleConfirmSelection} disabled={isAdding}>
+                {isAdding ? (
+                  <>
+                    <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    新增中...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    新增作品
+                  </>
+                )}
               </Button>
             </div>
           </div>

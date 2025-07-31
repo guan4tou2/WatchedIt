@@ -41,6 +41,23 @@ export const workStorage = {
     }
   },
 
+  // 檢查作品是否已存在
+  findByTitle(title: string): Work | null {
+    const works = this.getAll();
+    return works.find((work) => work.title === title) || null;
+  },
+
+  // 檢查 AniList 作品是否已存在
+  findByAniListId(aniListId: number): Work | null {
+    const works = this.getAll();
+    return (
+      works.find(
+        (work) =>
+          work.note && work.note.includes(`來自 AniList (ID: ${aniListId})`)
+      ) || null
+    );
+  },
+
   // 新增作品
   create(workData: WorkCreate): Work {
     const works = this.getAll();

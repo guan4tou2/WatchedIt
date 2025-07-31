@@ -2,7 +2,7 @@
 export interface Work {
   id: string;
   title: string;
-  type: "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲";
+  type: string; // 改為動態類型
   status: "進行中" | "已完成" | "暫停" | "放棄";
   year?: number;
   episodes: Episode[];
@@ -33,7 +33,7 @@ export interface Episode {
 // 作品建立
 export interface WorkCreate {
   title: string;
-  type: Work["type"];
+  type: string; // 改為動態類型
   status: Work["status"];
   year?: number;
   episodes?: Episode[];
@@ -49,7 +49,7 @@ export interface WorkCreate {
 // 作品更新
 export interface WorkUpdate {
   title?: string;
-  type?: Work["type"];
+  type?: string; // 改為動態類型
   status?: Work["status"];
   year?: number;
   episodes?: Episode[];

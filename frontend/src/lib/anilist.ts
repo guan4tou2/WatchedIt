@@ -277,9 +277,7 @@ class AniListService {
   }
 
   // 將 AniList 類型轉換為我們的類型
-  convertTypeToWorkType(
-    type: string
-  ): "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲" {
+  convertTypeToWorkType(type: string): string {
     switch (type) {
       case "ANIME":
         return "動畫";

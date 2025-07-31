@@ -11,7 +11,7 @@ import { Plus, Edit, Trash2, Check } from "lucide-react";
 interface EpisodeManagerProps {
   episodes: Episode[];
   onEpisodesChange: (episodes: Episode[]) => void;
-  type: "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲";
+  type: string;
   disabled?: boolean;
 }
 

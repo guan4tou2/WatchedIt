@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import WorkTypeManager from "@/components/WorkTypeManager";
 import {
   Database,
   Cloud,
@@ -18,6 +19,7 @@ import {
   RefreshCw,
   AlertTriangle,
   CheckCircle,
+  Palette,
 } from "lucide-react";
 
 interface Settings {
@@ -53,16 +55,26 @@ export default function SettingsPage() {
 
   useEffect(() => {
     // 載入設定
-    const savedSettings = localStorage.getItem("watchedit_settings");
-    if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+    try {
+      const savedSettings = localStorage.getItem("watchedit_settings");
+      if (savedSettings) {
+        setSettings(JSON.parse(savedSettings));
+      }
+    } catch (error) {
+      console.error("載入設定失敗:", error);
     }
   }, []);
 
   const saveSettings = () => {
-    localStorage.setItem("watchedit_settings", JSON.stringify(settings));
-    setMessage({ type: "success", text: "設定已儲存" });
-    setTimeout(() => setMessage(null), 3000);
+    try {
+      localStorage.setItem("watchedit_settings", JSON.stringify(settings));
+      setMessage({ type: "success", text: "設定已儲存" });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      console.error("儲存設定失敗:", error);
+      setMessage({ type: "error", text: "儲存設定失敗" });
+      setTimeout(() => setMessage(null), 3000);
+    }
   };
 
   const exportData = () => {
@@ -92,6 +104,7 @@ export default function SettingsPage() {
 
       setMessage({ type: "success", text: "資料匯出成功" });
     } catch (error) {
+      console.error("匯出資料失敗:", error);
       setMessage({ type: "error", text: "資料匯出失敗" });
     }
     setIsLoading(false);
@@ -131,10 +144,16 @@ export default function SettingsPage() {
 
   const clearData = () => {
     if (confirm("確定要清除所有資料嗎？此操作無法復原。")) {
-      localStorage.removeItem("watchedit_works");
-      localStorage.removeItem("watchedit_tags");
-      setMessage({ type: "success", text: "資料已清除" });
-      setTimeout(() => setMessage(null), 3000);
+      try {
+        localStorage.removeItem("watchedit_works");
+        localStorage.removeItem("watchedit_tags");
+        setMessage({ type: "success", text: "資料已清除" });
+        setTimeout(() => setMessage(null), 3000);
+      } catch (error) {
+        console.error("清除資料失敗:", error);
+        setMessage({ type: "error", text: "清除資料失敗" });
+        setTimeout(() => setMessage(null), 3000);
+      }
     }
   };
 
@@ -421,6 +440,19 @@ export default function SettingsPage() {
         </Card>
       </div>
 
+      {/* 作品類型管理 */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Palette className="w-4 h-4 mr-2" />
+            作品類型管理
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <WorkTypeManager />
+        </CardContent>
+      </Card>
+
       {/* 系統資訊 */}
       <Card className="mt-6">
         <CardHeader>
@@ -444,10 +476,14 @@ export default function SettingsPage() {
             <div>
               <span className="font-medium">資料大小:</span>{" "}
               {(() => {
-                const works = localStorage.getItem("watchedit_works");
-                const tags = localStorage.getItem("watchedit_tags");
-                const size = (works?.length || 0) + (tags?.length || 0);
-                return `${size} 筆資料`;
+                try {
+                  const works = localStorage.getItem("watchedit_works");
+                  const tags = localStorage.getItem("watchedit_tags");
+                  const size = (works?.length || 0) + (tags?.length || 0);
+                  return `${size} 筆資料`;
+                } catch (error) {
+                  return "無法取得";
+                }
               })()}
             </div>
           </div>

@@ -11,7 +11,7 @@ import { Plus, X, Check } from "lucide-react";
 interface QuickAddEpisodeProps {
   workId: string;
   workTitle: string;
-  workType: "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲";
+  workType: string;
   currentEpisodes: Episode[];
   onEpisodeAdded: (episode: Episode) => void;
   onBatchEpisodesAdded?: (episodes: Episode[]) => void; // 新增批量更新回調

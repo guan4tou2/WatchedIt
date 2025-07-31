@@ -7,15 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AniListMedia, anilistService } from "@/lib/anilist";
 import { WorkCreate } from "@/types";
-import {
-  Search,
-  X,
-  Star,
-  Calendar,
-  Play,
-  Plus,
-  Loader2,
-} from "lucide-react";
+import { useWorkStore } from "@/store/useWorkStore";
+import { Search, X, Star, Calendar, Play, Plus, Loader2 } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import AnimeDetailModal from "./AnimeDetailModal";
 
@@ -38,6 +31,7 @@ export default function AniListSearch({
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedAnimeForDetail, setSelectedAnimeForDetail] =
     useState<AniListMedia | null>(null);
+  const { createWork } = useWorkStore();
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -116,8 +110,16 @@ ${
         : [],
     };
 
-    onSelectAnime(workData);
-    onClose();
+    try {
+      // 新增作品（store 會自動檢查重複）
+      const newWork = createWork(workData);
+      onClose();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "新增作品失敗";
+      alert(errorMessage);
+      // 不關閉視窗，讓用戶看到錯誤訊息
+    }
   };
 
   const getStatusColor = (status: string) => {

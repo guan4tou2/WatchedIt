@@ -55,12 +55,17 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
 
   // 初始化
   initialize: () => {
-    initializeSampleData();
+    // 只在沒有數據時初始化示例數據
     const works = workStorage.getAll();
+    if (works.length === 0) {
+      initializeSampleData();
+    }
+
+    const updatedWorks = workStorage.getAll();
     const tags = tagStorage.getAll();
     const stats = workStorage.getStats();
 
-    set({ works, tags, stats });
+    set({ works: updatedWorks, tags, stats });
   },
 
   // 作品相關操作
@@ -83,6 +88,29 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
+      // 檢查標題重複（所有作品都檢查）
+      const existingByTitle = workStorage.findByTitle(workData.title);
+
+      if (existingByTitle) {
+        throw new Error(`作品「${workData.title}」已存在於您的收藏中！`);
+      }
+
+      // 如果是來自 AniList 的作品，額外檢查 AniList ID
+      if (workData.source === "AniList" && workData.note) {
+        const aniListIdMatch = workData.note.match(
+          /來自 AniList \(ID: (\d+)\)/
+        );
+
+        if (aniListIdMatch) {
+          const aniListId = parseInt(aniListIdMatch[1]);
+          const existingByAniListId = workStorage.findByAniListId(aniListId);
+
+          if (existingByAniListId) {
+            throw new Error(`作品「${workData.title}」已存在於您的收藏中！`);
+          }
+        }
+      }
+
       const newWork = workStorage.create(workData);
       const works = workStorage.getAll();
       const stats = workStorage.getStats();

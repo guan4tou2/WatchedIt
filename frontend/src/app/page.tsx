@@ -35,7 +35,7 @@ export default function HomePage() {
   const [quickAddEpisode, setQuickAddEpisode] = useState<{
     workId: string;
     workTitle: string;
-    workType: "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲";
+    workType: string;
   } | null>(null);
   const [showAniListSearch, setShowAniListSearch] = useState(false);
 
@@ -54,7 +54,7 @@ export default function HomePage() {
   const handleQuickAddEpisode = (
     workId: string,
     workTitle: string,
-    workType: "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲"
+    workType: string
   ) => {
     setQuickAddEpisode({ workId, workTitle, workType });
   };
@@ -139,9 +139,8 @@ export default function HomePage() {
   };
 
   const handleAniListSelect = (workData: WorkCreate) => {
-    const createdWork = createWork(workData);
-    // 可以選擇導航到新創建的作品詳情頁面
-    // router.push(`/works/${createdWork.id}`);
+    // 這個函數現在只是一個空函數，因為實際的新增邏輯已經在組件內部處理
+    // 保留它是為了向後相容性
   };
 
   if (loading) {
