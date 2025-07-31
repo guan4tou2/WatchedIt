@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const query = searchParams.get('q');
-  const page = searchParams.get('page') || '1';
-  const perPage = searchParams.get('perPage') || '10';
+  const query = searchParams.get("q");
+  const page = searchParams.get("page") || "1";
+  const perPage = searchParams.get("perPage") || "10";
 
   if (!query) {
-    return NextResponse.json({ error: '搜尋詞是必需的' }, { status: 400 });
+    return NextResponse.json({ error: "搜尋詞是必需的" }, { status: 400 });
   }
 
   try {
@@ -53,11 +53,11 @@ export async function GET(request: NextRequest) {
       }
     `;
 
-    const response = await fetch('https://graphql.anilist.co', {
-      method: 'POST',
+    const response = await fetch("https://trace.moe/anilist/", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify({
         query: graphqlQuery,
@@ -76,15 +76,15 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
 
     if (data.errors) {
-      throw new Error(data.errors[0]?.message || 'AniList API error');
+      throw new Error(data.errors[0]?.message || "AniList API error");
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('AniList API error:', error);
+    console.error("AniList API error:", error);
     return NextResponse.json(
-      { error: '搜尋失敗，請稍後再試' },
+      { error: "搜尋失敗，請稍後再試" },
       { status: 500 }
     );
   }
-} 
+}

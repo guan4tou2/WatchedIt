@@ -360,11 +360,24 @@ class AniListService {
   };
 
   // 獲取最佳中文標題
-  getBestChineseTitle(title: {
-    romaji: string;
-    english: string;
-    native: string;
-  }): string {
+  getBestChineseTitle(
+    title: {
+      romaji: string;
+      english: string;
+      native: string;
+    },
+    synonyms?: string[]
+  ): string {
+    // 優先從 synonyms 中尋找中文標題
+    if (synonyms) {
+      const chineseTitle = synonyms.find(
+        (synonym) => /[\u4e00-\u9fff]/.test(synonym) && synonym.length > 0
+      );
+      if (chineseTitle) {
+        return chineseTitle;
+      }
+    }
+
     // 嘗試從映射表中找到中文標題
     const englishTitle = title.english || title.romaji;
     if (englishTitle && this.chineseTitleMap[englishTitle]) {
@@ -376,17 +389,33 @@ class AniListService {
   }
 
   // 獲取所有可用的標題
-  getAllTitles(title: {
-    romaji: string;
-    english: string;
-    native: string;
-  }): string[] {
+  getAllTitles(
+    title: {
+      romaji: string;
+      english: string;
+      native: string;
+    },
+    synonyms?: string[]
+  ): string[] {
     const titles: string[] = [];
 
-    // 優先添加中文標題（包括映射的）
-    const bestChineseTitle = this.getBestChineseTitle(title);
+    // 優先添加中文標題（包括 synonyms 和映射的）
+    const bestChineseTitle = this.getBestChineseTitle(title, synonyms);
     if (bestChineseTitle && !titles.includes(bestChineseTitle)) {
       titles.push(bestChineseTitle);
+    }
+
+    // 添加其他中文 synonyms
+    if (synonyms) {
+      synonyms.forEach((synonym) => {
+        if (
+          /[\u4e00-\u9fff]/.test(synonym) &&
+          synonym.length > 0 &&
+          !titles.includes(synonym)
+        ) {
+          titles.push(synonym);
+        }
+      });
     }
 
     // 添加其他標題

@@ -65,7 +65,7 @@ export default function AniListSearch({
     if (!selectedAnime) return;
 
     const workData: WorkCreate = {
-      title: anilistService.getBestChineseTitle(selectedAnime.title),
+      title: anilistService.getBestChineseTitle(selectedAnime.title, selectedAnime.synonyms),
       type: anilistService.convertTypeToWorkType(selectedAnime.type),
       status: anilistService.convertStatus(selectedAnime.status),
       year: anilistService.getYear(selectedAnime.startDate),
@@ -81,7 +81,7 @@ ${
     : ""
 }
 其他標題: ${anilistService
-        .getAllTitles(selectedAnime.title)
+        .getAllTitles(selectedAnime.title, selectedAnime.synonyms)
         .slice(1)
         .join(", ")}`,
       source: "AniList",
