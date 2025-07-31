@@ -7,9 +7,18 @@ import { Button } from "@/components/ui/button";
 import PlatformInfo from "@/components/PlatformInfo";
 import { pwaService } from "@/lib/pwa";
 import Link from "next/link";
-import { ArrowRight, Play, Check, Eye, Plus, Settings } from "lucide-react";
+import {
+  ArrowRight,
+  Play,
+  Check,
+  Eye,
+  Plus,
+  Settings,
+  Search,
+} from "lucide-react";
 import QuickAddEpisode from "@/components/QuickAddEpisode";
-import { Episode } from "@/types";
+import AniListSearch from "@/components/AniListSearch";
+import { Episode, WorkCreate } from "@/types";
 
 export default function HomePage() {
   const {
@@ -21,12 +30,14 @@ export default function HomePage() {
     fetchWorks,
     fetchStats,
     updateWork,
+    createWork,
   } = useWorkStore();
   const [quickAddEpisode, setQuickAddEpisode] = useState<{
     workId: string;
     workTitle: string;
     workType: "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲";
   } | null>(null);
+  const [showAniListSearch, setShowAniListSearch] = useState(false);
 
   useEffect(() => {
     // 初始化本地儲存
@@ -54,6 +65,16 @@ export default function HomePage() {
     const work = works.find((w) => w.id === quickAddEpisode.workId);
     if (!work) return;
 
+    // 檢查是否已經有這個集數（避免重複添加）
+    const existingEpisode = work.episodes?.find(
+      (ep) => ep.season === episode.season && ep.number === episode.number
+    );
+
+    if (existingEpisode) {
+      // 如果集數已存在，跳過
+      return;
+    }
+
     const updatedEpisodes = [...(work.episodes || []), episode].sort((a, b) => {
       if (a.season !== b.season) return a.season - b.season;
       return a.number - b.number;
@@ -62,8 +83,44 @@ export default function HomePage() {
     updateWork(work.id, { episodes: updatedEpisodes });
   };
 
+  // 批量添加集數的函數
+  const handleBatchEpisodesAdded = (episodes: Episode[]) => {
+    if (!quickAddEpisode) return;
+
+    const work = works.find((w) => w.id === quickAddEpisode.workId);
+    if (!work) return;
+
+    // 過濾掉已存在的集數
+    const existingEpisodes = work.episodes || [];
+    const newEpisodes = episodes.filter(
+      (newEpisode) =>
+        !existingEpisodes.some(
+          (existing) =>
+            existing.season === newEpisode.season &&
+            existing.number === newEpisode.number
+        )
+    );
+
+    if (newEpisodes.length === 0) return;
+
+    const updatedEpisodes = [...existingEpisodes, ...newEpisodes].sort(
+      (a, b) => {
+        if (a.season !== b.season) return a.season - b.season;
+        return a.number - b.number;
+      }
+    );
+
+    updateWork(work.id, { episodes: updatedEpisodes });
+  };
+
   const handleQuickAddClose = () => {
     setQuickAddEpisode(null);
+  };
+
+  const handleAniListSelect = (workData: WorkCreate) => {
+    const createdWork = createWork(workData);
+    // 可以選擇導航到新創建的作品詳情頁面
+    // router.push(`/works/${createdWork.id}`);
   };
 
   if (loading) {
@@ -89,13 +146,26 @@ export default function HomePage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">看過了</h1>
         <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAniListSearch(true)}
+          >
+            <Search className="w-4 h-4 mr-1" />
+            搜尋動畫
+          </Button>
           <Link href="/settings">
             <Button variant="outline" size="sm">
               <Settings className="w-4 h-4 mr-1" />
               設定
             </Button>
           </Link>
-          <Button>新增作品</Button>
+          <Link href="/works/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              新增作品
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -285,9 +355,17 @@ export default function HomePage() {
             works.find((w) => w.id === quickAddEpisode.workId)?.episodes || []
           }
           onEpisodeAdded={handleEpisodeAdded}
+          onBatchEpisodesAdded={handleBatchEpisodesAdded}
           onClose={handleQuickAddClose}
         />
       )}
+
+      {/* AniList 搜尋對話框 */}
+      <AniListSearch
+        onSelectAnime={handleAniListSelect}
+        onClose={() => setShowAniListSearch(false)}
+        isOpen={showAniListSearch}
+      />
     </div>
   );
 }

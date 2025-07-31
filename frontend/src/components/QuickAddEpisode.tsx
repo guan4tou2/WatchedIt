@@ -14,6 +14,7 @@ interface QuickAddEpisodeProps {
   workType: "動畫" | "電影" | "電視劇" | "小說" | "漫畫" | "遊戲";
   currentEpisodes: Episode[];
   onEpisodeAdded: (episode: Episode) => void;
+  onBatchEpisodesAdded?: (episodes: Episode[]) => void; // 新增批量更新回調
   onClose: () => void;
 }
 
@@ -23,6 +24,7 @@ export default function QuickAddEpisode({
   workType,
   currentEpisodes,
   onEpisodeAdded,
+  onBatchEpisodesAdded,
   onClose,
 }: QuickAddEpisodeProps) {
   // 計算下一集數
@@ -112,10 +114,16 @@ export default function QuickAddEpisode({
       episodes.push(episode);
     }
 
-    // 批量新增所有集數
-    episodes.forEach((episode) => {
-      onEpisodeAdded(episode);
-    });
+    // 批量新增所有集數 - 一次性更新
+    if (onBatchEpisodesAdded && episodes.length > 1) {
+      // 如果有批量更新回調且多於一集，使用批量更新
+      onBatchEpisodesAdded(episodes);
+    } else {
+      // 否則逐個更新
+      episodes.forEach((episode) => {
+        onEpisodeAdded(episode);
+      });
+    }
 
     onClose();
   };

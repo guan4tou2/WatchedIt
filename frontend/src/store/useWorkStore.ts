@@ -24,7 +24,7 @@ interface WorkStore {
     year?: number;
     tag_ids?: number[];
   }) => Promise<WorkList>;
-  createWork: (work: WorkCreate) => Promise<Work>;
+  createWork: (work: WorkCreate) => Work;
   updateWork: (id: string, work: WorkUpdate) => Promise<Work | null>;
   deleteWork: (id: string) => Promise<boolean>;
   getWork: (id: string) => Work | null;
@@ -79,7 +79,7 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     }
   },
 
-  createWork: async (workData) => {
+  createWork: (workData) => {
     set({ loading: true, error: null });
 
     try {

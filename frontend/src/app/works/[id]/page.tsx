@@ -5,10 +5,20 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Work, Episode } from "@/types";
+import { Work, Episode, WorkUpdate } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
 import EpisodeManager from "@/components/EpisodeManager";
-import { ArrowLeft, Edit, Trash2, Star, Calendar, Tag } from "lucide-react";
+import WorkEditForm from "@/components/WorkEditForm";
+import {
+  ArrowLeft,
+  Edit,
+  Trash2,
+  Star,
+  Calendar,
+  Tag,
+  Save,
+  X,
+} from "lucide-react";
 
 export default function WorkDetailPage() {
   const params = useParams();
@@ -16,6 +26,7 @@ export default function WorkDetailPage() {
   const { getWork, updateWork, deleteWork, loading } = useWorkStore();
   const [work, setWork] = useState<Work | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   useEffect(() => {
     if (params?.id) {
@@ -35,6 +46,20 @@ export default function WorkDetailPage() {
 
     setWork(updatedWork);
     updateWork(work.id, { episodes });
+  };
+
+  const handleWorkUpdate = (updatedData: WorkUpdate) => {
+    if (!work) return;
+
+    const updatedWork = {
+      ...work,
+      ...updatedData,
+      date_updated: new Date().toISOString(),
+    };
+
+    setWork(updatedWork);
+    updateWork(work.id, updatedData);
+    setShowEditForm(false);
   };
 
   const handleDelete = async () => {
@@ -83,10 +108,18 @@ export default function WorkDetailPage() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setShowEditForm(true)}
+          >
+            <Edit className="w-4 h-4 mr-2" />
+            編輯作品
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setIsEditing(!isEditing)}
           >
             <Edit className="w-4 h-4 mr-2" />
-            編輯
+            {isEditing ? "完成編輯" : "編輯集數"}
           </Button>
           <Button
             variant="outline"
@@ -296,6 +329,16 @@ export default function WorkDetailPage() {
           </Card>
         </div>
       </div>
+
+      {/* 編輯作品表單 */}
+      {work && (
+        <WorkEditForm
+          work={work}
+          onSave={handleWorkUpdate}
+          onCancel={() => setShowEditForm(false)}
+          isOpen={showEditForm}
+        />
+      )}
     </div>
   );
 }
