@@ -70,7 +70,7 @@ export const DEFAULT_WORK_TYPES: WorkType[] = [
     icon: "🎮",
     description: "遊戲作品",
     isDefault: true,
-    isEnabled: true,
+    isEnabled: false, // 預設禁用遊戲類型
     createdAt: new Date().toISOString(),
   },
 ];

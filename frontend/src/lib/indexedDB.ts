@@ -692,49 +692,6 @@ export const initializeSampleData = async () => {
           },
         ],
       });
-
-      // 遊戲類型 - 薩爾達傳說：曠野之息
-      await workStorage.create({
-        title: "薩爾達傳說：曠野之息",
-        type: "遊戲",
-        status: "已完成",
-        year: 2017,
-        rating: 5,
-        review: "開放世界遊戲的典範，自由度極高，探索樂趣無窮。",
-        source: "手動新增",
-        episodes: [
-          {
-            id: "quest-1",
-            number: 1,
-            title: "初始台地",
-            description: "林克在初始台地醒來，開始冒險",
-            type: "chapter",
-            season: 1,
-            watched: true,
-            date_watched: "2023-05-01T00:00:00.000Z",
-          },
-          {
-            id: "quest-2",
-            number: 2,
-            title: "四神獸",
-            description: "解放四神獸，恢復海拉魯的和平",
-            type: "chapter",
-            season: 1,
-            watched: true,
-            date_watched: "2023-05-15T00:00:00.000Z",
-          },
-          {
-            id: "quest-3",
-            number: 3,
-            title: "最終決戰",
-            description: "與災厄加農的最終決戰",
-            type: "chapter",
-            season: 1,
-            watched: true,
-            date_watched: "2023-06-01T00:00:00.000Z",
-          },
-        ],
-      });
     }
 
     if (tags.length === 0) {
