@@ -12,6 +12,7 @@ import CustomEpisodeTypeManager from "@/components/CustomEpisodeTypeManager";
 import { useTheme } from "@/components/ThemeProvider";
 import { useWorkStore } from "@/store/useWorkStore";
 import { cloudStorage, CloudConfig } from "@/lib/cloudStorage";
+import { dbUtils } from "@/lib/indexedDB";
 import Link from "next/link";
 import {
   Database,
@@ -108,17 +109,17 @@ export default function SettingsPage() {
     }
   };
 
-  const exportData = () => {
+  const exportData = async () => {
     setIsLoading(true);
     try {
-      const data = {
-        works,
-        tags,
+      const data = await dbUtils.exportData();
+      const exportData = {
+        ...data,
         exportDate: new Date().toISOString(),
         version: "1.0.0",
       };
 
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
         type: "application/json",
       });
 
@@ -148,29 +149,24 @@ export default function SettingsPage() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".json";
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           try {
             const data = JSON.parse(e.target?.result as string);
 
-            if (data.works && typeof window !== "undefined") {
-              localStorage.setItem(
-                "watchedit_works",
-                JSON.stringify(data.works)
-              );
-            }
-            if (data.tags && typeof window !== "undefined") {
-              localStorage.setItem("watchedit_tags", JSON.stringify(data.tags));
+            if (data.works && data.tags) {
+              await dbUtils.importData({ works: data.works, tags: data.tags });
+
+              // 更新 store 狀態
+              await updateWorks(data.works);
+              await updateTags(data.tags);
             }
 
             setMessage({ type: "success", text: "資料匯入成功" });
             setTimeout(() => setMessage(null), 3000);
-
-            // 重新載入頁面以更新數據
-            window.location.reload();
           } catch (error) {
             console.error("匯入資料失敗:", error);
             setMessage({ type: "error", text: "匯入資料失敗" });
@@ -183,15 +179,22 @@ export default function SettingsPage() {
     input.click();
   };
 
-  const clearData = () => {
+  const clearData = async () => {
     if (confirm("確定要清除所有資料嗎？此操作無法復原！")) {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("watchedit_works");
-        localStorage.removeItem("watchedit_tags");
+      try {
+        await dbUtils.clearAll();
+
+        // 更新 store 狀態
+        await updateWorks([]);
+        await updateTags([]);
+
+        setMessage({ type: "success", text: "資料已清除" });
+        setTimeout(() => setMessage(null), 3000);
+      } catch (error) {
+        console.error("清除資料失敗:", error);
+        setMessage({ type: "error", text: "清除資料失敗" });
+        setTimeout(() => setMessage(null), 3000);
       }
-      setMessage({ type: "success", text: "資料已清除" });
-      setTimeout(() => setMessage(null), 3000);
-      window.location.reload();
     }
   };
 

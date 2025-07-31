@@ -8,6 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import PlatformInfo from "@/components/PlatformInfo";
 import { pwaService } from "@/lib/pwa";
+import {
+  checkMigrationNeeded,
+  migrateFromLocalStorage,
+  clearLocalStorageData,
+} from "@/lib/migration";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -19,6 +24,8 @@ import {
   Search,
   Filter,
   X,
+  Database,
+  AlertTriangle,
 } from "lucide-react";
 import QuickAddEpisode from "@/components/QuickAddEpisode";
 import AniListSearch from "@/components/AniListSearch";
@@ -52,7 +59,18 @@ export default function HomePage() {
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
 
+  // 遷移狀態
+  const [migrationStatus, setMigrationStatus] = useState<{
+    needsMigration: boolean;
+    hasLocalData: boolean;
+    hasIndexedDBData: boolean;
+  } | null>(null);
+  const [isMigrating, setIsMigrating] = useState(false);
+
   useEffect(() => {
+    // 檢查是否需要數據遷移
+    checkMigrationStatus();
+
     // 初始化本地儲存
     initialize();
 
@@ -64,6 +82,44 @@ export default function HomePage() {
     pwaService.registerServiceWorker();
   }, [initialize, fetchWorks, fetchStats]);
 
+  const checkMigrationStatus = async () => {
+    try {
+      const status = await checkMigrationNeeded();
+      setMigrationStatus(status);
+    } catch (error) {
+      console.error("檢查遷移狀態失敗:", error);
+    }
+  };
+
+  const handleMigration = async () => {
+    setIsMigrating(true);
+    try {
+      const result = await migrateFromLocalStorage();
+
+      if (result.success) {
+        // 清理 localStorage 數據
+        clearLocalStorageData();
+
+        // 重新載入數據
+        await initialize();
+        await fetchWorks();
+        await fetchStats();
+
+        // 重新檢查遷移狀態
+        await checkMigrationStatus();
+
+        alert(result.message);
+      } else {
+        alert(`遷移失敗: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("遷移失敗:", error);
+      alert("遷移失敗，請檢查控制台錯誤信息");
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
   const handleQuickAddEpisode = (
     workId: string,
     workTitle: string,
@@ -72,7 +128,7 @@ export default function HomePage() {
     setQuickAddEpisode({ workId, workTitle, workType });
   };
 
-  const handleEpisodeAdded = (episode: Episode) => {
+  const handleEpisodeAdded = async (episode: Episode) => {
     if (!quickAddEpisode) return;
 
     const work = works.find((w) => w.id === quickAddEpisode.workId);
@@ -94,7 +150,7 @@ export default function HomePage() {
       return a.number - b.number;
     });
 
-    updateWork(work.id, { episodes: updatedEpisodes });
+    await updateWork(work.id, { episodes: updatedEpisodes });
   };
 
   // 批量添加集數的函數
@@ -382,6 +438,23 @@ export default function HomePage() {
           </Card>
         )}
       </div>
+
+      {/* 數據遷移提示 */}
+      {migrationStatus?.needsMigration && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6 flex items-center">
+          <AlertTriangle className="w-5 h-5 mr-2" />
+          發現舊版數據，建議進行數據遷移。
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleMigration}
+            disabled={isMigrating}
+            className="ml-4"
+          >
+            {isMigrating ? "遷移中..." : "立即遷移"}
+          </Button>
+        </div>
+      )}
 
       {/* 作品列表 */}
       <div className="space-y-4">

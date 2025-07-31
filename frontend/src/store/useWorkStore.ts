@@ -1,10 +1,6 @@
 import { create } from "zustand";
 import { Work, WorkCreate, WorkUpdate, WorkList, Tag, Stats } from "@/types";
-import {
-  workStorage,
-  tagStorage,
-  initializeSampleData,
-} from "@/lib/localStorage";
+import { workStorage, tagStorage, initializeSampleData } from "@/lib/indexedDB";
 
 interface WorkStore {
   // 狀態
@@ -24,11 +20,11 @@ interface WorkStore {
     year?: number;
     tag_ids?: number[];
   }) => Promise<WorkList>;
-  createWork: (work: WorkCreate) => Work;
+  createWork: (work: WorkCreate) => Promise<Work>;
   updateWork: (id: string, work: WorkUpdate) => Promise<Work | null>;
   deleteWork: (id: string) => Promise<boolean>;
-  getWork: (id: string) => Work | null;
-  updateWorks: (works: Work[]) => void;
+  getWork: (id: string) => Promise<Work | null>;
+  updateWorks: (works: Work[]) => Promise<void>;
 
   // 標籤相關操作
   fetchTags: () => Promise<Tag[]>;
@@ -38,13 +34,13 @@ interface WorkStore {
     tag: { name?: string; color?: string }
   ) => Promise<Tag | null>;
   deleteTag: (id: number) => Promise<boolean>;
-  updateTags: (tags: Tag[]) => void;
+  updateTags: (tags: Tag[]) => Promise<void>;
 
   // 統計相關操作
   fetchStats: () => Promise<Stats>;
 
   // 初始化
-  initialize: () => void;
+  initialize: () => Promise<void>;
 }
 
 export const useWorkStore = create<WorkStore>((set, get) => ({
@@ -56,18 +52,27 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
   error: null,
 
   // 初始化
-  initialize: () => {
-    // 只在沒有數據時初始化示例數據
-    const works = workStorage.getAll();
-    if (works.length === 0) {
-      initializeSampleData();
+  initialize: async () => {
+    try {
+      // 初始化 IndexedDB
+      await workStorage.init();
+      await tagStorage.init();
+
+      // 只在沒有數據時初始化示例數據
+      const works = await workStorage.getAll();
+      if (works.length === 0) {
+        await initializeSampleData();
+      }
+
+      const updatedWorks = await workStorage.getAll();
+      const tags = await tagStorage.getAll();
+      const stats = await workStorage.getStats();
+
+      set({ works: updatedWorks, tags, stats });
+    } catch (error) {
+      console.error("初始化失敗:", error);
+      set({ error: "初始化失敗" });
     }
-
-    const updatedWorks = workStorage.getAll();
-    const tags = tagStorage.getAll();
-    const stats = workStorage.getStats();
-
-    set({ works: updatedWorks, tags, stats });
   },
 
   // 作品相關操作
@@ -75,7 +80,7 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const result = workStorage.getList(params);
+      const result = await workStorage.getList(params);
       set({ works: result.works, loading: false });
       return result;
     } catch (error) {
@@ -86,12 +91,12 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     }
   },
 
-  createWork: (workData) => {
+  createWork: async (workData) => {
     set({ loading: true, error: null });
 
     try {
       // 檢查標題重複（所有作品都檢查）
-      const existingByTitle = workStorage.findByTitle(workData.title);
+      const existingByTitle = await workStorage.findByTitle(workData.title);
 
       if (existingByTitle) {
         throw new Error(`作品「${workData.title}」已存在於您的收藏中！`);
@@ -102,16 +107,18 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
         const aniListIdMatch = workData.note.match(/AniList ID: (\d+)/);
         if (aniListIdMatch) {
           const aniListId = parseInt(aniListIdMatch[1]);
-          const existingByAniListId = workStorage.findByAniListId(aniListId);
+          const existingByAniListId = await workStorage.findByAniListId(
+            aniListId
+          );
           if (existingByAniListId) {
             throw new Error(`作品「${workData.title}」已存在於您的收藏中！`);
           }
         }
       }
 
-      const newWork = workStorage.create(workData);
-      const works = workStorage.getAll();
-      const stats = workStorage.getStats();
+      const newWork = await workStorage.create(workData);
+      const works = await workStorage.getAll();
+      const stats = await workStorage.getStats();
 
       set({ works, stats, loading: false });
       return newWork;
@@ -127,13 +134,13 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const updatedWork = workStorage.update(id, workData);
+      const updatedWork = await workStorage.update(id, workData);
       if (!updatedWork) {
         throw new Error("作品不存在");
       }
 
-      const works = workStorage.getAll();
-      const stats = workStorage.getStats();
+      const works = await workStorage.getAll();
+      const stats = await workStorage.getStats();
 
       set({ works, stats, loading: false });
       return updatedWork;
@@ -149,13 +156,13 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const success = workStorage.delete(id);
+      const success = await workStorage.delete(id);
       if (!success) {
         throw new Error("作品不存在");
       }
 
-      const works = workStorage.getAll();
-      const stats = workStorage.getStats();
+      const works = await workStorage.getAll();
+      const stats = await workStorage.getStats();
 
       set({ works, stats, loading: false });
       return true;
@@ -167,15 +174,20 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     }
   },
 
-  getWork: (id) => {
-    const works = workStorage.getAll();
-    return works.find((w) => w.id === id) || null;
+  getWork: async (id) => {
+    try {
+      const works = await workStorage.getAll();
+      return works.find((w) => w.id === id) || null;
+    } catch (error) {
+      console.error("取得作品失敗:", error);
+      return null;
+    }
   },
 
-  updateWorks: (works) => {
+  updateWorks: async (works) => {
     try {
       // 更新本地儲存
-      workStorage.setAll(works);
+      await workStorage.setAll(works);
       set({ works });
     } catch (error) {
       console.error("更新作品失敗:", error);
@@ -187,7 +199,7 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const tags = tagStorage.getAll();
+      const tags = await tagStorage.getAll();
       set({ tags, loading: false });
       return tags;
     } catch (error) {
@@ -202,8 +214,8 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const newTag = tagStorage.create(tagData);
-      const tags = tagStorage.getAll();
+      const newTag = await tagStorage.create(tagData);
+      const tags = await tagStorage.getAll();
 
       set({ tags, loading: false });
       return newTag;
@@ -219,12 +231,12 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const updatedTag = tagStorage.update(id, tagData);
+      const updatedTag = await tagStorage.update(id, tagData);
       if (!updatedTag) {
         throw new Error("標籤不存在");
       }
 
-      const tags = tagStorage.getAll();
+      const tags = await tagStorage.getAll();
       set({ tags, loading: false });
       return updatedTag;
     } catch (error) {
@@ -239,12 +251,12 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const success = tagStorage.delete(id);
+      const success = await tagStorage.delete(id);
       if (!success) {
         throw new Error("標籤不存在");
       }
 
-      const tags = tagStorage.getAll();
+      const tags = await tagStorage.getAll();
       set({ tags, loading: false });
       return true;
     } catch (error) {
@@ -255,10 +267,10 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     }
   },
 
-  updateTags: (tags) => {
+  updateTags: async (tags) => {
     try {
       // 更新本地儲存
-      tagStorage.setAll(tags);
+      await tagStorage.setAll(tags);
       set({ tags });
     } catch (error) {
       console.error("更新標籤失敗:", error);
@@ -270,7 +282,7 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const stats = workStorage.getStats();
+      const stats = await workStorage.getStats();
       set({ stats, loading: false });
       return stats;
     } catch (error) {
