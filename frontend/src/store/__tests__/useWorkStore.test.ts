@@ -46,7 +46,7 @@ describe("useWorkStore", () => {
           id: "2",
           title: "作品2",
           type: "電影",
-          status: "已完成",
+          status: "已完結",
           episodes: [],
         },
       ];

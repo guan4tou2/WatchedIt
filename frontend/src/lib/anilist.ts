@@ -202,17 +202,18 @@ class AniListService {
   }
 
   // 將 AniList 狀態轉換為我們的狀態
-  convertStatus(aniListStatus: string): "進行中" | "已完成" | "暫停" | "放棄" {
+  convertStatus(aniListStatus: string): "進行中" | "已完結" | "暫停" | "放棄" {
     switch (aniListStatus) {
       case "FINISHED":
-        return "已完成";
+        return "已完結";
       case "RELEASING":
         return "進行中";
       case "NOT_YET_RELEASED":
-        return "暫停";
+        return "進行中";
       case "CANCELLED":
-      case "HIATUS":
         return "放棄";
+      case "HIATUS":
+        return "暫停";
       default:
         return "進行中";
     }

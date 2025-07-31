@@ -148,7 +148,7 @@ interface Work {
   id: string
   title: string
   type: '動畫' | '電影' | '電視劇' | '小說'
-  status: '進行中' | '已完成' | '暫停' | '放棄'
+  status: '進行中' | '已完結' | '暫停' | '放棄'
   year?: number
   progress?: number
   rating?: number

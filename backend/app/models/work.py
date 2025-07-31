@@ -13,7 +13,7 @@ class Work(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     title = Column(String, nullable=False, index=True)
     type = Column(String, nullable=False)  # 動畫、小說、漫畫、電影、電視劇、自定義
-    status = Column(String, nullable=False)  # 進行中、已完成、暫停、放棄
+    status = Column(String, nullable=False)  # 進行中、已完結、暫停、放棄
     year = Column(Integer)
     progress = Column(JSON)  # 進度資訊，如集數、總集數等
     date_added = Column(DateTime(timezone=True), server_default=func.now())

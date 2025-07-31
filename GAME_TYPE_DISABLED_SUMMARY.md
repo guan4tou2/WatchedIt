@@ -36,7 +36,7 @@
 await workStorage.create({
   title: "薩爾達傳說：曠野之息",
   type: "遊戲",
-  status: "已完成",
+  status: "已完結",
   year: 2017,
   rating: 5,
   review: "開放世界遊戲的典範，自由度極高，探索樂趣無窮。",

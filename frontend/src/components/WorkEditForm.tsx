@@ -137,7 +137,7 @@ export default function WorkEditForm({
             required
           >
             <option value="進行中">進行中</option>
-            <option value="已完成">已完成</option>
+            <option value="已完結">已完結</option>
             <option value="暫停">暫停</option>
             <option value="放棄">放棄</option>
           </select>

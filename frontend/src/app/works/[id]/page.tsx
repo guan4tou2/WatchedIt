@@ -177,7 +177,7 @@ export default function WorkDetailPage() {
                   <div className="mt-1">
                     <Badge
                       variant={
-                        work.status === "已完成"
+                        work.status === "已完結"
                           ? "default"
                           : work.status === "進行中"
                           ? "secondary"

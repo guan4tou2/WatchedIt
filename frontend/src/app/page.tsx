@@ -385,12 +385,15 @@ export default function HomePage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-xs sm:text-sm font-medium">
-                已完成
+                已完結
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-lg sm:text-2xl font-bold">
-                {stats.status_stats["已完成"] || 0}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {stats.status_stats["已完結"] || 0}
+                </div>
+                <div className="text-sm text-gray-600">已完結</div>
               </div>
             </CardContent>
           </Card>

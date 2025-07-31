@@ -506,7 +506,7 @@ export const initializeSampleData = async () => {
       await workStorage.create({
         title: "進擊的巨人",
         type: "動畫",
-        status: "已完成",
+        status: "已完結",
         year: 2013,
         rating: 5,
         review: "經典神作！劇情緊湊，角色塑造深刻，音樂震撼人心。",
@@ -548,7 +548,7 @@ export const initializeSampleData = async () => {
       await workStorage.create({
         title: "星際效應",
         type: "電影",
-        status: "已完成",
+        status: "已完結",
         year: 2014,
         rating: 5,
         review: "諾蘭的科幻傑作，結合了硬科幻與人文情感，視覺效果震撼。",
@@ -571,7 +571,7 @@ export const initializeSampleData = async () => {
       await workStorage.create({
         title: "權力遊戲",
         type: "電視劇",
-        status: "已完成",
+        status: "已完結",
         year: 2011,
         rating: 4,
         review: "史詩級奇幻劇集，政治鬥爭與奇幻元素完美結合。",
@@ -613,7 +613,7 @@ export const initializeSampleData = async () => {
       await workStorage.create({
         title: "哈利波特與魔法石",
         type: "小說",
-        status: "已完成",
+        status: "已完結",
         year: 1997,
         rating: 5,
         review: "魔法世界的開始，J.K.羅琳的奇幻傑作。",

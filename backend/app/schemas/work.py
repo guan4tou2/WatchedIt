@@ -9,7 +9,7 @@ class WorkCreate(BaseModel):
     type: str = Field(
         ..., description="作品類型：動畫、小說、漫畫、電影、電視劇、自定義"
     )
-    status: str = Field(..., description="狀態：進行中、已完成、暫停、放棄")
+    status: str = Field(..., description="狀態：進行中、已完結、暫停、放棄")
     year: Optional[int] = Field(None, ge=1900, le=2030)
     progress: Optional[Dict[str, Any]] = Field(None, description="進度資訊")
     rating: Optional[int] = Field(None, ge=1, le=5, description="1-5星評分")

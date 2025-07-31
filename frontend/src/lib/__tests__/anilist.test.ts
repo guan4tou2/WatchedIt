@@ -241,7 +241,7 @@ describe("AniListService", () => {
 
   describe("convertStatus", () => {
     it("應該正確轉換各種狀態", () => {
-      expect(anilistService.convertStatus("FINISHED")).toBe("已完成");
+      expect(anilistService.convertStatus("FINISHED")).toBe("已完結");
       expect(anilistService.convertStatus("RELEASING")).toBe("進行中");
       expect(anilistService.convertStatus("NOT_YET_RELEASED")).toBe("未播出");
       expect(anilistService.convertStatus("CANCELLED")).toBe("已取消");

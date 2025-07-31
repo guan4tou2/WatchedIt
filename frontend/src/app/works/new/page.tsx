@@ -70,7 +70,7 @@ export default function NewWorkPage() {
     switch (status) {
       case "進行中":
         return "bg-blue-100 text-blue-800";
-      case "已完成":
+      case "已完結":
         return "bg-green-100 text-green-800";
       case "暫停":
         return "bg-yellow-100 text-yellow-800";
@@ -97,6 +97,21 @@ export default function NewWorkPage() {
         return "bg-pink-100 text-pink-800";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "進行中":
+        return "進行中";
+      case "已完結":
+        return "已完結";
+      case "暫停":
+        return "暫停";
+      case "放棄":
+        return "放棄";
+      default:
+        return status;
     }
   };
 
@@ -180,7 +195,7 @@ export default function NewWorkPage() {
                       required
                     >
                       <option value="進行中">進行中</option>
-                      <option value="已完成">已完成</option>
+                      <option value="已完結">已完結</option>
                       <option value="暫停">暫停</option>
                       <option value="放棄">放棄</option>
                     </select>
@@ -328,7 +343,7 @@ export default function NewWorkPage() {
                       {formData.type}
                     </Badge>
                     <Badge className={getStatusColor(formData.status)}>
-                      {formData.status}
+                      {getStatusLabel(formData.status)}
                     </Badge>
                   </div>
                 </div>

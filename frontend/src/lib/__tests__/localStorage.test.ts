@@ -78,7 +78,7 @@ describe("localStorage", () => {
             id: "2",
             title: "作品2",
             type: "電影",
-            status: "已完成",
+            status: "已完結",
             episodes: [],
           },
         ];
@@ -116,7 +116,7 @@ describe("localStorage", () => {
             id: "2",
             title: "作品2",
             type: "電影",
-            status: "已完成",
+            status: "已完結",
             episodes: [],
           },
         ];
@@ -162,7 +162,7 @@ describe("localStorage", () => {
             id: "2",
             title: "作品2",
             type: "電影",
-            status: "已完成",
+            status: "已完結",
             episodes: [],
             aniListId: 456,
           },
@@ -250,7 +250,7 @@ describe("localStorage", () => {
             id: "2",
             title: "作品2",
             type: "電影",
-            status: "已完成",
+            status: "已完結",
             episodes: [],
           },
         ];
@@ -296,7 +296,7 @@ describe("localStorage", () => {
             id: "2",
             title: "作品2",
             type: "電影",
-            status: "已完成",
+            status: "已完結",
             episodes: [mockEpisode, mockEpisode],
           },
           {
@@ -316,7 +316,7 @@ describe("localStorage", () => {
         expect(stats.type_stats["動畫"]).toBe(2);
         expect(stats.type_stats["電影"]).toBe(1);
         expect(stats.status_stats["進行中"]).toBe(2);
-        expect(stats.status_stats["已完成"]).toBe(1);
+        expect(stats.status_stats["已完結"]).toBe(1);
         expect(stats.episode_stats.total_episodes).toBe(3);
         expect(stats.episode_stats.watched_episodes).toBe(0);
       });

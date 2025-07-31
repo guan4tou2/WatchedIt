@@ -3,7 +3,7 @@ export interface Work {
   id: string;
   title: string;
   type: string; // 改為動態類型
-  status: "進行中" | "已完成" | "暫停" | "放棄";
+  status: "進行中" | "已完結" | "暫停" | "放棄";
   year?: number;
   episodes: Episode[];
   rating?: number;
