@@ -7,8 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AniListMedia, anilistService } from "@/lib/anilist";
 import { WorkCreate } from "@/types";
-import { Search, X, Star, Calendar, Play, Plus, Loader2 } from "lucide-react";
+import {
+  Search,
+  X,
+  Star,
+  Calendar,
+  Play,
+  Plus,
+  Loader2,
+} from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
+import AnimeDetailModal from "./AnimeDetailModal";
 
 interface AniListSearchProps {
   onSelectAnime: (workData: WorkCreate) => void;
@@ -26,6 +35,9 @@ export default function AniListSearch({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedAnime, setSelectedAnime] = useState<AniListMedia | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedAnimeForDetail, setSelectedAnimeForDetail] =
+    useState<AniListMedia | null>(null);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -59,6 +71,11 @@ export default function AniListSearch({
 
   const handleAnimeSelect = (anime: AniListMedia) => {
     setSelectedAnime(anime);
+  };
+
+  const handleViewDetail = (anime: AniListMedia) => {
+    setSelectedAnimeForDetail(anime);
+    setDetailModalOpen(true);
   };
 
   const handleConfirmSelection = () => {
@@ -200,7 +217,7 @@ ${
                     ? "ring-2 ring-blue-500 bg-blue-50"
                     : ""
                 }`}
-                onClick={() => handleAnimeSelect(anime)}
+                onClick={() => handleViewDetail(anime)}
               >
                 <CardContent className="p-4">
                   <div className="flex space-x-4">
@@ -271,6 +288,21 @@ ${
                       )}
                     </div>
                   </div>
+
+                  {/* 操作按鈕 */}
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAnimeSelect(anime);
+                      }}
+                      className="flex-1"
+                    >
+                      選擇
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -304,6 +336,17 @@ ${
           </div>
         )}
       </Card>
+
+      {/* 動畫詳情彈窗 */}
+      <AnimeDetailModal
+        anime={selectedAnimeForDetail}
+        isOpen={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false);
+          setSelectedAnimeForDetail(null);
+        }}
+        onSelectAnime={onSelectAnime}
+      />
     </div>
   );
 }
