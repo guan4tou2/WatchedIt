@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import PWAInstall from "@/components/PWAInstall";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { pwaService } from "@/lib/pwa";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,10 +45,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-TW">
+    <html lang="zh-TW" suppressHydrationWarning>
       <body className={inter.className}>
-        {children}
-        <PWAInstall />
+        <Suspense fallback={null}>
+          <ThemeProvider>
+            {children}
+            <PWAInstall />
+          </ThemeProvider>
+        </Suspense>
         <script
           dangerouslySetInnerHTML={{
             __html: `

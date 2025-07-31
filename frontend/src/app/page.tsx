@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import QuickAddEpisode from "@/components/QuickAddEpisode";
 import AniListSearch from "@/components/AniListSearch";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Episode, WorkCreate } from "@/types";
 
 export default function HomePage() {
@@ -166,6 +167,7 @@ export default function HomePage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">看過了</h1>
         <div className="flex items-center space-x-2">
+          <ThemeToggle />
           <Button
             variant="outline"
             size="sm"

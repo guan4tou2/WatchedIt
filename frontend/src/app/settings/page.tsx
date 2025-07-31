@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import WorkTypeManager from "@/components/WorkTypeManager";
 import CustomEpisodeTypeManager from "@/components/CustomEpisodeTypeManager";
+import { useTheme } from "@/components/ThemeProvider";
 import {
   Database,
   Cloud,
@@ -21,6 +22,9 @@ import {
   AlertTriangle,
   CheckCircle,
   Palette,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 
 interface Settings {
@@ -47,6 +51,8 @@ export default function SettingsPage() {
     dataBackup: true,
     dataBackupInterval: 7,
   });
+
+  const { theme, setTheme } = useTheme();
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{
@@ -196,6 +202,65 @@ export default function SettingsPage() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 主題設定 */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Palette className="w-4 h-4 mr-2" />
+              主題設定
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium">主題模式</Label>
+              <div className="flex space-x-4 mt-2">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="light"
+                    name="theme"
+                    value="light"
+                    checked={theme === "light"}
+                    onChange={() => setTheme("light")}
+                  />
+                  <Label htmlFor="light" className="flex items-center">
+                    <Sun className="w-4 h-4 mr-1" />
+                    淺色
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="dark"
+                    name="theme"
+                    value="dark"
+                    checked={theme === "dark"}
+                    onChange={() => setTheme("dark")}
+                  />
+                  <Label htmlFor="dark" className="flex items-center">
+                    <Moon className="w-4 h-4 mr-1" />
+                    深色
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="auto"
+                    name="theme"
+                    value="auto"
+                    checked={theme === "auto"}
+                    onChange={() => setTheme("auto")}
+                  />
+                  <Label htmlFor="auto" className="flex items-center">
+                    <Monitor className="w-4 h-4 mr-1" />
+                    自動
+                  </Label>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* 儲存設定 */}
         <Card>
           <CardHeader>
@@ -350,24 +415,6 @@ export default function SettingsPage() {
             <CardTitle>應用程式設定</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium">主題</Label>
-              <select
-                value={settings.theme}
-                onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    theme: e.target.value as "light" | "dark" | "auto",
-                  })
-                }
-                className="w-full mt-1 p-2 border rounded-md"
-              >
-                <option value="auto">自動</option>
-                <option value="light">淺色</option>
-                <option value="dark">深色</option>
-              </select>
-            </div>
-
             <div>
               <Label className="text-sm font-medium">語言</Label>
               <select
