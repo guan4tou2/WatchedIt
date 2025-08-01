@@ -375,7 +375,7 @@ export default function HomePage() {
 
       {/* 統計卡片 */}
       {stats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-xs sm:text-sm font-medium">
@@ -415,18 +415,7 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">
-                觀看進度
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-foreground/90 dark:text-foreground/98">
-                {stats.episode_stats?.completion_rate || 0}%
-              </div>
-            </CardContent>
-          </Card>
+
         </div>
       )}
 
