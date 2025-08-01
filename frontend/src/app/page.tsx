@@ -23,7 +23,6 @@ import {
   Plus,
   Settings,
   Search,
-  Filter,
   X,
   Database,
   AlertTriangle,
@@ -31,11 +30,18 @@ import {
   Star,
   Calendar,
   Info,
+  Edit3,
+  Square,
+  CheckSquare,
+  Trash2,
 } from "lucide-react";
 import QuickAddEpisode from "@/components/QuickAddEpisode";
 import AniListSearch from "@/components/AniListSearch";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Episode, WorkCreate } from "@/types";
+import SearchFilter from "@/components/SearchFilter";
+import BatchEditModal from "@/components/BatchEditModal";
+import BatchDeleteModal from "@/components/BatchDeleteModal";
+import { Episode, WorkCreate, Tag } from "@/types";
 import CloudSyncStatus from "@/components/CloudSyncStatus";
 
 export default function HomePage() {
@@ -49,6 +55,7 @@ export default function HomePage() {
     fetchStats,
     updateWork,
     createWork,
+    deleteWork,
   } = useWorkStore();
   const [quickAddEpisode, setQuickAddEpisode] = useState<{
     workId: string;
@@ -62,7 +69,20 @@ export default function HomePage() {
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [selectedYear, setSelectedYear] = useState<string>("");
-  const [showFilters, setShowFilters] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [ratingRange, setRatingRange] = useState<{ min: number; max: number }>({
+    min: 0,
+    max: 5,
+  });
+  const [progressFilter, setProgressFilter] = useState<string>("");
+
+  // 批量選擇狀態
+  const [isBatchMode, setIsBatchMode] = useState(false);
+  const [selectedWorkIds, setSelectedWorkIds] = useState<Set<string>>(
+    new Set()
+  );
+  const [showBatchEditModal, setShowBatchEditModal] = useState(false);
+  const [showBatchDeleteModal, setShowBatchDeleteModal] = useState(false);
 
   // 遷移狀態
   const [migrationStatus, setMigrationStatus] = useState<{
@@ -224,7 +244,12 @@ export default function HomePage() {
         work.review?.toLowerCase().includes(searchLower) || false;
       const matchesNote =
         work.note?.toLowerCase().includes(searchLower) || false;
-      if (!matchesTitle && !matchesReview && !matchesNote) return false;
+      const matchesTags =
+        work.tags?.some((tag) =>
+          tag.name.toLowerCase().includes(searchLower)
+        ) || false;
+      if (!matchesTitle && !matchesReview && !matchesNote && !matchesTags)
+        return false;
     }
 
     // 類型篩選
@@ -236,6 +261,49 @@ export default function HomePage() {
     // 年份篩選
     if (selectedYear && work.year?.toString() !== selectedYear) return false;
 
+    // 標籤篩選
+    if (selectedTags.length > 0) {
+      const workTagIds = work.tags?.map((tag) => tag.id) || [];
+      const hasSelectedTag = selectedTags.some((tag) =>
+        workTagIds.includes(tag.id)
+      );
+      if (!hasSelectedTag) return false;
+    }
+
+    // 評分篩選
+    if (work.rating) {
+      if (work.rating < ratingRange.min || work.rating > ratingRange.max) {
+        return false;
+      }
+    }
+
+    // 進度篩選
+    if (progressFilter && work.episodes && work.episodes.length > 0) {
+      const watchedCount = work.episodes.filter((ep) => ep.watched).length;
+      const totalEpisodes = work.episodes.length;
+      const progress =
+        totalEpisodes > 0 ? (watchedCount / totalEpisodes) * 100 : 0;
+
+      switch (progressFilter) {
+        case "未開始":
+          if (watchedCount > 0) return false;
+          break;
+        case "進行中":
+          if (watchedCount === 0 || watchedCount === totalEpisodes)
+            return false;
+          break;
+        case "已完成":
+          if (watchedCount !== totalEpisodes) return false;
+          break;
+        case "高進度":
+          if (progress < 80) return false;
+          break;
+        case "低進度":
+          if (progress >= 20) return false;
+          break;
+      }
+    }
+
     return true;
   });
 
@@ -245,7 +313,76 @@ export default function HomePage() {
     setSelectedType("");
     setSelectedStatus("");
     setSelectedYear("");
+    setSelectedTags([]);
+    setRatingRange({ min: 0, max: 5 });
+    setProgressFilter("");
   };
+
+  // 批量操作函數
+  const toggleBatchMode = () => {
+    setIsBatchMode(!isBatchMode);
+    setSelectedWorkIds(new Set());
+  };
+
+  const toggleWorkSelection = (workId: string) => {
+    const newSelectedIds = new Set(selectedWorkIds);
+    if (newSelectedIds.has(workId)) {
+      newSelectedIds.delete(workId);
+    } else {
+      newSelectedIds.add(workId);
+    }
+    setSelectedWorkIds(newSelectedIds);
+  };
+
+  const selectAllWorks = () => {
+    setSelectedWorkIds(new Set(filteredWorks.map((work) => work.id)));
+  };
+
+  const clearSelection = () => {
+    setSelectedWorkIds(new Set());
+  };
+
+  const handleBatchUpdate = async (updates: any) => {
+    try {
+      const selectedWorks = works.filter((work) =>
+        selectedWorkIds.has(work.id)
+      );
+
+      for (const work of selectedWorks) {
+        await updateWork(work.id, updates);
+      }
+
+      // 清除選擇並退出批量模式
+      setSelectedWorkIds(new Set());
+      setIsBatchMode(false);
+      setShowBatchEditModal(false);
+    } catch (error) {
+      console.error("批量更新失敗:", error);
+      alert("批量更新失敗，請檢查控制台錯誤信息");
+    }
+  };
+
+  const handleBatchDelete = async () => {
+    try {
+      const selectedWorks = works.filter((work) =>
+        selectedWorkIds.has(work.id)
+      );
+
+      for (const work of selectedWorks) {
+        await deleteWork(work.id);
+      }
+
+      // 清除選擇並退出批量模式
+      setSelectedWorkIds(new Set());
+      setIsBatchMode(false);
+      setShowBatchDeleteModal(false);
+    } catch (error) {
+      console.error("批量刪除失敗:", error);
+      alert("批量刪除失敗，請檢查控制台錯誤信息");
+    }
+  };
+
+  const selectedWorks = works.filter((work) => selectedWorkIds.has(work.id));
 
   // 獲取可用的篩選選項
   const availableTypes = Array.from(new Set(works.map((w) => w.type)));
@@ -257,6 +394,13 @@ export default function HomePage() {
         .filter((year): year is number => year !== undefined)
     )
   ).sort((a, b) => b - a);
+
+  // 獲取所有標籤
+  const allTags = Array.from(
+    new Set(
+      works.flatMap((w) => w.tags || []).map((tag) => JSON.stringify(tag))
+    )
+  ).map((tagStr) => JSON.parse(tagStr));
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -481,111 +625,29 @@ export default function HomePage() {
       )}
 
       {/* 搜尋和篩選 */}
-      <div className="mb-6 space-y-4">
-        {/* 搜尋欄 */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 status-text-muted w-4 h-4" />
-            <Input
-              placeholder="搜尋作品標題、評論或備註..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex-1 sm:flex-none"
-            >
-              <Filter className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">篩選</span>
-            </Button>
-            {(searchTerm || selectedType || selectedStatus || selectedYear) && (
-              <Button variant="outline" size="sm" onClick={clearFilters}>
-                <X className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">清除</span>
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* 篩選選項 */}
-        {showFilters && (
-          <Card>
-            <CardContent className="pt-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* 類型篩選 */}
-                <div>
-                  <label className="text-sm font-medium form-label">類型</label>
-                  <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value)}
-                    className="w-full mt-1 p-2 border border-input/60 rounded-md text-sm bg-background/95 dark:text-foreground/95"
-                  >
-                    <option value="">全部類型</option>
-                    {availableTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* 狀態篩選 */}
-                <div>
-                  <label className="text-sm font-medium form-label">狀態</label>
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="w-full mt-1 p-2 border border-input/60 rounded-md text-sm bg-background/95 dark:text-foreground/95"
-                  >
-                    <option value="">全部狀態</option>
-                    {availableStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* 年份篩選 */}
-                <div>
-                  <label className="text-sm font-medium form-label-secondary">
-                    年份
-                  </label>
-                  <select
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
-                    className="w-full mt-1 p-2 border rounded-md text-sm dark:text-foreground/95 dark:bg-background/95"
-                  >
-                    <option value="">全部年份</option>
-                    {availableYears.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* 快速操作 */}
-                <div className="flex items-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={clearFilters}
-                    className="w-full"
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    清除篩選
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      <div className="mb-6">
+        <SearchFilter
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedType={selectedType}
+          onTypeChange={setSelectedType}
+          selectedStatus={selectedStatus}
+          onStatusChange={setSelectedStatus}
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
+          selectedTags={selectedTags}
+          onTagsChange={setSelectedTags}
+          ratingRange={ratingRange}
+          onRatingChange={setRatingRange}
+          progressFilter={progressFilter}
+          onProgressChange={setProgressFilter}
+          onClearFilters={clearFilters}
+          availableTypes={availableTypes}
+          availableStatuses={availableStatuses}
+          availableYears={availableYears}
+          allTags={allTags}
+          works={works}
+        />
       </div>
 
       {/* 數據遷移提示 */}
@@ -610,13 +672,90 @@ export default function HomePage() {
       {/* 作品列表 */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-          <h2 className="text-lg sm:text-xl font-semibold dark:text-foreground/98">
-            {searchTerm || selectedType || selectedStatus || selectedYear
-              ? "搜尋結果"
-              : "最近作品"}
-          </h2>
+          <div className="flex items-center space-x-4">
+            <h2 className="text-lg sm:text-xl font-semibold dark:text-foreground/98">
+              {searchTerm ||
+              selectedType ||
+              selectedStatus ||
+              selectedYear ||
+              selectedTags.length > 0 ||
+              ratingRange.min !== 0 ||
+              ratingRange.max !== 5 ||
+              progressFilter
+                ? "搜尋結果"
+                : "最近作品"}
+            </h2>
+
+            {/* 批量操作按鈕 */}
+            {filteredWorks.length > 0 && (
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant={isBatchMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={toggleBatchMode}
+                >
+                  {isBatchMode ? (
+                    <>
+                      <CheckSquare className="w-4 h-4 mr-1" />
+                      批量模式
+                    </>
+                  ) : (
+                    <>
+                      <Square className="w-4 h-4 mr-1" />
+                      批量選擇
+                    </>
+                  )}
+                </Button>
+
+                {isBatchMode && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={selectAllWorks}
+                    >
+                      全選
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={clearSelection}
+                    >
+                      清除
+                    </Button>
+                    {selectedWorkIds.size > 0 && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => setShowBatchEditModal(true)}
+                        >
+                          <Edit3 className="w-4 h-4 mr-1" />
+                          批量編輯 ({selectedWorkIds.size})
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => setShowBatchDeleteModal(true)}
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          批量刪除 ({selectedWorkIds.size})
+                        </Button>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
           {filteredWorks.length > 0 && (
-            <div className="stats-text">共 {filteredWorks.length} 個作品</div>
+            <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+              <span>共 {filteredWorks.length} 個作品</span>
+              {works.length !== filteredWorks.length && (
+                <span>（從 {works.length} 個中篩選）</span>
+              )}
+              {searchTerm && <span>搜尋：「{searchTerm}」</span>}
+            </div>
           )}
         </div>
 
@@ -632,42 +771,68 @@ export default function HomePage() {
               const episodes = work.episodes || [];
               const watchedCount = episodes.filter((ep) => ep.watched).length;
               const totalEpisodes = episodes.length;
+              const isSelected = selectedWorkIds.has(work.id);
 
               return (
                 <Card
                   key={work.id}
-                  className="hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() =>
-                    (window.location.href = getFullPath(
-                      `/works/detail?id=${work.id}`
-                    ))
-                  }
+                  className={`hover:shadow-lg transition-shadow ${
+                    isBatchMode ? "cursor-pointer" : "cursor-pointer"
+                  } ${
+                    isSelected
+                      ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    if (isBatchMode) {
+                      toggleWorkSelection(work.id);
+                    } else {
+                      window.location.href = getFullPath(
+                        `/works/detail?id=${work.id}`
+                      );
+                    }
+                  }}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-2 sm:space-y-0">
-                      <CardTitle className="text-base sm:text-lg line-clamp-2">
-                        {work.title}
-                      </CardTitle>
+                      <div className="flex items-start space-x-2 flex-1">
+                        {isBatchMode && (
+                          <div className="flex items-center mt-1">
+                            {isSelected ? (
+                              <CheckSquare className="w-4 h-4 text-blue-500" />
+                            ) : (
+                              <Square className="w-4 h-4 text-gray-400" />
+                            )}
+                          </div>
+                        )}
+                        <CardTitle className="text-base sm:text-lg line-clamp-2 flex-1">
+                          {work.title}
+                        </CardTitle>
+                      </div>
                       <div className="flex items-center space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleQuickAddEpisode(
-                              work.id,
-                              work.title,
-                              work.type
-                            );
-                          }}
-                          className="text-xs sm:text-sm"
-                        >
-                          <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                          <span className="hidden sm:inline">新增集數</span>
-                          <span className="sm:hidden">新增</span>
-                        </Button>
-                        <ArrowRight className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" />
+                        {!isBatchMode && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleQuickAddEpisode(
+                                work.id,
+                                work.title,
+                                work.type
+                              );
+                            }}
+                            className="text-xs sm:text-sm"
+                          >
+                            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                            <span className="hidden sm:inline">新增集數</span>
+                            <span className="sm:hidden">新增</span>
+                          </Button>
+                        )}
+                        {!isBatchMode && (
+                          <ArrowRight className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" />
+                        )}
                       </div>
                     </div>
                   </CardHeader>
@@ -771,6 +936,23 @@ export default function HomePage() {
 
       {/* 雲端同步狀態 */}
       <CloudSyncStatus />
+
+      {/* 批量編輯對話框 */}
+      <BatchEditModal
+        isOpen={showBatchEditModal}
+        onClose={() => setShowBatchEditModal(false)}
+        selectedWorks={selectedWorks}
+        allTags={allTags}
+        onBatchUpdate={handleBatchUpdate}
+      />
+
+      {/* 批量刪除對話框 */}
+      <BatchDeleteModal
+        isOpen={showBatchDeleteModal}
+        onClose={() => setShowBatchDeleteModal(false)}
+        selectedWorks={selectedWorks}
+        onBatchDelete={handleBatchDelete}
+      />
     </div>
   );
 }

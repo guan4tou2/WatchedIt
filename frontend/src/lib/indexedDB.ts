@@ -288,6 +288,15 @@ export const workStorage = {
     }
   },
 
+  // 清空所有作品
+  async clearAll(): Promise<void> {
+    try {
+      await dbManager.clear(STORES.WORKS);
+    } catch (error) {
+      console.error("清空作品數據失敗:", error);
+    }
+  },
+
   // 取得作品列表（支援分頁和篩選）
   async getList(params?: {
     page?: number;
@@ -489,6 +498,15 @@ export const tagStorage = {
     } catch (error) {
       console.error("刪除標籤失敗:", error);
       return false;
+    }
+  },
+
+  // 清空所有標籤
+  async clearAll(): Promise<void> {
+    try {
+      await dbManager.clear(STORES.TAGS);
+    } catch (error) {
+      console.error("清空標籤數據失敗:", error);
     }
   },
 };

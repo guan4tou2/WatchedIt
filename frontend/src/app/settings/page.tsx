@@ -46,6 +46,7 @@ import {
   Wifi,
   WifiOff,
   BookOpen,
+  HardDrive,
 } from "lucide-react";
 
 interface Settings {
@@ -979,6 +980,26 @@ export default function SettingsPage() {
               <Link href={getFullPath("/settings/tags")}>
                 <Button className="w-full">
                   管理標籤
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <HardDrive className="w-5 h-5" />
+                <span>資料備份還原</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                管理您的資料備份，包括手動備份、自動備份和資料還原功能。
+              </p>
+              <Link href="/backup">
+                <Button className="w-full">
+                  管理備份還原
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>

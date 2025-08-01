@@ -1,3 +1,6 @@
+// 提醒頻率類型
+export type ReminderFrequency = "daily" | "weekly" | "monthly" | "custom";
+
 // 作品類型
 export interface Work {
   id: string;
@@ -11,7 +14,7 @@ export interface Work {
   note?: string;
   source?: string;
   reminder_enabled: boolean;
-  reminder_frequency?: string;
+  reminder_frequency?: ReminderFrequency;
   tags: Tag[];
   date_added: string;
   date_updated?: string;
@@ -153,7 +156,7 @@ export interface WorkCreate {
   note?: string;
   source?: string;
   reminder_enabled?: boolean;
-  reminder_frequency?: string;
+  reminder_frequency?: ReminderFrequency;
   tag_ids?: number[];
   tags?: Tag[];
 }
@@ -170,7 +173,7 @@ export interface WorkUpdate {
   note?: string;
   source?: string;
   reminder_enabled?: boolean;
-  reminder_frequency?: string;
+  reminder_frequency?: ReminderFrequency;
   tag_ids?: number[];
   tags?: Tag[];
 }

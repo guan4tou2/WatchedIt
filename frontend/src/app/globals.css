@@ -100,27 +100,24 @@
   }
 
   .status-text-muted {
-    @apply text-gray-500 dark:text-gray-400;
+    @apply text-gray-500 dark:text-gray-500;
   }
 
   /* 錯誤訊息 */
   .error-message {
-    @apply dark:bg-red-900/20 dark:border-red-800 dark:text-red-200;
+    @apply text-red-600 dark:text-red-400;
   }
 
-  /* 成功訊息 */
   .success-message {
-    @apply dark:bg-green-900/20 dark:border-green-800 dark:text-green-200;
+    @apply text-green-600 dark:text-green-400;
   }
 
-  /* 警告訊息 */
   .warning-message {
-    @apply dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200;
+    @apply text-yellow-600 dark:text-yellow-400;
   }
 
-  /* 資訊訊息 */
   .info-message {
-    @apply dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200;
+    @apply text-blue-600 dark:text-blue-400;
   }
 
   /* 星星圖標 */
@@ -129,30 +126,30 @@
   }
 
   .star-icon-unselected {
-    @apply text-gray-400 dark:text-gray-500 hover:text-yellow-400 dark:hover:text-yellow-300;
+    @apply text-gray-300 dark:text-gray-600;
   }
 
-  /* 徽章未選中狀態 */
+  /* 徽章樣式 */
   .badge-unselected {
-    @apply bg-gray-100 dark:bg-gray-900/20 text-gray-600 dark:text-gray-400;
+    @apply bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400;
   }
 
-  /* 選中狀態背景 */
+  /* 選中背景 */
   .selected-bg {
-    @apply dark:bg-blue-900/20;
+    @apply bg-blue-50 dark:bg-blue-900/20;
   }
 
   /* 下拉選單背景 */
   .dropdown-bg {
-    @apply dark:bg-gray-800;
+    @apply bg-white dark:bg-gray-800;
   }
 
-  /* 懸停效果 */
+  /* 懸停背景 */
   .hover-bg {
-    @apply dark:hover:bg-gray-700;
+    @apply hover:bg-gray-50 dark:hover:bg-gray-700;
   }
 
-  /* 空狀態文字 */
+  /* 空狀態 */
   .empty-state {
     @apply text-gray-500 dark:text-gray-400;
   }
@@ -162,19 +159,19 @@
     @apply text-gray-600 dark:text-gray-400;
   }
 
-  /* 備註文字 */
+  /* 註解文字 */
   .note-text {
-    @apply text-gray-500 dark:text-gray-400;
+    @apply text-gray-500 dark:text-gray-500;
   }
 
   /* 統計文字 */
   .stats-text {
-    @apply text-gray-600 dark:text-gray-400;
+    @apply text-gray-700 dark:text-gray-300;
   }
 
   /* 標題文字 */
   .title-text {
-    @apply text-gray-800 dark:text-gray-200;
+    @apply text-gray-900 dark:text-gray-100;
   }
 
   /* 副標題文字 */
@@ -188,32 +185,32 @@
   }
 
   .error-text-hover {
-    @apply text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300;
+    @apply hover:text-red-700 dark:hover:text-red-300;
   }
 
-  /* 錯誤訊息容器 */
+  /* 錯誤容器 */
   .error-container {
-    @apply bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-200;
+    @apply bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800;
   }
 
-  /* 成功訊息容器 */
+  /* 成功容器 */
   .success-container {
-    @apply bg-green-100 dark:bg-green-900/20 border border-green-400 dark:border-green-800 text-green-700 dark:text-green-200;
+    @apply bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800;
   }
 
-  /* 警告訊息容器 */
+  /* 警告容器 */
   .warning-container {
-    @apply bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-400 dark:border-yellow-800 text-yellow-700 dark:text-yellow-200;
+    @apply bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800;
   }
 
-  /* 資訊訊息容器 */
+  /* 資訊容器 */
   .info-container {
-    @apply bg-blue-100 dark:bg-blue-900/20 border border-blue-400 dark:border-blue-800 text-blue-700 dark:text-blue-200;
+    @apply bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800;
   }
 
   /* 圖標容器 */
   .icon-container {
-    @apply w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400;
+    @apply text-gray-400 dark:text-gray-500;
   }
 
   /* 標籤文字 */
@@ -223,29 +220,112 @@
 
   /* 小文字 */
   .text-xs-muted {
-    @apply text-xs text-gray-600 dark:text-gray-400;
-  }
-
-  .text-xs-secondary {
     @apply text-xs text-gray-500 dark:text-gray-400;
   }
 
-  /* 描述文字容器 */
+  .text-xs-secondary {
+    @apply text-xs text-gray-600 dark:text-gray-400;
+  }
+
+  /* 描述容器 */
   .description-container {
     @apply text-sm text-gray-600 dark:text-gray-400;
   }
 
   .description-container-secondary {
-    @apply text-sm text-gray-700 dark:text-gray-300;
+    @apply text-sm text-gray-500 dark:text-gray-500;
   }
 
   /* 列表文字 */
   .list-text {
-    @apply text-gray-600 dark:text-gray-400;
+    @apply text-sm text-gray-700 dark:text-gray-300;
   }
 
   /* 段落文字 */
   .paragraph-text {
-    @apply text-sm text-gray-700 dark:text-gray-300 leading-relaxed;
+    @apply text-base text-gray-600 dark:text-gray-400 leading-relaxed;
+  }
+}
+
+/* 自定義滑動條樣式 */
+@layer utilities {
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .slider::-webkit-slider-track {
+    background: #e5e7eb;
+    border-radius: 0.5rem;
+    height: 0.5rem;
+  }
+
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #3b82f6;
+    border-radius: 50%;
+    height: 1.25rem;
+    width: 1.25rem;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .slider::-webkit-slider-thumb:hover {
+    background: #2563eb;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .slider::-moz-range-track {
+    background: #e5e7eb;
+    border-radius: 0.5rem;
+    height: 0.5rem;
+    border: none;
+  }
+
+  .slider::-moz-range-thumb {
+    background: #3b82f6;
+    border-radius: 50%;
+    height: 1.25rem;
+    width: 1.25rem;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .slider::-moz-range-thumb:hover {
+    background: #2563eb;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* 深色模式滑動條 */
+  .dark .slider::-webkit-slider-track {
+    background: #374151;
+  }
+
+  .dark .slider::-webkit-slider-thumb {
+    background: #60a5fa;
+  }
+
+  .dark .slider::-webkit-slider-thumb:hover {
+    background: #3b82f6;
+  }
+
+  .dark .slider::-moz-range-track {
+    background: #374151;
+  }
+
+  .dark .slider::-moz-range-thumb {
+    background: #60a5fa;
+  }
+
+  .dark .slider::-moz-range-thumb:hover {
+    background: #3b82f6;
   }
 }

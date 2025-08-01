@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { Work, WorkCreate, WorkUpdate, WorkList, Tag, Stats } from "@/types";
 import { workStorage, tagStorage, initializeSampleData } from "@/lib/indexedDB";
+import { reminderService } from "@/lib/reminder";
+import { backupService } from "@/lib/backup";
 
 interface WorkStore {
   // 狀態
@@ -41,6 +43,14 @@ interface WorkStore {
 
   // 初始化
   initialize: () => Promise<void>;
+
+  // 提醒相關操作
+  checkReminders: () => Promise<void>;
+  testReminder: (workTitle?: string) => Promise<void>;
+
+  // 備份相關操作
+  createBackup: () => Promise<any>;
+  restoreBackup: (backupData: any) => Promise<void>;
 }
 
 export const useWorkStore = create<WorkStore>((set, get) => ({
@@ -69,6 +79,9 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
       const stats = await workStorage.getStats();
 
       set({ works: updatedWorks, tags, stats });
+
+      // 初始化提醒服務
+      await reminderService.initialize();
     } catch (error) {
       console.error("初始化失敗:", error);
       set({ error: "初始化失敗" });
@@ -289,6 +302,46 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
       const errorMessage =
         error instanceof Error ? error.message : "取得統計數據失敗";
       set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  // 提醒相關操作
+  checkReminders: async () => {
+    try {
+      const { works } = get();
+      await reminderService.checkAllReminders(works);
+    } catch (error) {
+      console.error("檢查提醒失敗:", error);
+    }
+  },
+
+  testReminder: async (workTitle?: string) => {
+    try {
+      await reminderService.testReminder(workTitle);
+    } catch (error) {
+      console.error("測試提醒失敗:", error);
+    }
+  },
+
+  // 備份相關操作
+  createBackup: async () => {
+    try {
+      return await backupService.createBackup();
+    } catch (error) {
+      console.error("建立備份失敗:", error);
+      throw error;
+    }
+  },
+
+  restoreBackup: async (backupData: any) => {
+    try {
+      await backupService.restoreBackup(backupData);
+      // 重新載入資料
+      await get().fetchWorks();
+      await get().fetchTags();
+    } catch (error) {
+      console.error("還原備份失敗:", error);
       throw error;
     }
   },
