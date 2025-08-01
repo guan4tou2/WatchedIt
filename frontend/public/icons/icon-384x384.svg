@@ -1,0 +1,31 @@
+<svg viewBox="0 0 384 384" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="iconBgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="iconIconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f0f0f0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <circle cx="192" cy="192" r="190" fill="url(#iconBgGradient)" stroke="#4c5777" stroke-width="2"/>
+  
+  <!-- Main eye icon representing "watched" -->
+  <g transform="translate(192, 165.12)">
+    <!-- Eye outline -->
+    <ellipse cx="0" cy="0" rx="57.599999999999994" ry="34.56" fill="url(#iconIconGradient)" stroke="#4c5777" stroke-width="1"/>
+    <!-- Pupil -->
+    <circle cx="0" cy="0" r="19.200000000000003" fill="#4c5777"/>
+    <!-- Highlight -->
+    <circle cx="-5.76" cy="-5.76" r="5.76" fill="#ffffff" opacity="0.8"/>
+  </g>
+  
+  <!-- Checkmark indicating completion -->
+  <g transform="translate(192, 238.07999999999998)">
+    <circle cx="0" cy="0" r="23.04" fill="#10b981" stroke="#ffffff" stroke-width="1"/>
+    <path d="M-9.600000000000001,0 L-3.84,7.68 L9.600000000000001,-9.600000000000001" stroke="#ffffff" stroke-width="3.84" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
