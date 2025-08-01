@@ -47,8 +47,14 @@ export default function TestDemoPage() {
       // 清空現有數據
       await dbUtils.clearAll();
 
+      // 重置初始化標記
+      localStorage.removeItem("watchedit_sample_initialized");
+
       // 重新初始化示例數據
       await initializeSampleData();
+
+      // 標記已初始化
+      localStorage.setItem("watchedit_sample_initialized", "true");
 
       // 重新載入數據
       await loadData();

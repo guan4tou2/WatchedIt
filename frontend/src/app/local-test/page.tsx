@@ -83,9 +83,20 @@ export default function LocalTestPage() {
     if (typeof window === "undefined") return;
 
     try {
-      initializeSampleData();
+      // 檢查是否已經初始化過
+      const hasInitialized = localStorage.getItem(
+        "watchedit_sample_initialized"
+      );
+
+      if (!hasInitialized) {
+        initializeSampleData();
+        localStorage.setItem("watchedit_sample_initialized", "true");
+        setMessage("已初始化示例數據");
+      } else {
+        setMessage("示例數據已經初始化過，如需重新初始化請先清除數據");
+      }
+
       loadData();
-      setMessage("已初始化示例數據");
     } catch (error) {
       console.error("初始化數據失敗:", error);
     }
