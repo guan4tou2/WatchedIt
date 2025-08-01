@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import PlatformInfo from "@/components/PlatformInfo";
 import Logo from "@/components/Logo";
 import { pwaService } from "@/lib/pwa";
 import {
@@ -28,6 +27,8 @@ import {
   Database,
   AlertTriangle,
   Menu,
+  Star,
+  Calendar,
 } from "lucide-react";
 import QuickAddEpisode from "@/components/QuickAddEpisode";
 import AniListSearch from "@/components/AniListSearch";
@@ -244,6 +245,40 @@ export default function HomePage() {
     )
   ).sort((a, b) => b - a);
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "進行中":
+        return "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200";
+      case "已完結":
+        return "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200";
+      case "暫停":
+        return "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200";
+      case "放棄":
+        return "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200";
+      default:
+        return "badge-unselected";
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case "動畫":
+        return "bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200";
+      case "電影":
+        return "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200";
+      case "電視劇":
+        return "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200";
+      case "小說":
+        return "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200";
+      case "漫畫":
+        return "bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-200";
+      case "遊戲":
+        return "bg-pink-100 dark:bg-pink-900/20 text-pink-800 dark:text-pink-200";
+      default:
+        return "badge-unselected";
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto p-6">
@@ -255,7 +290,7 @@ export default function HomePage() {
   if (error) {
     return (
       <div className="container mx-auto p-6">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-200 px-4 py-3 rounded">
           錯誤: {error}
         </div>
       </div>
@@ -337,9 +372,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 平台資訊 */}
-      <PlatformInfo />
-
       {/* 統計卡片 */}
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
@@ -393,9 +425,7 @@ export default function HomePage() {
                 <div className="text-2xl font-bold text-blue-500/80 dark:text-blue-400/90">
                   {stats.status_stats["已完結"] || 0}
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  已完結
-                </div>
+                <div className="text-sm status-text-muted">已完結</div>
               </div>
             </CardContent>
           </Card>
@@ -407,7 +437,7 @@ export default function HomePage() {
         {/* 搜尋欄 */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 status-text-muted w-4 h-4" />
             <Input
               placeholder="搜尋作品標題、評論或備註..."
               value={searchTerm}
@@ -441,9 +471,7 @@ export default function HomePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* 類型篩選 */}
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    類型
-                  </label>
+                  <label className="text-sm font-medium form-label">類型</label>
                   <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
@@ -460,9 +488,7 @@ export default function HomePage() {
 
                 {/* 狀態篩選 */}
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    狀態
-                  </label>
+                  <label className="text-sm font-medium form-label">狀態</label>
                   <select
                     value={selectedStatus}
                     onChange={(e) => setSelectedStatus(e.target.value)}
@@ -479,13 +505,13 @@ export default function HomePage() {
 
                 {/* 年份篩選 */}
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium form-label-secondary">
                     年份
                   </label>
                   <select
                     value={selectedYear}
                     onChange={(e) => setSelectedYear(e.target.value)}
-                    className="w-full mt-1 p-2 border rounded-md text-sm"
+                    className="w-full mt-1 p-2 border rounded-md text-sm dark:text-foreground/95 dark:bg-background/95"
                   >
                     <option value="">全部年份</option>
                     {availableYears.map((year) => (
@@ -516,7 +542,7 @@ export default function HomePage() {
 
       {/* 數據遷移提示 */}
       {migrationStatus?.needsMigration && (
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6 flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0">
+        <div className="bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-400 dark:border-yellow-800 text-yellow-700 dark:text-yellow-200 px-4 py-3 rounded mb-6 flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0">
           <div className="flex items-center">
             <AlertTriangle className="w-5 h-5 mr-2 flex-shrink-0" />
             <span className="text-sm">發現舊版數據，建議進行數據遷移。</span>
@@ -542,14 +568,12 @@ export default function HomePage() {
               : "最近作品"}
           </h2>
           {filteredWorks.length > 0 && (
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              共 {filteredWorks.length} 個作品
-            </div>
+            <div className="stats-text">共 {filteredWorks.length} 個作品</div>
           )}
         </div>
 
         {filteredWorks.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-8 empty-state">
             {works.length === 0
               ? "還沒有作品，開始新增你的第一個作品吧！"
               : "沒有找到符合條件的作品"}
@@ -572,116 +596,66 @@ export default function HomePage() {
                       <CardTitle className="text-base sm:text-lg line-clamp-2">
                         {work.title}
                       </CardTitle>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleQuickAddEpisode(
-                              work.id,
-                              work.title,
-                              work.type
-                            );
-                          }}
-                          className="text-xs sm:text-sm"
-                        >
-                          <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                          <span className="hidden sm:inline">新增集數</span>
-                          <span className="sm:hidden">新增</span>
-                        </Button>
-                        <ArrowRight className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" />
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap items-center space-x-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                      <span>{work.type}</span>
-                      <span>•</span>
-                      <span>{work.status}</span>
-                      {work.year && (
-                        <>
-                          <span>•</span>
-                          <span>{work.year}</span>
-                        </>
-                      )}
+                      <Badge className={getTypeColor(work.type)}>
+                        {work.type}
+                      </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    {/* 評分 */}
-                    {work.rating && (
-                      <div className="flex items-center space-x-1 mb-2">
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <span
-                              key={i}
-                              className={`text-sm ${
-                                i < work.rating!
-                                  ? "text-yellow-500 dark:text-yellow-400"
-                                  : "text-gray-300 dark:text-gray-600"
-                              }`}
-                            >
-                              ★
-                            </span>
-                          ))}
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Badge
+                        variant={
+                          work.status === "已完結"
+                            ? "default"
+                            : work.status === "進行中"
+                            ? "secondary"
+                            : "outline"
+                        }
+                        className={getStatusColor(work.status)}
+                      >
+                        {work.status}
+                      </Badge>
+                      {work.rating && (
+                        <div className="flex items-center">
+                          <Star className="w-4 h-4 star-icon mr-1" />
+                          <span className="text-sm">{work.rating}/5</span>
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {work.rating}/5
-                        </span>
-                      </div>
+                      )}
+                    </div>
+
+                    {work.review && (
+                      <p className="text-xs description-text line-clamp-2">
+                        {work.review}
+                      </p>
                     )}
 
-                    {/* 集數進度 */}
-                    {totalEpisodes > 0 && (
-                      <div className="mb-2">
-                        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
-                          <span>集數進度</span>
-                          <span>
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="w-3 h-3" />
+                        <span className="note-text">
+                          {work.year || "未知年份"}
+                        </span>
+                      </div>
+                      {totalEpisodes > 0 && (
+                        <div className="flex items-center space-x-1">
+                          <Play className="w-3 h-3" />
+                          <span className="note-text">
                             {watchedCount}/{totalEpisodes}
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                          <div
-                            className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
-                            style={{
-                              width: `${(watchedCount / totalEpisodes) * 100}%`,
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
-                    {/* 標籤 */}
-                    {work.tags && work.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {work.tags.slice(0, 3).map((tag) => (
-                          <Badge
-                            key={tag.id}
-                            variant="secondary"
-                            className="text-xs"
-                            style={{
-                              backgroundColor: `${tag.color}20`,
-                              color: tag.color,
-                            }}
-                          >
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center space-x-2 text-xs sm:text-sm description-text">
+                        {work.tags?.map((tag) => (
+                          <Badge key={tag.id} className="text-xs">
                             {tag.name}
                           </Badge>
                         ))}
-                        {work.tags.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{work.tags.length - 3}
-                          </Badge>
-                        )}
                       </div>
-                    )}
-
-                    {/* 評論預覽 */}
-                    {work.review && (
-                      <div className="mt-2">
-                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
-                          {work.review}
-                        </p>
-                      </div>
-                    )}
+                      <ArrowRight className="w-4 h-4 note-text hover:text-gray-600 dark:hover:text-gray-300" />
+                    </div>
                   </CardContent>
                 </Card>
               );

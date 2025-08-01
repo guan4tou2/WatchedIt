@@ -208,11 +208,11 @@ export default function EpisodeTestPage() {
                   return (
                     <div key={index} className="border p-3 rounded">
                       <div className="font-medium">{work.title}</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
                         類型: {work.type} | 集數: {watchedCount}/{totalEpisodes}{" "}
                         ({completionRate}%)
                       </div>
-                      <div className="mt-2 text-xs text-gray-500">
+                      <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                         集數類型:{" "}
                         {Object.entries(
                           episodes.reduce((acc: any, ep: any) => {
@@ -227,7 +227,7 @@ export default function EpisodeTestPage() {
                   );
                 })}
                 {testWorks.length === 0 && (
-                  <div className="text-gray-500 text-center py-4">
+                  <div className="text-gray-500 dark:text-gray-400 text-center py-4">
                     還沒有測試作品
                   </div>
                 )}

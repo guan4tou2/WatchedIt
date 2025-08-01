@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import WorkTypeManager from "@/components/WorkTypeManager";
 import CustomEpisodeTypeManager from "@/components/CustomEpisodeTypeManager";
+import PlatformInfo from "@/components/PlatformInfo";
 import { useTheme } from "@/components/ThemeProvider";
 import { useWorkStore } from "@/store/useWorkStore";
 import { cloudStorage, CloudConfig } from "@/lib/cloudStorage";
@@ -939,6 +940,11 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* 平台資訊 */}
+      <div className="mt-6">
+        <PlatformInfo />
       </div>
     </div>
   );

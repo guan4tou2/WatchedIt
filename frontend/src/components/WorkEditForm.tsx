@@ -88,7 +88,7 @@ export default function WorkEditForm({
       {/* 基本資訊 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="text-sm font-medium text-gray-600">標題</label>
+          <label className="form-label">標題</label>
           <Input
             value={formData.title}
             onChange={(e) =>
@@ -100,7 +100,7 @@ export default function WorkEditForm({
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-gray-600">類型</label>
+          <label className="form-label">類型</label>
           <select
             value={formData.type}
             onChange={(e) =>
@@ -109,7 +109,7 @@ export default function WorkEditForm({
                 type: e.target.value as Work["type"],
               })
             }
-            className="w-full mt-1 p-2 border rounded-md"
+            className="w-full mt-1 p-2 border rounded-md form-select"
             required
           >
             <option value="動畫">動畫</option>
@@ -124,7 +124,7 @@ export default function WorkEditForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="text-sm font-medium text-gray-600">狀態</label>
+          <label className="form-label">狀態</label>
           <select
             value={formData.status}
             onChange={(e) =>
@@ -133,7 +133,7 @@ export default function WorkEditForm({
                 status: e.target.value as Work["status"],
               })
             }
-            className="w-full mt-1 p-2 border rounded-md"
+            className="w-full mt-1 p-2 border rounded-md form-select"
             required
           >
             <option value="進行中">進行中</option>
@@ -143,7 +143,7 @@ export default function WorkEditForm({
           </select>
         </div>
         <div>
-          <label className="text-sm font-medium text-gray-600">年份</label>
+          <label className="form-label">年份</label>
           <Input
             type="number"
             value={formData.year}
@@ -165,7 +165,7 @@ export default function WorkEditForm({
 
       {/* 評分 */}
       <div>
-        <label className="text-sm font-medium text-gray-600">評分</label>
+        <label className="form-label">評分</label>
         <div className="flex items-center space-x-2 mt-2">
           {[1, 2, 3, 4, 5].map((rating) => (
             <button
@@ -173,15 +173,15 @@ export default function WorkEditForm({
               type="button"
               onClick={() => handleRatingClick(rating)}
               className={`p-2 rounded-md transition-colors ${
-                parseInt(String(formData.rating || "0")) >= rating
-                  ? "text-yellow-500 bg-yellow-50"
-                  : "text-gray-400 hover:text-yellow-400"
+                parseInt(formData.rating || "0") >= rating
+                  ? "star-icon bg-yellow-50 dark:bg-yellow-900/20"
+                  : "star-icon-unselected"
               }`}
             >
               <Star
                 className="w-5 h-5"
                 fill={
-                  parseInt(String(formData.rating || "0")) >= rating
+                  parseInt(formData.rating || "0") >= rating
                     ? "currentColor"
                     : "none"
                 }
@@ -189,7 +189,7 @@ export default function WorkEditForm({
             </button>
           ))}
           {formData.rating && (
-            <span className="text-sm text-gray-600 ml-2">
+            <span className="text-sm description-text ml-2">
               {formData.rating}/5
             </span>
           )}
@@ -198,35 +198,35 @@ export default function WorkEditForm({
 
       {/* 評論 */}
       <div>
-        <label className="text-sm font-medium text-gray-600">評論</label>
-        <Textarea
+        <label className="form-label">評論</label>
+        <textarea
           value={formData.review}
           onChange={(e) => setFormData({ ...formData, review: e.target.value })}
           placeholder="分享您的觀後感..."
           rows={3}
-          className="mt-1"
+          className="w-full mt-1 p-2 border rounded-md resize-none form-input"
         />
       </div>
 
       {/* 備註 */}
       <div>
-        <label className="text-sm font-medium text-gray-600">備註</label>
-        <Textarea
+        <label className="form-label">備註</label>
+        <textarea
           value={formData.note}
           onChange={(e) => setFormData({ ...formData, note: e.target.value })}
           placeholder="其他備註..."
           rows={2}
-          className="mt-1"
+          className="w-full mt-1 p-2 border rounded-md resize-none form-input"
         />
       </div>
 
       {/* 來源 */}
       <div>
-        <label className="text-sm font-medium text-gray-600">來源</label>
+        <label className="form-label">來源</label>
         <Input
           value={formData.source}
           onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-          placeholder="AniList, 手動新增..."
+          placeholder="作品來源"
           className="mt-1"
         />
       </div>

@@ -30,7 +30,7 @@ export default function NewWorkPage() {
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -48,7 +48,7 @@ export default function NewWorkPage() {
         episodes: [],
       };
 
-      const createdWork = createWork(newWork);
+      const createdWork = await createWork(newWork);
 
       // 導航到新創建的作品詳情頁面
       router.push(`/works/${createdWork.id}`);
@@ -69,34 +69,34 @@ export default function NewWorkPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "進行中":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200";
       case "已完結":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200";
       case "暫停":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200";
       case "放棄":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "badge-unselected";
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
       case "動畫":
-        return "bg-purple-100 text-purple-800";
+        return "bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200";
       case "電影":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200";
       case "電視劇":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200";
       case "小說":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200";
       case "漫畫":
-        return "bg-orange-100 text-orange-800";
+        return "bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-200";
       case "遊戲":
-        return "bg-pink-100 text-pink-800";
+        return "bg-pink-100 dark:bg-pink-900/20 text-pink-800 dark:text-pink-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "badge-unselected";
     }
   };
 
@@ -140,7 +140,7 @@ export default function NewWorkPage() {
                 {/* 基本資訊 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium form-label-secondary">
                       標題 *
                     </label>
                     <Input
@@ -154,7 +154,7 @@ export default function NewWorkPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium form-label-secondary">
                       類型 *
                     </label>
                     <select
@@ -165,7 +165,7 @@ export default function NewWorkPage() {
                           type: e.target.value as Work["type"],
                         })
                       }
-                      className="w-full mt-1 p-2 border rounded-md"
+                      className="w-full mt-1 p-2 border rounded-md dark:text-foreground/95 dark:bg-background/95"
                       required
                     >
                       <option value="動畫">動畫</option>
@@ -180,7 +180,7 @@ export default function NewWorkPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium form-label-secondary">
                       狀態 *
                     </label>
                     <select
@@ -191,7 +191,7 @@ export default function NewWorkPage() {
                           status: e.target.value as Work["status"],
                         })
                       }
-                      className="w-full mt-1 p-2 border rounded-md"
+                      className="w-full mt-1 p-2 border rounded-md dark:text-foreground/95 dark:bg-background/95"
                       required
                     >
                       <option value="進行中">進行中</option>
@@ -201,7 +201,7 @@ export default function NewWorkPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium form-label-secondary">
                       年份
                     </label>
                     <Input
@@ -227,7 +227,7 @@ export default function NewWorkPage() {
 
                 {/* 評分 */}
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     評分
                   </label>
                   <div className="flex items-center space-x-2 mt-2">
@@ -238,8 +238,8 @@ export default function NewWorkPage() {
                         onClick={() => handleRatingClick(rating)}
                         className={`p-2 rounded-md transition-colors ${
                           parseInt(formData.rating || "0") >= rating
-                            ? "text-yellow-500 bg-yellow-50"
-                            : "text-gray-400 hover:text-yellow-400"
+                            ? "text-yellow-500 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
+                            : "star-icon-unselected"
                         }`}
                       >
                         <Star
@@ -253,7 +253,7 @@ export default function NewWorkPage() {
                       </button>
                     ))}
                     {formData.rating && (
-                      <span className="text-sm text-gray-600 ml-2">
+                      <span className="text-sm status-text ml-2">
                         {formData.rating}/5
                       </span>
                     )}
@@ -262,7 +262,7 @@ export default function NewWorkPage() {
 
                 {/* 評論 */}
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium form-label-secondary">
                     評論
                   </label>
                   <Textarea
@@ -278,7 +278,7 @@ export default function NewWorkPage() {
 
                 {/* 備註 */}
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium form-label-secondary">
                     備註
                   </label>
                   <Textarea
@@ -294,7 +294,7 @@ export default function NewWorkPage() {
 
                 {/* 來源 */}
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium form-label-secondary">
                     來源
                   </label>
                   <Input
@@ -350,27 +350,17 @@ export default function NewWorkPage() {
               )}
 
               {formData.year && (
-                <div className="text-sm text-gray-600">
-                  年份: {formData.year}
-                </div>
+                <div className="text-sm status-text">年份: {formData.year}</div>
               )}
 
               {selectedTags.length > 0 && (
                 <div>
-                  <div className="text-sm font-medium text-gray-600 mb-1">
+                  <div className="text-sm font-medium form-label-secondary mb-1">
                     標籤:
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {selectedTags.map((tag) => (
-                      <Badge
-                        key={tag.id}
-                        style={{
-                          backgroundColor: tag.color + "20",
-                          color: tag.color,
-                        }}
-                      >
-                        {tag.name}
-                      </Badge>
+                      <Badge key={tag.id}>{tag.name}</Badge>
                     ))}
                   </div>
                 </div>
@@ -385,7 +375,7 @@ export default function NewWorkPage() {
 
               {formData.review && (
                 <div>
-                  <div className="text-sm font-medium text-gray-600 mb-1">
+                  <div className="text-sm font-medium form-label-secondary mb-1">
                     評論:
                   </div>
                   <div className="text-sm text-gray-800 bg-gray-50 p-2 rounded">
@@ -396,7 +386,7 @@ export default function NewWorkPage() {
 
               {formData.note && (
                 <div>
-                  <div className="text-sm font-medium text-gray-600 mb-1">
+                  <div className="text-sm font-medium form-label-secondary mb-1">
                     備註:
                   </div>
                   <div className="text-sm text-gray-800 bg-gray-50 p-2 rounded">
@@ -406,13 +396,13 @@ export default function NewWorkPage() {
               )}
 
               {formData.source && (
-                <div className="text-sm text-gray-600">
+                <div className="text-sm status-text">
                   來源: {formData.source}
                 </div>
               )}
 
               {!formData.title && (
-                <div className="text-center text-gray-500 py-8">
+                <div className="text-center empty-state py-8">
                   填寫資訊後將在此顯示預覽
                 </div>
               )}
@@ -424,7 +414,7 @@ export default function NewWorkPage() {
             <CardHeader>
               <CardTitle className="text-sm">提示</CardTitle>
             </CardHeader>
-            <CardContent className="text-xs text-gray-600 space-y-2">
+            <CardContent className="text-xs note-text space-y-2">
               <div>• 標題和類型為必填項目</div>
               <div>• 可以為作品添加多個標籤</div>
               <div>• 創建後可以立即添加集數</div>

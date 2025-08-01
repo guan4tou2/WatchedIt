@@ -29,7 +29,9 @@ export default function CustomEpisodeTypeManager({
   onTypesChange,
 }: CustomEpisodeTypeManagerProps) {
   const [episodeTypes, setEpisodeTypes] = useState<CustomEpisodeType[]>([]);
-  const [editingType, setEditingType] = useState<CustomEpisodeType | null>(null);
+  const [editingType, setEditingType] = useState<CustomEpisodeType | null>(
+    null
+  );
   const [isAdding, setIsAdding] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -96,7 +98,12 @@ export default function CustomEpisodeTypeManager({
       }
 
       // 檢查名稱重複
-      if (customEpisodeTypeStorage.isNameDuplicate(editingType.name, editingType.id)) {
+      if (
+        customEpisodeTypeStorage.isNameDuplicate(
+          editingType.name,
+          editingType.id
+        )
+      ) {
         showMessage("error", "類型名稱已存在");
         return;
       }
@@ -154,7 +161,10 @@ export default function CustomEpisodeTypeManager({
         loadEpisodeTypes();
       } catch (error) {
         console.error("刪除集數類型失敗:", error);
-        showMessage("error", error instanceof Error ? error.message : "刪除失敗");
+        showMessage(
+          "error",
+          error instanceof Error ? error.message : "刪除失敗"
+        );
       }
     }
   };
@@ -194,8 +204,8 @@ export default function CustomEpisodeTypeManager({
         <div
           className={`p-3 rounded-md flex items-center gap-2 ${
             message.type === "success"
-              ? "bg-green-100 text-green-800 border border-green-200"
-              : "bg-red-100 text-red-800 border border-red-200"
+              ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800"
+              : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
           }`}
         >
           {message.type === "success" ? (
@@ -229,7 +239,9 @@ export default function CustomEpisodeTypeManager({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-sm font-medium">類型名稱 *</Label>
-                <p className="text-xs text-gray-600">用於系統識別的英文名稱</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  用於系統識別的英文名稱
+                </p>
                 <Input
                   value={editingType.name}
                   onChange={(e) =>
@@ -241,7 +253,9 @@ export default function CustomEpisodeTypeManager({
               </div>
               <div>
                 <Label className="text-sm font-medium">顯示標籤 *</Label>
-                <p className="text-xs text-gray-600">顯示給用戶看的中文名稱</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  顯示給用戶看的中文名稱
+                </p>
                 <Input
                   value={editingType.label}
                   onChange={(e) =>
@@ -276,7 +290,9 @@ export default function CustomEpisodeTypeManager({
                     }
                     className="w-10 h-10 rounded border"
                   />
-                  <span className="text-sm text-gray-600">{editingType.color}</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {editingType.color}
+                  </span>
                 </div>
               </div>
             </div>
@@ -284,7 +300,9 @@ export default function CustomEpisodeTypeManager({
             <div className="flex items-center justify-between">
               <div>
                 <Label className="text-sm font-medium">啟用</Label>
-                <p className="text-xs text-gray-600">是否啟用此類型</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  是否啟用此類型
+                </p>
               </div>
               <Switch
                 checked={editingType.isEnabled}
@@ -317,7 +335,11 @@ export default function CustomEpisodeTypeManager({
                 <Plus className="w-4 h-4 mr-2" />
                 新增類型
               </Button>
-              <Button onClick={handleResetToDefault} variant="outline" size="sm">
+              <Button
+                onClick={handleResetToDefault}
+                variant="outline"
+                size="sm"
+              >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 重置預設
               </Button>
@@ -332,15 +354,14 @@ export default function CustomEpisodeTypeManager({
                 className="flex items-center justify-between p-3 border rounded-lg"
               >
                 <div className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-white"
-                    style={{ backgroundColor: type.color }}
-                  >
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white">
                     {type.icon}
                   </div>
                   <div>
                     <div className="font-medium">{type.label}</div>
-                    <div className="text-sm text-gray-500">{type.name}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      {type.name}
+                    </div>
                   </div>
                   {type.isDefault && (
                     <Badge variant="secondary" className="text-xs">
@@ -378,4 +399,4 @@ export default function CustomEpisodeTypeManager({
       </Card>
     </div>
   );
-} 
+}

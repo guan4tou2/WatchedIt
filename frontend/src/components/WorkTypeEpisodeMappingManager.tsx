@@ -206,8 +206,8 @@ export default function WorkTypeEpisodeMappingManager({
         <div
           className={`p-3 rounded-md flex items-center ${
             message.type === "success"
-              ? "bg-green-100 text-green-800 border border-green-200"
-              : "bg-red-100 text-red-800 border border-red-200"
+              ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800"
+              : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
           }`}
         >
           {message.type === "success" ? (
@@ -328,7 +328,7 @@ export default function WorkTypeEpisodeMappingManager({
                 className="flex items-center justify-between p-3 border rounded-lg"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
                     <Settings className="w-4 h-4" />
                   </div>
                   <div>

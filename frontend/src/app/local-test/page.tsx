@@ -183,15 +183,7 @@ export default function LocalTestPage() {
           <div className="space-y-2">
             {tags.map((tag) => (
               <div key={tag.id} className="bg-white border p-3 rounded">
-                <span
-                  className="px-2 py-1 text-sm rounded"
-                  style={{
-                    backgroundColor: tag.color + "20",
-                    color: tag.color,
-                  }}
-                >
-                  {tag.name}
-                </span>
+                <span className="px-2 py-1 text-sm rounded">{tag.name}</span>
               </div>
             ))}
           </div>

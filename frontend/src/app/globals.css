@@ -57,3 +57,128 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  /* 文字顏色層次結構 */
+  .text-primary-title {
+    @apply text-gray-800 dark:text-gray-200;
+  }
+
+  .text-secondary-title {
+    @apply text-gray-700 dark:text-gray-300;
+  }
+
+  .text-body {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  .text-muted {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+
+  /* 表單標籤 */
+  .form-label {
+    @apply text-sm font-medium text-gray-600 dark:text-gray-400;
+  }
+
+  .form-label-secondary {
+    @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+  }
+
+  /* 表單元素 */
+  .form-input {
+    @apply dark:text-foreground/95 dark:bg-background/95;
+  }
+
+  .form-select {
+    @apply dark:text-foreground/95 dark:bg-background/95;
+  }
+
+  /* 狀態文字 */
+  .status-text {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  .status-text-muted {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+
+  /* 錯誤訊息 */
+  .error-message {
+    @apply dark:bg-red-900/20 dark:border-red-800 dark:text-red-200;
+  }
+
+  /* 成功訊息 */
+  .success-message {
+    @apply dark:bg-green-900/20 dark:border-green-800 dark:text-green-200;
+  }
+
+  /* 警告訊息 */
+  .warning-message {
+    @apply dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200;
+  }
+
+  /* 資訊訊息 */
+  .info-message {
+    @apply dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200;
+  }
+
+  /* 星星圖標 */
+  .star-icon {
+    @apply text-yellow-500 dark:text-yellow-400;
+  }
+
+  .star-icon-unselected {
+    @apply text-gray-400 dark:text-gray-500 hover:text-yellow-400 dark:hover:text-yellow-300;
+  }
+
+  /* 徽章未選中狀態 */
+  .badge-unselected {
+    @apply bg-gray-100 dark:bg-gray-900/20 text-gray-600 dark:text-gray-400;
+  }
+
+  /* 選中狀態背景 */
+  .selected-bg {
+    @apply dark:bg-blue-900/20;
+  }
+
+  /* 下拉選單背景 */
+  .dropdown-bg {
+    @apply dark:bg-gray-800;
+  }
+
+  /* 懸停效果 */
+  .hover-bg {
+    @apply dark:hover:bg-gray-700;
+  }
+
+  /* 空狀態文字 */
+  .empty-state {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+
+  /* 描述文字 */
+  .description-text {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  /* 備註文字 */
+  .note-text {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+
+  /* 統計文字 */
+  .stats-text {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  /* 標題文字 */
+  .title-text {
+    @apply text-gray-800 dark:text-gray-200;
+  }
+
+  /* 副標題文字 */
+  .subtitle-text {
+    @apply text-gray-700 dark:text-gray-300;
+  }
+}

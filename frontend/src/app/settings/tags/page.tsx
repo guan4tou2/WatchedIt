@@ -40,21 +40,29 @@ export default function TagsPage() {
             <CardHeader>
               <CardTitle>使用說明</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm text-gray-600">
+            <CardContent className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
               <div>
-                <h4 className="font-medium text-gray-800 mb-1">新增標籤</h4>
+                <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-1">
+                  新增標籤
+                </h4>
                 <p>點擊「新增標籤」按鈕，輸入標籤名稱並選擇顏色。</p>
               </div>
               <div>
-                <h4 className="font-medium text-gray-800 mb-1">編輯標籤</h4>
+                <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-1">
+                  編輯標籤
+                </h4>
                 <p>點擊標籤旁的編輯圖示，可以修改標籤名稱和顏色。</p>
               </div>
               <div>
-                <h4 className="font-medium text-gray-800 mb-1">刪除標籤</h4>
+                <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-1">
+                  刪除標籤
+                </h4>
                 <p>點擊標籤旁的刪除圖示，確認後即可刪除標籤。</p>
               </div>
               <div>
-                <h4 className="font-medium text-gray-800 mb-1">標籤使用</h4>
+                <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-1">
+                  標籤使用
+                </h4>
                 <p>在新增或編輯作品時，可以為作品添加多個標籤。</p>
               </div>
             </CardContent>
@@ -64,7 +72,7 @@ export default function TagsPage() {
             <CardHeader>
               <CardTitle>標籤統計</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <div className="flex justify-between">
                 <span>總標籤數:</span>
                 <span className="font-medium">{tags.length}</span>
@@ -82,7 +90,7 @@ export default function TagsPage() {
             <CardHeader>
               <CardTitle>注意事項</CardTitle>
             </CardHeader>
-            <CardContent className="text-xs text-gray-600 space-y-2">
+            <CardContent className="text-xs text-gray-600 dark:text-gray-400 space-y-2">
               <div>• 標籤名稱不能重複</div>
               <div>• 刪除標籤會從所有作品中移除</div>
               <div>• 標籤顏色可以自定義</div>

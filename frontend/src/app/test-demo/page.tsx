@@ -86,7 +86,7 @@ export default function TestDemoPage() {
       <h1 className="text-3xl font-bold mb-6">Demo 作品測試</h1>
 
       {message && (
-        <div className="mb-4 p-4 bg-blue-100 text-blue-800 rounded-md">
+        <div className="mb-4 p-4 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 rounded-md">
           {message}
         </div>
       )}
@@ -131,15 +131,7 @@ export default function TestDemoPage() {
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
-                <Badge
-                  key={tag.id}
-                  style={{
-                    backgroundColor: `${tag.color}20`,
-                    color: tag.color,
-                  }}
-                >
-                  {tag.name}
-                </Badge>
+                <Badge key={tag.id}>{tag.name}</Badge>
               ))}
             </div>
           </CardContent>
@@ -161,7 +153,7 @@ export default function TestDemoPage() {
         <h2 className="text-2xl font-semibold">Demo 作品列表</h2>
 
         {works.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             {isLoading ? "載入中..." : "沒有作品"}
           </div>
         ) : (
@@ -182,7 +174,7 @@ export default function TestDemoPage() {
                         <CardTitle className="text-lg mb-2">
                           {work.title}
                         </CardTitle>
-                        <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
+                        <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
                           <Badge variant="outline">{work.type}</Badge>
                           <Badge variant="outline">{work.status}</Badge>
                           {work.year && (
@@ -195,7 +187,7 @@ export default function TestDemoPage() {
                       </div>
                       {work.rating && (
                         <div className="flex items-center">
-                          <Star className="w-4 h-4 text-yellow-500 mr-1" />
+                          <Star className="w-4 h-4 text-yellow-500 dark:text-yellow-400 mr-1" />
                           <span className="text-sm">{work.rating}/5</span>
                         </div>
                       )}
@@ -205,26 +197,21 @@ export default function TestDemoPage() {
                     {/* 集數進度 */}
                     {totalEpisodes > 0 && (
                       <div className="mb-3">
-                        <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
                           <span>進度</span>
                           <span>
                             {watchedCount}/{totalEpisodes}
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                            style={{
-                              width: `${(watchedCount / totalEpisodes) * 100}%`,
-                            }}
-                          ></div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"></div>
                         </div>
                       </div>
                     )}
 
                     {/* 評論 */}
                     {work.review && (
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                         {work.review}
                       </p>
                     )}
@@ -237,10 +224,6 @@ export default function TestDemoPage() {
                             key={tag.id}
                             variant="secondary"
                             className="text-xs"
-                            style={{
-                              backgroundColor: `${tag.color}20`,
-                              color: tag.color,
-                            }}
                           >
                             {tag.name}
                           </Badge>
@@ -255,7 +238,7 @@ export default function TestDemoPage() {
 
                     {/* 來源 */}
                     {work.source && (
-                      <div className="mt-2 text-xs text-gray-500">
+                      <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                         來源: {work.source}
                       </div>
                     )}

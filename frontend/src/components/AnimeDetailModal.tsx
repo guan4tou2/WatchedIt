@@ -201,18 +201,20 @@ ${
                   )}
                 </h1>
                 {anime.title.romaji && (
-                  <p className="text-lg text-gray-600 mb-1">
+                  <p className="text-lg description-text mb-1">
                     {anime.title.romaji}
                   </p>
                 )}
                 {anime.title.english &&
                   anime.title.english !== anime.title.romaji && (
-                    <p className="text-lg text-gray-600 mb-1">
+                    <p className="text-lg description-text mb-1">
                       {anime.title.english}
                     </p>
                   )}
                 {anime.title.native && (
-                  <p className="text-lg text-gray-600">{anime.title.native}</p>
+                  <p className="text-lg description-text">
+                    {anime.title.native}
+                  </p>
                 )}
               </div>
 
@@ -247,11 +249,11 @@ ${
               {/* 評分 */}
               {anime.averageScore && (
                 <div className="flex items-center">
-                  <Star className="w-5 h-5 text-yellow-500 mr-2" />
+                  <Star className="w-5 h-5 star-icon mr-2" />
                   <span className="text-lg font-semibold">
                     {(anime.averageScore / 10).toFixed(1)}/10
                   </span>
-                  <span className="text-sm text-gray-500 ml-2">
+                  <span className="text-sm note-text ml-2">
                     ({anime.averageScore} 分)
                   </span>
                 </div>
@@ -266,12 +268,12 @@ ${
                   </h3>
                   <div className="space-y-1 text-sm">
                     <div>
-                      <span className="text-gray-600">開始：</span>
+                      <span className="description-text">開始：</span>
                       {formatDate(anime.startDate)}
                     </div>
                     {anime.endDate && (
                       <div>
-                        <span className="text-gray-600">結束：</span>
+                        <span className="description-text">結束：</span>
                         {formatDate(anime.endDate)}
                       </div>
                     )}
@@ -308,7 +310,7 @@ ${
                     簡介
                   </h3>
                   <div
-                    className="text-sm text-gray-700 leading-relaxed"
+                    className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
                     dangerouslySetInnerHTML={{
                       __html: anime.description.replace(/\n/g, "<br>"),
                     }}
@@ -347,15 +349,15 @@ ${
         </CardContent>
 
         {/* 底部操作按鈕 */}
-        <div className="border-t p-4 bg-gray-50">
+        <div className="border-t p-4 bg-gray-50 dark:bg-gray-800">
           {duplicateMessage && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-200 rounded">
               {duplicateMessage}
             </div>
           )}
 
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
               <p>
                 將新增作品：{" "}
                 <span className="font-medium">
@@ -366,7 +368,7 @@ ${
                 </span>
               </p>
               {anime.episodes && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   自動創建 {anime.episodes} 集
                 </p>
               )}

@@ -80,8 +80,8 @@ export default function CloudSyncStatus() {
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Clock className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-600">
+            <Clock className="w-4 h-4 note-text" />
+            <span className="text-sm description-text">
               最後同步:{" "}
               {lastSync
                 ? new Date(lastSync).toLocaleString("zh-TW")

@@ -44,26 +44,26 @@ export default function TestPage() {
       <button
         onClick={testAPI}
         disabled={loading}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4 disabled:opacity-50"
+        className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded mb-4 disabled:opacity-50"
       >
         {loading ? "測試中..." : "重新測試 API"}
       </button>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-200 px-4 py-3 rounded mb-4">
           <strong>錯誤:</strong> {error}
         </div>
       )}
 
       {stats && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        <div className="bg-green-100 dark:bg-green-900/20 border border-green-400 dark:border-green-800 text-green-700 dark:text-green-200 px-4 py-3 rounded mb-4">
           <strong>統計 API 成功:</strong>
           <pre className="mt-2 text-sm">{JSON.stringify(stats, null, 2)}</pre>
         </div>
       )}
 
       {works && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        <div className="bg-green-100 dark:bg-green-900/20 border border-green-400 dark:border-green-800 text-green-700 dark:text-green-200 px-4 py-3 rounded mb-4">
           <strong>作品 API 成功:</strong>
           <pre className="mt-2 text-sm">{JSON.stringify(works, null, 2)}</pre>
         </div>

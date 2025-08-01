@@ -96,9 +96,7 @@ export default function TagManager({
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">標籤管理</CardTitle>
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">
-              已建立: {tags.length} 個標籤
-            </span>
+            <span className="stats-text">已建立: {tags.length} 個標籤</span>
             {!disabled && (
               <Button size="sm" onClick={() => setIsAdding(true)}>
                 <Plus className="w-4 h-4 mr-1" />
@@ -111,11 +109,11 @@ export default function TagManager({
       <CardContent className="space-y-4">
         {/* 新增標籤表單 */}
         {isAdding && (
-          <Card className="border-2 border-dashed border-blue-200">
+          <Card className="border-2 border-dashed border-blue-200 dark:border-blue-800">
             <CardContent className="pt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">標籤名稱</label>
+                  <label className="form-label-secondary">標籤名稱</label>
                   <Input
                     value={newTag.name}
                     onChange={(e) =>
@@ -126,18 +124,15 @@ export default function TagManager({
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">顏色</label>
+                  <label className="form-label-secondary">顏色</label>
                   <div className="flex items-center space-x-2 mt-1">
-                    <div
-                      className="w-8 h-8 rounded border"
-                      style={{ backgroundColor: newTag.color }}
-                    />
+                    <div className="w-8 h-8 rounded border" />
                     <select
                       value={newTag.color}
                       onChange={(e) =>
                         setNewTag({ ...newTag, color: e.target.value })
                       }
-                      className="flex-1 p-2 border rounded-md"
+                      className="flex-1 p-2 border rounded-md form-select"
                     >
                       {colorOptions.map((color) => (
                         <option key={color} value={color}>
@@ -171,7 +166,7 @@ export default function TagManager({
         {/* 標籤列表 */}
         <div className="space-y-2">
           {tags.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 empty-state">
               還沒有標籤，點擊「新增標籤」開始添加
             </div>
           ) : (
@@ -181,18 +176,8 @@ export default function TagManager({
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Badge
-                          style={{
-                            backgroundColor: tag.color + "20",
-                            color: tag.color,
-                          }}
-                        >
-                          {tag.name}
-                        </Badge>
-                        <div
-                          className="w-4 h-4 rounded border"
-                          style={{ backgroundColor: tag.color }}
-                        />
+                        <Badge>{tag.name}</Badge>
+                        <div className="w-4 h-4 rounded border" />
                       </div>
                       <div className="flex items-center space-x-1">
                         {!disabled && (
@@ -208,7 +193,7 @@ export default function TagManager({
                               size="sm"
                               variant="ghost"
                               onClick={() => handleDeleteTag(tag.id)}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>
@@ -221,11 +206,11 @@ export default function TagManager({
 
                 {/* 編輯標籤表單 */}
                 {editingTag && editingTag.id === tag.id && (
-                  <Card className="mt-2 border-2 border-dashed border-blue-200">
+                  <Card className="mt-2 border-2 border-dashed border-blue-200 dark:border-blue-800">
                     <CardContent className="pt-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-sm font-medium">
+                          <label className="form-label-secondary">
                             標籤名稱
                           </label>
                           <Input
@@ -241,12 +226,9 @@ export default function TagManager({
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-medium">顏色</label>
+                          <label className="form-label-secondary">顏色</label>
                           <div className="flex items-center space-x-2 mt-1">
-                            <div
-                              className="w-8 h-8 rounded border"
-                              style={{ backgroundColor: editingTag.color }}
-                            />
+                            <div className="w-8 h-8 rounded border" />
                             <select
                               value={editingTag.color}
                               onChange={(e) =>
@@ -255,7 +237,7 @@ export default function TagManager({
                                   color: e.target.value,
                                 })
                               }
-                              className="flex-1 p-2 border rounded-md"
+                              className="flex-1 p-2 border rounded-md form-select"
                             >
                               {colorOptions.map((color) => (
                                 <option key={color} value={color}>

@@ -136,7 +136,7 @@ export default function TestIndexedDBPage() {
       <h1 className="text-3xl font-bold mb-6">IndexedDB 測試</h1>
 
       {message && (
-        <div className="mb-4 p-4 bg-blue-100 text-blue-800 rounded-md">
+        <div className="mb-4 p-4 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 rounded-md">
           {message}
         </div>
       )}
@@ -201,12 +201,14 @@ export default function TestIndexedDBPage() {
               {works.map((work) => (
                 <div key={work.id} className="p-2 border rounded">
                   <p className="font-medium">{work.title}</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     {work.type} • {work.status} • {work.year}
                   </p>
                 </div>
               ))}
-              {works.length === 0 && <p className="text-gray-500">沒有作品</p>}
+              {works.length === 0 && (
+                <p className="text-gray-500 dark:text-gray-400">沒有作品</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -221,10 +223,14 @@ export default function TestIndexedDBPage() {
               {tags.map((tag) => (
                 <div key={tag.id} className="p-2 border rounded">
                   <p className="font-medium">{tag.name}</p>
-                  <p className="text-sm text-gray-600">顏色: {tag.color}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    顏色: {tag.color}
+                  </p>
                 </div>
               ))}
-              {tags.length === 0 && <p className="text-gray-500">沒有標籤</p>}
+              {tags.length === 0 && (
+                <p className="text-gray-500 dark:text-gray-400">沒有標籤</p>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -326,8 +326,8 @@ export default function WorkTypeManager({
         <div
           className={`p-3 rounded-md flex items-center gap-2 ${
             message.type === "success"
-              ? "bg-green-100 text-green-800 border border-green-200"
-              : "bg-red-100 text-red-800 border border-red-200"
+              ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800"
+              : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
           }`}
         >
           {message.type === "success" ? (
@@ -409,7 +409,7 @@ export default function WorkTypeManager({
                     }
                     className="w-10 h-10 rounded border"
                   />
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
                     {editingType.color}
                   </span>
                 </div>
@@ -419,7 +419,9 @@ export default function WorkTypeManager({
             <div className="flex items-center justify-between">
               <div>
                 <Label className="text-sm font-medium">啟用</Label>
-                <p className="text-xs text-gray-600">是否啟用此類型</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  是否啟用此類型
+                </p>
               </div>
               <Switch
                 checked={editingType.isEnabled}
@@ -434,7 +436,7 @@ export default function WorkTypeManager({
               <div className="space-y-4 border-t pt-4">
                 <div>
                   <Label className="text-sm font-medium">集數類型設定</Label>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     設定此作品類型可用的集數類型
                   </p>
                 </div>
@@ -473,10 +475,7 @@ export default function WorkTypeManager({
                           }}
                         />
                         <div className="flex items-center gap-2">
-                          <div
-                            className="w-4 h-4 rounded-full flex items-center justify-center text-white text-xs"
-                            style={{ backgroundColor: type.color }}
-                          >
+                          <div className="w-4 h-4 rounded-full flex items-center justify-center text-white text-xs">
                             {type.icon}
                           </div>
                           <Label className="text-sm">{type.label}</Label>
@@ -496,7 +495,7 @@ export default function WorkTypeManager({
                         defaultEpisodeType: e.target.value,
                       })
                     }
-                    className="w-full mt-1 p-2 border rounded-md"
+                    className="w-full mt-1 p-2 border rounded-md dark:text-foreground/95 dark:bg-background/95"
                     required
                   >
                     {editingEpisodeMapping.episodeTypes.map((type) => {
@@ -556,16 +555,13 @@ export default function WorkTypeManager({
                 className="flex items-center justify-between p-3 border rounded-lg"
               >
                 <div className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-white"
-                    style={{ backgroundColor: type.color }}
-                  >
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white">
                     {type.icon}
                   </div>
                   <div>
                     <div className="font-medium">{type.name}</div>
                     {type.description && (
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
                         {type.description}
                       </div>
                     )}
@@ -593,7 +589,7 @@ export default function WorkTypeManager({
                       onClick={() => handleDeleteType(type)}
                       variant="outline"
                       size="sm"
-                      className="text-red-600 hover:text-red-700"
+                      className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

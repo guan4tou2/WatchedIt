@@ -103,17 +103,17 @@ export default function QuickAddEpisode({
     // 預設顏色
     switch (type) {
       case "episode":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200";
       case "special":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200";
       case "ova":
-        return "bg-purple-100 text-purple-800";
+        return "bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200";
       case "movie":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200";
       case "chapter":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 dark:bg-gray-900/20 text-gray-800 dark:text-gray-200";
     }
   };
 
@@ -169,29 +169,20 @@ export default function QuickAddEpisode({
               <X className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-sm text-gray-600">為「{workTitle}」新增集數</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            為「{workTitle}」新增集數
+          </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
+          <div>
+            <p className="text-sm description-text">
+              為「{workTitle}」新增集數
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-gray-600">季數</label>
-              <Input
-                type="number"
-                min="1"
-                value={episodeData.season}
-                onChange={(e) => {
-                  const newSeason = parseInt(e.target.value) || 1;
-                  setEpisodeData({
-                    ...episodeData,
-                    season: newSeason,
-                    number: getNextEpisodeNumber(newSeason),
-                  });
-                }}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600">集數</label>
+              <label className="form-label">開始集數</label>
               <Input
                 type="number"
                 min="1"
@@ -206,9 +197,22 @@ export default function QuickAddEpisode({
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-600">
-                新增數量
-              </label>
+              <label className="form-label">季數</label>
+              <Input
+                type="number"
+                min="1"
+                value={episodeData.season}
+                onChange={(e) =>
+                  setEpisodeData({
+                    ...episodeData,
+                    season: parseInt(e.target.value) || 1,
+                  })
+                }
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="form-label">新增數量</label>
               <Input
                 type="number"
                 min="1"
@@ -225,7 +229,7 @@ export default function QuickAddEpisode({
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-600">標題</label>
+            <label className="form-label">標題</label>
             <Input
               value={episodeData.title}
               onChange={(e) =>
@@ -237,7 +241,7 @@ export default function QuickAddEpisode({
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-600">描述</label>
+            <label className="form-label">描述</label>
             <Input
               value={episodeData.description}
               onChange={(e) =>
@@ -249,7 +253,7 @@ export default function QuickAddEpisode({
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-600">類型</label>
+            <label className="form-label">類型</label>
             <div className="flex flex-wrap gap-2 mt-1">
               {availableEpisodeTypes.map((type) => (
                 <Badge
@@ -257,7 +261,7 @@ export default function QuickAddEpisode({
                   className={`cursor-pointer ${
                     episodeData.type === type
                       ? getEpisodeTypeColor(type)
-                      : "bg-gray-100 text-gray-600"
+                      : "badge-unselected"
                   }`}
                   onClick={() =>
                     setEpisodeData({
@@ -273,7 +277,7 @@ export default function QuickAddEpisode({
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-600">備註</label>
+            <label className="form-label">備註</label>
             <Input
               value={episodeData.note}
               onChange={(e) =>

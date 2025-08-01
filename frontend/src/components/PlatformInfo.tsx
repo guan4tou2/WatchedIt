@@ -24,7 +24,9 @@ export default function PlatformInfo() {
             <span>PWA 模式:</span>
             <span
               className={
-                platformInfo.isPWA ? "text-green-600" : "text-gray-600"
+                platformInfo.isPWA
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-gray-600 dark:text-gray-400"
               }
             >
               {platformInfo.isPWA ? "是" : "否"}
@@ -34,7 +36,9 @@ export default function PlatformInfo() {
             <span>行動裝置:</span>
             <span
               className={
-                platformInfo.isMobile ? "text-green-600" : "text-gray-600"
+                platformInfo.isMobile
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-gray-600 dark:text-gray-400"
               }
             >
               {platformInfo.isMobile ? "是" : "否"}
@@ -44,7 +48,9 @@ export default function PlatformInfo() {
             <span>iOS:</span>
             <span
               className={
-                platformInfo.isIOS ? "text-green-600" : "text-gray-600"
+                platformInfo.isIOS
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-gray-600 dark:text-gray-400"
               }
             >
               {platformInfo.isIOS ? "是" : "否"}
@@ -54,7 +60,9 @@ export default function PlatformInfo() {
             <span>Android:</span>
             <span
               className={
-                platformInfo.isAndroid ? "text-green-600" : "text-gray-600"
+                platformInfo.isAndroid
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-gray-600 dark:text-gray-400"
               }
             >
               {platformInfo.isAndroid ? "是" : "否"}
@@ -64,14 +72,16 @@ export default function PlatformInfo() {
             <span>桌面:</span>
             <span
               className={
-                platformInfo.isDesktop ? "text-green-600" : "text-gray-600"
+                platformInfo.isDesktop
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-gray-600 dark:text-gray-400"
               }
             >
               {platformInfo.isDesktop ? "是" : "否"}
             </span>
           </div>
         </div>
-        <div className="mt-2 text-xs text-gray-500">
+        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
           <div>User Agent:</div>
           <div className="break-all">{platformInfo.userAgent}</div>
         </div>

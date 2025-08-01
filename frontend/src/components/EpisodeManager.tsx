@@ -107,39 +107,63 @@ export default function EpisodeManager({
   const handleAddEpisode = () => {
     if (newEpisode.number < 1) return;
 
-    const episode: Episode = {
-      id: generateEpisodeId(),
-      ...newEpisode,
-      watched: false,
-    };
+    try {
+      const episode: Episode = {
+        id: generateEpisodeId(),
+        ...newEpisode,
+        watched: false,
+      };
 
-    const updatedEpisodes = [...episodes, episode];
-    onEpisodesChange(updatedEpisodes);
+      console.log("新增集數:", episode);
 
-    // 重置表單
-    setNewEpisode({
-      number: newEpisode.number + 1,
-      title: "",
-      description: "",
-      type: defaultEpisodeType,
-      season: newEpisode.season,
-      note: "",
-    });
+      const updatedEpisodes = [...episodes, episode];
+      console.log("更新後的集數列表:", updatedEpisodes);
 
-    setIsAdding(false);
+      onEpisodesChange(updatedEpisodes);
+
+      // 重置表單
+      setNewEpisode({
+        number: newEpisode.number + 1,
+        title: "",
+        description: "",
+        type: defaultEpisodeType,
+        season: newEpisode.season,
+        note: "",
+      });
+
+      setIsAdding(false);
+    } catch (error) {
+      console.error("新增集數失敗:", error);
+    }
   };
 
   const handleUpdateEpisode = (episode: Episode) => {
-    const updatedEpisodes = episodes.map((ep) =>
-      ep.id === episode.id ? episode : ep
-    );
-    onEpisodesChange(updatedEpisodes);
-    setEditingEpisode(null);
+    try {
+      console.log("更新集數:", episode);
+
+      const updatedEpisodes = episodes.map((ep) =>
+        ep.id === episode.id ? episode : ep
+      );
+      console.log("更新後的集數列表:", updatedEpisodes);
+
+      onEpisodesChange(updatedEpisodes);
+      setEditingEpisode(null);
+    } catch (error) {
+      console.error("更新集數失敗:", error);
+    }
   };
 
   const handleDeleteEpisode = (episodeId: string) => {
-    const updatedEpisodes = episodes.filter((ep) => ep.id !== episodeId);
-    onEpisodesChange(updatedEpisodes);
+    try {
+      console.log("刪除集數:", episodeId);
+
+      const updatedEpisodes = episodes.filter((ep) => ep.id !== episodeId);
+      console.log("更新後的集數列表:", updatedEpisodes);
+
+      onEpisodesChange(updatedEpisodes);
+    } catch (error) {
+      console.error("刪除集數失敗:", error);
+    }
   };
 
   const handleToggleWatched = (episodeId: string) => {
@@ -189,7 +213,9 @@ export default function EpisodeManager({
             <CardContent className="pt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium">集數</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    集數
+                  </label>
                   <Input
                     type="number"
                     min="1"
@@ -203,7 +229,9 @@ export default function EpisodeManager({
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">季數</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    季數
+                  </label>
                   <Input
                     type="number"
                     min="1"
@@ -217,9 +245,11 @@ export default function EpisodeManager({
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">類型</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    類型
+                  </label>
                   <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md dark:text-foreground/95 dark:bg-background/95"
                     value={newEpisode.type}
                     onChange={(e) =>
                       setNewEpisode({
@@ -236,7 +266,9 @@ export default function EpisodeManager({
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">標題 (選填)</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    標題 (選填)
+                  </label>
                   <Input
                     value={newEpisode.title}
                     onChange={(e) =>
@@ -249,7 +281,9 @@ export default function EpisodeManager({
                   />
                 </div>
                 <div className="col-span-1 sm:col-span-2">
-                  <label className="text-sm font-medium">描述 (選填)</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    描述 (選填)
+                  </label>
                   <Input
                     value={newEpisode.description}
                     onChange={(e) =>
@@ -262,7 +296,9 @@ export default function EpisodeManager({
                   />
                 </div>
                 <div className="col-span-1 sm:col-span-2">
-                  <label className="text-sm font-medium">備註 (選填)</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    備註 (選填)
+                  </label>
                   <Input
                     value={newEpisode.note}
                     onChange={(e) =>
@@ -295,7 +331,7 @@ export default function EpisodeManager({
         {/* 集數列表 */}
         <div className="space-y-2">
           {episodes.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 empty-state">
               還沒有集數，點擊「新增集數」開始添加
             </div>
           ) : (
@@ -307,11 +343,11 @@ export default function EpisodeManager({
                       <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                         <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
                           <div className="text-center sm:text-left">
-                            <div className="font-semibold text-sm sm:text-base">
+                            <div className="font-semibold text-sm sm:text-base title-text">
                               第{episode.season}季 第{episode.number}集
                             </div>
                             {episode.title && (
-                              <div className="text-xs sm:text-sm text-gray-600">
+                              <div className="text-xs sm:text-sm description-text">
                                 {episode.title}
                               </div>
                             )}
@@ -347,7 +383,7 @@ export default function EpisodeManager({
                               size="sm"
                               variant="ghost"
                               onClick={() => handleDeleteEpisode(episode.id)}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 dark:text-red-400 hover:text-red-700"
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>
@@ -356,12 +392,12 @@ export default function EpisodeManager({
                       </div>
                     </div>
                     {(episode.description || episode.note) && (
-                      <div className="mt-2 text-sm text-gray-600">
+                      <div className="mt-2 text-sm description-text">
                         {episode.description && (
                           <div className="mb-1">{episode.description}</div>
                         )}
                         {episode.note && (
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs note-text">
                             備註: {episode.note}
                           </div>
                         )}
@@ -376,7 +412,7 @@ export default function EpisodeManager({
                     <CardContent className="pt-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="text-sm font-medium">集數</label>
+                          <label className="form-label-secondary">集數</label>
                           <Input
                             type="number"
                             min="1"
@@ -390,7 +426,7 @@ export default function EpisodeManager({
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-medium">季數</label>
+                          <label className="form-label-secondary">季數</label>
                           <Input
                             type="number"
                             min="1"
@@ -404,9 +440,9 @@ export default function EpisodeManager({
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-medium">類型</label>
+                          <label className="form-label-secondary">類型</label>
                           <select
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md form-select"
                             value={editingEpisode.type}
                             onChange={(e) =>
                               setEditingEpisode({
@@ -423,7 +459,7 @@ export default function EpisodeManager({
                           </select>
                         </div>
                         <div>
-                          <label className="text-sm font-medium">標題</label>
+                          <label className="form-label-secondary">標題</label>
                           <Input
                             value={editingEpisode.title || ""}
                             onChange={(e) =>
@@ -436,7 +472,7 @@ export default function EpisodeManager({
                           />
                         </div>
                         <div className="col-span-1 sm:col-span-2">
-                          <label className="text-sm font-medium">描述</label>
+                          <label className="form-label-secondary">描述</label>
                           <Input
                             value={editingEpisode.description || ""}
                             onChange={(e) =>
@@ -449,7 +485,7 @@ export default function EpisodeManager({
                           />
                         </div>
                         <div className="col-span-1 sm:col-span-2">
-                          <label className="text-sm font-medium">備註</label>
+                          <label className="form-label-secondary">備註</label>
                           <Input
                             value={editingEpisode.note || ""}
                             onChange={(e) =>

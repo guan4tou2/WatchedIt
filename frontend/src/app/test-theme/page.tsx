@@ -81,7 +81,7 @@ export default function TestThemePage() {
 
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">最後更新</span>
-                <span className="text-xs text-gray-600">
+                <span className="text-xs description-text">
                   {lastUpdate.toLocaleTimeString()}
                 </span>
               </div>
@@ -156,14 +156,14 @@ export default function TestThemePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
                 <h3 className="font-semibold mb-2">淺色背景</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm description-text">
                   這是一個淺色背景的測試區域，在深色模式下會自動調整。
                 </p>
               </div>
 
               <div className="p-4 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
                 <h3 className="font-semibold mb-2">深色背景</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm description-text">
                   這是一個深色背景的測試區域，在淺色模式下會自動調整。
                 </p>
               </div>

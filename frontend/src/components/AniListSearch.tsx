@@ -199,13 +199,11 @@ ${
           )}
 
           {searchResults.length === 0 && !isLoading && searchTerm && (
-            <div className="text-center py-8 text-gray-500">
-              沒有找到相關動畫
-            </div>
+            <div className="text-center py-8 empty-state">沒有找到相關動畫</div>
           )}
 
           {!searchTerm && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 empty-state">
               輸入動畫名稱開始搜尋
             </div>
           )}
@@ -216,7 +214,7 @@ ${
                 key={anime.id}
                 className={`cursor-pointer transition-all hover:shadow-md ${
                   selectedAnime?.id === anime.id
-                    ? "ring-2 ring-blue-500 bg-blue-50"
+                    ? "ring-2 ring-blue-500 selected-bg"
                     : ""
                 }`}
                 onClick={() => handleViewDetail(anime)}
@@ -238,7 +236,7 @@ ${
                         )}
                       </h3>
                       {anime.title.romaji && (
-                        <p className="text-sm text-gray-600 truncate">
+                        <p className="text-sm description-text truncate">
                           {anime.title.romaji}
                         </p>
                       )}
@@ -268,8 +266,8 @@ ${
 
                       {anime.averageScore && (
                         <div className="flex items-center mt-2">
-                          <Star className="w-4 h-4 text-yellow-500 mr-1" />
-                          <span className="text-sm text-gray-600">
+                          <Star className="w-4 h-4 star-icon mr-1" />
+                          <span className="text-sm description-text">
                             {(anime.averageScore / 10).toFixed(1)}/10
                           </span>
                         </div>
@@ -312,10 +310,10 @@ ${
         </CardContent>
 
         {selectedAnime && (
-          <div className="border-t p-4 bg-gray-50">
+          <div className="border-t p-4 bg-gray-50 dark:bg-gray-800">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   已選擇:{" "}
                   <span className="font-medium">
                     {anilistService.getBestChineseTitle(
@@ -325,7 +323,7 @@ ${
                   </span>
                 </p>
                 {selectedAnime.episodes && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     將自動創建 {selectedAnime.episodes} 集
                   </p>
                 )}

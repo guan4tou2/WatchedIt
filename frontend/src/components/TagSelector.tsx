@@ -46,20 +46,13 @@ export default function TagSelector({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-600">標籤</label>
+      <label className="form-label">標籤</label>
 
       {/* 已選擇的標籤 */}
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {selectedTags.map((tag) => (
-            <Badge
-              key={tag.id}
-              style={{
-                backgroundColor: tag.color + "20",
-                color: tag.color,
-              }}
-              className="flex items-center space-x-1"
-            >
+            <Badge key={tag.id} className="flex items-center space-x-1">
               <span>{tag.name}</span>
               {!disabled && (
                 <button
@@ -89,9 +82,9 @@ export default function TagSelector({
           </Button>
 
           {isOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-md shadow-lg z-10 max-h-48 overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white dropdown-bg border rounded-md shadow-lg z-10 max-h-48 overflow-y-auto">
               {unselectedTags.length === 0 ? (
-                <div className="p-3 text-sm text-gray-500 text-center">
+                <div className="p-3 text-sm empty-state text-center">
                   所有標籤都已選擇
                 </div>
               ) : (
@@ -100,12 +93,9 @@ export default function TagSelector({
                     <button
                       key={tag.id}
                       onClick={() => handleTagToggle(tag)}
-                      className="w-full text-left p-2 hover:bg-gray-50 rounded flex items-center space-x-2"
+                      className="w-full text-left p-2 hover:bg-gray-50 hover-bg rounded flex items-center space-x-2"
                     >
-                      <div
-                        className="w-4 h-4 rounded border"
-                        style={{ backgroundColor: tag.color }}
-                      />
+                      <div className="w-4 h-4 rounded border" />
                       <span className="text-sm">{tag.name}</span>
                     </button>
                   ))}
