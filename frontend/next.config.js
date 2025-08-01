@@ -3,7 +3,6 @@ const nextConfig = {
   // GitHub Pages 配置
   basePath: process.env.NODE_ENV === "production" ? "/WatchedIt" : "",
   assetPrefix: process.env.NODE_ENV === "production" ? "/WatchedIt/" : "",
-  trailingSlash: true,
 
   images: {
     domains: ["s4.anilist.co"], // 允許 AniList 圖片
@@ -22,11 +21,6 @@ const nextConfig = {
 
   // 輸出配置 - 使用 export 以支援 GitHub Pages
   output: "export",
-
-  // 禁用動態路由的預渲染
-  trailingSlash: true,
-  skipTrailingSlashRedirect: true,
-  skipMiddlewareUrlNormalize: true,
 };
 
 module.exports = nextConfig;

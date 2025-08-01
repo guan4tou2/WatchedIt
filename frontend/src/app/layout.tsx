@@ -4,6 +4,8 @@ import "./globals.css";
 import PWAInstall from "@/components/PWAInstall";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { pwaService } from "@/lib/pwa";
+import SPARedirect from "@/components/SPARedirect";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -47,7 +49,10 @@ export default function RootLayout({
     <html lang="zh-TW" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
-          {children}
+          <Suspense fallback={<div>Loading...</div>}>
+            <SPARedirect />
+            {children}
+          </Suspense>
           <PWAInstall />
         </ThemeProvider>
         <script
