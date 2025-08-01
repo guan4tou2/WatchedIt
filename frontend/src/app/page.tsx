@@ -596,9 +596,27 @@ export default function HomePage() {
                       <CardTitle className="text-base sm:text-lg line-clamp-2">
                         {work.title}
                       </CardTitle>
-                      <Badge className={getTypeColor(work.type)}>
-                        {work.type}
-                      </Badge>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleQuickAddEpisode(
+                              work.id,
+                              work.title,
+                              work.type
+                            );
+                          }}
+                          className="text-xs sm:text-sm"
+                        >
+                          <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                          <span className="hidden sm:inline">新增集數</span>
+                          <span className="sm:hidden">新增</span>
+                        </Button>
+                        <ArrowRight className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" />
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -615,13 +633,17 @@ export default function HomePage() {
                       >
                         {work.status}
                       </Badge>
-                      {work.rating && (
-                        <div className="flex items-center">
-                          <Star className="w-4 h-4 star-icon mr-1" />
-                          <span className="text-sm">{work.rating}/5</span>
-                        </div>
-                      )}
+                      <Badge className={getTypeColor(work.type)}>
+                        {work.type}
+                      </Badge>
                     </div>
+
+                    {work.rating && (
+                      <div className="flex items-center justify-end">
+                        <Star className="w-4 h-4 star-icon mr-1" />
+                        <span className="text-sm">{work.rating}/5</span>
+                      </div>
+                    )}
 
                     {work.review && (
                       <p className="text-xs description-text line-clamp-2">
