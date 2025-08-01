@@ -591,7 +591,9 @@ export default function HomePage() {
                   key={work.id}
                   className="hover:shadow-lg transition-shadow cursor-pointer"
                   onClick={() =>
-                    (window.location.href = getFullPath(`/works/${work.id}`))
+                    (window.location.href = getFullPath(
+                      `/works/detail?id=${work.id}`
+                    ))
                   }
                 >
                   <CardHeader className="pb-3">

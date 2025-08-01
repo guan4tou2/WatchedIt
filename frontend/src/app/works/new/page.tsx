@@ -52,7 +52,7 @@ export default function NewWorkPage() {
       const createdWork = await createWork(newWork);
 
       // 導航到新創建的作品詳情頁面
-      router.push(getFullPath(`/works/${createdWork.id}`));
+      router.push(getFullPath(`/works/detail?id=${createdWork.id}`));
     } catch (error) {
       console.error("創建作品失敗:", error);
     } finally {

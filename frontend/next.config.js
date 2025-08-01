@@ -10,21 +10,6 @@ const nextConfig = {
     unoptimized: true, // GitHub Pages 需要
   },
 
-  // PWA 配置
-  async headers() {
-    return [
-      {
-        source: "/manifest.json",
-        headers: [
-          {
-            key: "Content-Type",
-            value: "application/manifest+json",
-          },
-        ],
-      },
-    ];
-  },
-
   // 實驗性功能
   experimental: {
     // 啟用 Service Worker
@@ -35,8 +20,13 @@ const nextConfig = {
   // 解決 hydration 問題
   reactStrictMode: false,
 
-  // 輸出配置 - 改回 standalone 以支援動態路由
-  output: "standalone",
+  // 輸出配置 - 使用 export 以支援 GitHub Pages
+  output: "export",
+
+  // 禁用動態路由的預渲染
+  trailingSlash: true,
+  skipTrailingSlashRedirect: true,
+  skipMiddlewareUrlNormalize: true,
 };
 
 module.exports = nextConfig;

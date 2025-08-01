@@ -22,10 +22,14 @@ echo "🔨 構建應用程序..."
 npm run build
 
 # 檢查構建是否成功
-if [ ! -d ".next" ]; then
-    echo "❌ 錯誤: 構建失敗，未找到 .next 目錄"
+if [ ! -d "out" ]; then
+    echo "❌ 錯誤: 構建失敗，未找到 out 目錄"
     exit 1
 fi
+
+# 創建 .nojekyll 文件
+echo "📝 創建 .nojekyll 文件..."
+touch out/.nojekyll
 
 # 創建 GitHub Actions 工作流程目錄
 echo "📝 創建 GitHub Actions 工作流程..."
@@ -69,14 +73,14 @@ jobs:
       if: github.ref == 'refs/heads/main'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./frontend/.next
+        publish_dir: ./frontend/out
         publish_branch: gh-pages
 EOF
 
 echo "✅ 構建完成！"
 echo ""
 echo "📋 下一步："
-echo "1. 推送代碼到 GitHub: git add . && git commit -m 'feat: 添加 GitHub Actions 部署配置' && git push origin main"
+echo "1. 推送代碼到 GitHub: git add . && git commit -m 'feat: 修改為靜態導出部署' && git push origin main"
 echo "2. 在 GitHub 倉庫設置中啟用 Pages"
 echo "3. 選擇 gh-pages 分支作為源"
 echo "4. 等待 GitHub Actions 完成部署"

@@ -34,5 +34,5 @@ jobs:
       if: github.ref == 'refs/heads/main'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./frontend/.next
+        publish_dir: ./frontend/out
         publish_branch: gh-pages

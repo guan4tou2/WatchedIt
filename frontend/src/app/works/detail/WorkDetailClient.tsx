@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,9 +21,9 @@ import {
   X,
 } from "lucide-react";
 
-export default function WorkDetailPage() {
-  const params = useParams();
+export default function WorkDetailClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { getWork, updateWork, deleteWork, loading } = useWorkStore();
   const [work, setWork] = useState<Work | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -32,10 +32,11 @@ export default function WorkDetailPage() {
 
   useEffect(() => {
     const loadWork = async () => {
-      if (params?.id) {
+      const id = searchParams?.get('id');
+      if (id) {
         setIsLoading(true);
         try {
-          const workData = await getWork(params.id as string);
+          const workData = await getWork(id);
           setWork(workData);
         } catch (error) {
           console.error("載入作品失敗:", error);
@@ -46,7 +47,7 @@ export default function WorkDetailPage() {
     };
 
     loadWork();
-  }, [params?.id, getWork]);
+  }, [searchParams, getWork]);
 
   const handleEpisodesChange = (episodes: Episode[]) => {
     if (!work) return;
