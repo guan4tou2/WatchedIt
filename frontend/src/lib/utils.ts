@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// GitHub Pages basePath 處理
+// 生產環境 basePath 處理
 export function getBasePath(): string {
   if (typeof window !== "undefined") {
     // 客戶端環境

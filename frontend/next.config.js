@@ -29,7 +29,7 @@ const nextConfig = {
   // 解決 hydration 問題
   reactStrictMode: process.env.NODE_ENV === "production",
 
-  // 輸出配置
+  // 輸出配置 - 生產環境使用 standalone，開發環境使用 export
   output: process.env.NODE_ENV === "production" ? "standalone" : "export",
 
   // 確保靜態資源正確處理

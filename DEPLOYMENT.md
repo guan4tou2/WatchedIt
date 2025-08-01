@@ -7,7 +7,7 @@
 ### 1. 靜態網站部署（推薦）
 - **適用場景**: 純前端應用，使用瀏覽器本地儲存
 - **優勢**: 成本低、速度快、易於維護
-- **平台**: Vercel、Netlify、GitHub Pages、Cloudflare Pages
+- **平台**: Vercel、Netlify、Cloudflare Pages
 
 ### 2. 全棧應用部署
 - **適用場景**: 需要後端 API 支援

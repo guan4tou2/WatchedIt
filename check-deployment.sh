@@ -13,7 +13,6 @@ NC='\033[0m' # No Color
 
 # 部署 URL
 VERCEL_URL="https://watchedit-psi.vercel.app"
-GITHUB_PAGES_URL="https://guan4tou2s.github.io/WatchedIt"
 
 # 日誌函數
 log_info() {
@@ -61,7 +60,7 @@ check_response_time() {
         local duration=$(( (end_time - start_time) / 1000000 ))
         log_info "✅ $name 響應時間: ${duration}ms"
     else
-        log_error "❌ $name 無法訪問"
+        log_warn "⚠️  $name 無法訪問"
     fi
 }
 
@@ -166,7 +165,6 @@ show_deployment_info() {
     log_info "部署信息摘要"
     echo "=================="
     echo "Vercel 部署: $VERCEL_URL"
-    echo "GitHub Pages: $GITHUB_PAGES_URL"
     echo
     echo "快速訪問:"
     echo "- 主頁: $VERCEL_URL"
@@ -198,7 +196,6 @@ main() {
     
     # 檢查 URL 狀態
     check_url "$VERCEL_URL" "Vercel 部署"
-    check_url "$GITHUB_PAGES_URL" "GitHub Pages"
     echo
     
     # 檢查響應時間
@@ -217,6 +214,7 @@ main() {
     show_deployment_info
     
     log_info "部署狀態檢查完成！"
+    return 0
 }
 
 # 執行主函數

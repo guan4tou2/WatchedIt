@@ -49,6 +49,10 @@ npm run dev
 docker-compose up -d
 ```
 
+### 方式四：GitHub Pages 部署（已移除）
+
+GitHub Pages 部署已被移除，推薦使用 Vercel 部署。
+
 ## 📱 安裝到設備
 
 ### Android
@@ -126,7 +130,7 @@ vercel --prod
 
 **優點**: 零配置、自動 HTTPS、全球 CDN、免費額度充足
 
-**實際部署**: https://watchedit-psi.vercel.app (已整合 Speed Insights)
+**實際部署**: https://watchedit-psi.vercel.app (已整合 Speed Insights 性能監控)
 
 #### 方案二：Netlify 部署
 
@@ -251,14 +255,14 @@ WatchedIt/
 
 1. **404 錯誤**
    - 確保所有路由都使用 `getFullPath()` 函數
-   - 檢查 GitHub Pages 設置
+   - 檢查 Vercel 部署設置
 
 2. **圖片不顯示**
    - 檢查 `next.config.js` 中的 `images.unoptimized` 設置
    - 確認圖片域名已添加到 `domains` 配置
 
 3. **部署失敗**
-   - 檢查 GitHub Actions 日誌中的錯誤信息
+   - 檢查 Vercel 部署日誌中的錯誤信息
    - 確認 Node.js 版本和依賴安裝
 
 4. **PWA 不工作**
