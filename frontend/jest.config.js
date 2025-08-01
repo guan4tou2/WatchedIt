@@ -7,9 +7,12 @@ const createJestConfig = nextJest({
 
 // Add any custom config to be passed to Jest
 const customJestConfig = {
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
+  setupFilesAfterEnv: [
+    "<rootDir>/jest.setup.js",
+    "fake-indexeddb/auto",
+  ],
   testEnvironment: "jsdom",
-  moduleNameMapping: {
+  moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   collectCoverageFrom: [

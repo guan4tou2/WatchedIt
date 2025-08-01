@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Eye } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { getFullPath } from "@/lib/utils";
 
 interface LogoProps {
   className?: string;
@@ -11,7 +10,7 @@ interface LogoProps {
 export default function Logo({ className = "", showText = true }: LogoProps) {
   return (
     <Link
-      href={getFullPath("/")}
+      href="/"
       className={`flex items-center space-x-2 ${className}`}
     >
       <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-lg">

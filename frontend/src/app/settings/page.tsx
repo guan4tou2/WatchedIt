@@ -17,7 +17,6 @@ import { dbUtils } from "@/lib/indexedDB";
 import { pwaService } from "@/lib/pwa";
 import Logo from "@/components/Logo";
 import Link from "next/link";
-import { getFullPath } from "@/lib/utils";
 import {
   Database,
   Cloud,
@@ -884,7 +883,7 @@ export default function SettingsPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 管理作品標籤，可以新增、編輯和刪除標籤。
               </p>
-              <Link href={getFullPath("/settings/tags")}>
+              <Link href="/settings/tags">
                 <Button className="w-full">
                   管理標籤
                   <ArrowRight className="w-4 h-4 ml-2" />

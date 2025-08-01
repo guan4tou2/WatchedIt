@@ -9,7 +9,6 @@ import { Work, Episode, WorkUpdate } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
 import EpisodeManager from "@/components/EpisodeManager";
 import WorkEditForm from "@/components/WorkEditForm";
-import { getFullPath } from "@/lib/utils";
 import {
   ArrowLeft,
   Edit,
@@ -89,7 +88,7 @@ export default function WorkDetailClient() {
 
     if (confirm("確定要刪除這個作品嗎？")) {
       await deleteWork(work.id);
-      router.push(getFullPath("/"));
+      router.push("/");
     }
   };
 
@@ -116,7 +115,7 @@ export default function WorkDetailClient() {
             </div>
             <Button
               variant="outline"
-              onClick={() => router.push(getFullPath("/"))}
+              onClick={() => router.push("/")}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               返回首頁

@@ -53,7 +53,7 @@ interface AniListMediaResponse {
   };
 }
 
-class AniListService {
+export class AniListService {
   private static instance: AniListService;
   private baseUrl = "/api/search";
 
