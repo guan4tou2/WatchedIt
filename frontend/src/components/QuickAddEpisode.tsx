@@ -161,7 +161,7 @@ export default function QuickAddEpisode({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md mx-4">
+      <Card className="w-full max-w-md mx-4 bg-white dark:bg-gray-800 shadow-xl">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg title-text">快速新增集數</CardTitle>
