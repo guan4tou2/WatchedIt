@@ -20,8 +20,8 @@ const nextConfig = {
     // 啟用 Service Worker
     workerThreads: false,
     cpus: 1,
-    // 生產環境優化
-    optimizeCss: process.env.NODE_ENV === "production",
+    // 生產環境優化 - 暫時禁用 optimizeCss 以避免 critters 依賴問題
+    // optimizeCss: process.env.NODE_ENV === "production",
     optimizePackageImports:
       process.env.NODE_ENV === "production" ? ["lucide-react"] : [],
   },

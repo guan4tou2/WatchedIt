@@ -126,6 +126,8 @@ vercel --prod
 
 **優點**: 零配置、自動 HTTPS、全球 CDN、免費額度充足
 
+**實際部署**: https://watchedit-psi.vercel.app (已整合 Speed Insights)
+
 #### 方案二：Netlify 部署
 
 ```bash
