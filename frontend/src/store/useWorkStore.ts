@@ -51,6 +51,9 @@ interface WorkStore {
   // 備份相關操作
   createBackup: () => Promise<any>;
   restoreBackup: (backupData: any) => Promise<void>;
+
+  // 重置示例數據標記
+  resetSampleDataFlag: () => void;
 }
 
 export const useWorkStore = create<WorkStore>((set, get) => ({
@@ -68,10 +71,17 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
       await workStorage.init();
       await tagStorage.init();
 
-      // 只在沒有數據時初始化示例數據
+      // 檢查是否已經初始化過示例數據
+      const hasInitialized = localStorage.getItem(
+        "watchedit_sample_initialized"
+      );
+
+      // 只在沒有數據且未初始化過示例數據時才初始化
       const works = await workStorage.getAll();
-      if (works.length === 0) {
+      if (works.length === 0 && !hasInitialized) {
         await initializeSampleData();
+        // 標記已初始化
+        localStorage.setItem("watchedit_sample_initialized", "true");
       }
 
       const updatedWorks = await workStorage.getAll();
@@ -344,5 +354,10 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
       console.error("還原備份失敗:", error);
       throw error;
     }
+  },
+
+  // 重置示例數據標記
+  resetSampleDataFlag: () => {
+    localStorage.removeItem("watchedit_sample_initialized");
   },
 }));

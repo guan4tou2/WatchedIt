@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>圖示預覽 - WatchedIt</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .preview-section {
+        background: white;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .icon-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+      }
+      .icon-item {
+        text-align: center;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: white;
+      }
+      .icon-item img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #eee;
+        border-radius: 4px;
+      }
+      .icon-info {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #666;
+      }
+      .test-backgrounds {
+        display: flex;
+        gap: 10px;
+        margin: 10px 0;
+      }
+      .test-bg {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: white;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+      }
+      .bg-light {
+        background: #ffffff;
+        color: #333;
+      }
+      .bg-dark {
+        background: #333333;
+      }
+      .bg-blue {
+        background: #3b82f6;
+      }
+      .bg-gradient {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🎯 WatchedIt 圖示預覽</h1>
+
+    <div class="preview-section">
+      <h2>📱 PWA 圖示預覽</h2>
+      <p>以下是所有尺寸的 PWA 圖示，用於不同設備和場景：</p>
+
+      <div class="icon-grid">
+        <div class="icon-item">
+          <img src="/icons/icon-72x72.png" alt="72x72" />
+          <div class="icon-info">72x72 - 小尺寸</div>
+        </div>
+        <div class="icon-item">
+          <img src="/icons/icon-96x96.png" alt="96x96" />
+          <div class="icon-info">96x96 - 標準尺寸</div>
+        </div>
+        <div class="icon-item">
+          <img src="/icons/icon-128x128.png" alt="128x128" />
+          <div class="icon-info">128x128 - 中等尺寸</div>
+        </div>
+        <div class="icon-item">
+          <img src="/icons/icon-144x144.png" alt="144x144" />
+          <div class="icon-info">144x144 - 高解析度</div>
+        </div>
+        <div class="icon-item">
+          <img src="/icons/icon-152x152.png" alt="152x152" />
+          <div class="icon-info">152x152 - iOS 標準</div>
+        </div>
+        <div class="icon-item">
+          <img src="/icons/icon-192x192.png" alt="192x192" />
+          <div class="icon-info">192x192 - Android 標準</div>
+        </div>
+        <div class="icon-item">
+          <img src="/icons/icon-384x384.png" alt="384x384" />
+          <div class="icon-info">384x384 - 高解析度</div>
+        </div>
+        <div class="icon-item">
+          <img src="/icons/icon-512x512.png" alt="512x512" />
+          <div class="icon-info">512x512 - 最大尺寸</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <h2>🎨 不同背景測試</h2>
+      <p>在不同背景下測試圖示的可見性：</p>
+
+      <div class="test-backgrounds">
+        <div class="test-bg bg-light">
+          <img
+            src="/icons/icon-192x192.png"
+            alt="192x192"
+            style="width: 40px; height: 40px"
+          />
+        </div>
+        <div class="test-bg bg-dark">
+          <img
+            src="/icons/icon-192x192.png"
+            alt="192x192"
+            style="width: 40px; height: 40px"
+          />
+        </div>
+        <div class="test-bg bg-blue">
+          <img
+            src="/icons/icon-192x192.png"
+            alt="192x192"
+            style="width: 40px; height: 40px"
+          />
+        </div>
+        <div class="test-bg bg-gradient">
+          <img
+            src="/icons/icon-192x192.png"
+            alt="192x192"
+            style="width: 40px; height: 40px"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <h2>📋 圖示資訊</h2>
+      <ul>
+        <li>
+          <strong>設計理念:</strong>
+          眼睛圖示代表「觀看」，勾選標記代表「已完成」
+        </li>
+        <li>
+          <strong>色彩方案:</strong> 漸層背景使用 WatchedIt 品牌色彩（#667eea 到
+          #764ba2）
+        </li>
+        <li><strong>格式支援:</strong> PNG 格式，支援透明背景</li>
+        <li><strong>尺寸範圍:</strong> 72x72 到 512x512，涵蓋所有 PWA 標準</li>
+        <li><strong>檔案大小:</strong> 4KB 到 89KB，適合網路傳輸</li>
+      </ul>
+    </div>
+
+    <div class="preview-section">
+      <h2>🔧 技術細節</h2>
+      <ul>
+        <li><strong>生成工具:</strong> Puppeteer + SVG 渲染</li>
+        <li><strong>原始設計:</strong> SVG 格式，可縮放</li>
+        <li><strong>品質保證:</strong> 高解析度 PNG 輸出</li>
+        <li><strong>相容性:</strong> 支援所有現代瀏覽器和 PWA 標準</li>
+      </ul>
+    </div>
+
+    <script>
+      // 檢查圖示載入狀態
+      const images = document.querySelectorAll("img");
+      let loadedCount = 0;
+      const totalCount = images.length;
+
+      images.forEach((img) => {
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount === totalCount) {
+            console.log("✅ 所有圖示載入完成");
+          }
+        };
+        img.onerror = () => {
+          console.error("❌ 圖示載入失敗:", img.src);
+        };
+      });
+    </script>
+  </body>
+</html>
