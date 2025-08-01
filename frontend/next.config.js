@@ -35,7 +35,7 @@ const nextConfig = {
   // 解決 hydration 問題
   reactStrictMode: false,
 
-  // 輸出配置 - 改為 standalone 以支援動態路由
+  // 輸出配置 - 改回 standalone 以支援動態路由
   output: "standalone",
 };
 

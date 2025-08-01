@@ -12,10 +12,10 @@ jobs:
     
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
       
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v3
       with:
         node-version: '18'
         cache: 'npm'
@@ -28,22 +28,11 @@ jobs:
     - name: Build application
       working-directory: ./frontend
       run: npm run build
-      env:
-        NODE_ENV: production
-        
-    - name: Create static export
-      working-directory: ./frontend
-      run: |
-        mkdir -p out
-        cp -r .next/standalone/* out/
-        cp -r .next/static out/
-        cp -r public/* out/
-        touch out/.nojekyll
-        
+      
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       if: github.ref == 'refs/heads/main'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./frontend/out
-        cname: watchedit.app
+        publish_dir: ./frontend/.next
+        publish_branch: gh-pages
