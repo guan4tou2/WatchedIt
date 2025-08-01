@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import WorkTypeManager from "@/components/WorkTypeManager";
 import CustomEpisodeTypeManager from "@/components/CustomEpisodeTypeManager";
 import PlatformInfo from "@/components/PlatformInfo";
+import HelpGuide from "@/components/HelpGuide";
 import { useTheme } from "@/components/ThemeProvider";
 import { useWorkStore } from "@/store/useWorkStore";
 import { cloudStorage, CloudConfig } from "@/lib/cloudStorage";
@@ -44,6 +45,7 @@ import {
   Shield,
   Wifi,
   WifiOff,
+  BookOpen,
 } from "lucide-react";
 
 interface Settings {
@@ -88,6 +90,7 @@ export default function SettingsPage() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [helpGuideOpen, setHelpGuideOpen] = useState(false);
 
   // PWA 相關狀態
   const [pwaInfo, setPwaInfo] = useState({
@@ -415,10 +418,21 @@ export default function SettingsPage() {
           <Logo showText={false} />
           <h1 className="text-2xl sm:text-3xl font-bold">設定</h1>
         </div>
-        <Button onClick={saveSettings} className="w-full sm:w-auto">
-          <Save className="w-4 h-4 mr-2" />
-          儲存設定
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setHelpGuideOpen(true)}
+            className="w-full sm:w-auto"
+          >
+            <BookOpen className="w-4 h-4 mr-2" />
+            教學說明
+          </Button>
+          <Button onClick={saveSettings} className="w-full sm:w-auto">
+            <Save className="w-4 h-4 mr-2" />
+            儲存設定
+          </Button>
+        </div>
       </div>
 
       {message && (
@@ -1025,6 +1039,42 @@ export default function SettingsPage() {
       <div className="mt-6">
         <PlatformInfo />
       </div>
+
+      {/* 教學說明 */}
+      <HelpGuide
+        isOpen={helpGuideOpen}
+        onClose={() => setHelpGuideOpen(false)}
+        stats={{
+          total_works: works.length,
+          episode_stats: {
+            total_episodes: works.reduce((total, work) => {
+              return total + (work.episodes?.length || 0);
+            }, 0),
+            watched_episodes: works.reduce((total, work) => {
+              return (
+                total + (work.episodes?.filter((ep) => ep.watched).length || 0)
+              );
+            }, 0),
+            completion_rate: (() => {
+              const totalEpisodes = works.reduce((sum, work) => {
+                return sum + (work.episodes?.length || 0);
+              }, 0);
+              const watchedEpisodes = works.reduce((sum, work) => {
+                return (
+                  sum + (work.episodes?.filter((ep) => ep.watched).length || 0)
+                );
+              }, 0);
+              return totalEpisodes > 0
+                ? (watchedEpisodes / totalEpisodes) * 100
+                : 0;
+            })(),
+          },
+          status_stats: works.reduce((acc, work) => {
+            acc[work.status] = (acc[work.status] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>),
+        }}
+      />
     </div>
   );
 }

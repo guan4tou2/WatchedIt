@@ -181,4 +181,71 @@
   .subtitle-text {
     @apply text-gray-700 dark:text-gray-300;
   }
+
+  /* 錯誤文字 */
+  .error-text {
+    @apply text-red-600 dark:text-red-400;
+  }
+
+  .error-text-hover {
+    @apply text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300;
+  }
+
+  /* 錯誤訊息容器 */
+  .error-container {
+    @apply bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-200;
+  }
+
+  /* 成功訊息容器 */
+  .success-container {
+    @apply bg-green-100 dark:bg-green-900/20 border border-green-400 dark:border-green-800 text-green-700 dark:text-green-200;
+  }
+
+  /* 警告訊息容器 */
+  .warning-container {
+    @apply bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-400 dark:border-yellow-800 text-yellow-700 dark:text-yellow-200;
+  }
+
+  /* 資訊訊息容器 */
+  .info-container {
+    @apply bg-blue-100 dark:bg-blue-900/20 border border-blue-400 dark:border-blue-800 text-blue-700 dark:text-blue-200;
+  }
+
+  /* 圖標容器 */
+  .icon-container {
+    @apply w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400;
+  }
+
+  /* 標籤文字 */
+  .label-text {
+    @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+  }
+
+  /* 小文字 */
+  .text-xs-muted {
+    @apply text-xs text-gray-600 dark:text-gray-400;
+  }
+
+  .text-xs-secondary {
+    @apply text-xs text-gray-500 dark:text-gray-400;
+  }
+
+  /* 描述文字容器 */
+  .description-container {
+    @apply text-sm text-gray-600 dark:text-gray-400;
+  }
+
+  .description-container-secondary {
+    @apply text-sm text-gray-700 dark:text-gray-300;
+  }
+
+  /* 列表文字 */
+  .list-text {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  /* 段落文字 */
+  .paragraph-text {
+    @apply text-sm text-gray-700 dark:text-gray-300 leading-relaxed;
+  }
 }

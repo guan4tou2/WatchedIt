@@ -328,7 +328,7 @@ export default function WorkTypeEpisodeMappingManager({
                 className="flex items-center justify-between p-3 border rounded-lg"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                  <div className="icon-container">
                     <Settings className="w-4 h-4" />
                   </div>
                   <div>

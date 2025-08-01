@@ -94,7 +94,7 @@ export default function HelpGuide({ isOpen, onClose, stats }: HelpGuideProps) {
                 <Info className="w-5 h-5 text-blue-500 mt-0.5" />
                 <div>
                   <h3 className="font-semibold">歡迎使用 WatchedIt</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="description-container mt-1">
                     這是一個簡單的個人作品管理工具，幫助您記錄看過的動畫、電影、電視劇等作品。
                   </p>
                 </div>
@@ -145,7 +145,7 @@ export default function HelpGuide({ isOpen, onClose, stats }: HelpGuideProps) {
                 <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5" />
                 <div>
                   <h3 className="font-semibold">重要提醒</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="description-container mt-1">
                     您的資料僅儲存在本地設備中，不會上傳到任何伺服器。
                   </p>
                 </div>
@@ -170,7 +170,7 @@ export default function HelpGuide({ isOpen, onClose, stats }: HelpGuideProps) {
                 <h4 className="font-medium">資料清理：</h4>
                 <div className="text-sm space-y-2">
                   <p>以下情況會導致資料被清除：</p>
-                  <ul className="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400">
+                  <ul className="list-disc list-inside space-y-1 list-text">
                     <li>清除瀏覽器快取和資料</li>
                     <li>使用無痕模式瀏覽</li>
                     <li>重新安裝瀏覽器</li>
@@ -187,7 +187,7 @@ export default function HelpGuide({ isOpen, onClose, stats }: HelpGuideProps) {
                 <Database className="w-5 h-5 text-blue-500 mt-0.5" />
                 <div>
                   <h3 className="font-semibold">備份資訊</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="description-container mt-1">
                     查看您的資料統計和備份選項。
                   </p>
                 </div>
@@ -243,7 +243,7 @@ export default function HelpGuide({ isOpen, onClose, stats }: HelpGuideProps) {
 
               <div className="space-y-3">
                 <h4 className="font-medium">備份建議：</h4>
-                <ul className="text-sm space-y-1 text-gray-600 dark:text-gray-400">
+                <ul className="text-sm space-y-1 list-text">
                   <li>• 每週備份一次重要資料</li>
                   <li>• 將備份檔案儲存在安全位置</li>
                   <li>• 更換設備前務必備份</li>

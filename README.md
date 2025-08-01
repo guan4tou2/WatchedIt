@@ -9,6 +9,7 @@
 - 🏷️ **標籤管理**: 自定義標籤分類
 - 📊 **統計分析**: 年度統計、類型分析
 - 🔍 **智能搜尋**: AniList API 自動完成
+- 🇹🇼 **繁體中文支援**: 使用 OpenCC 進行高質量的簡體轉繁體轉換
 - 📱 **響應式設計**: 支援桌面和行動裝置
 - 💾 **本地儲存**: 數據儲存在瀏覽器本地
 - 🌐 **跨平台支援**: PWA 技術，支援所有平台
@@ -245,6 +246,11 @@ interface Tag {
 ```
 WatchedIt/
 ├── .github/workflows/deploy.yml    # GitHub Actions 工作流程
+├── docs/                           # 📚 專案文檔
+│   ├── README.md                   # 文檔索引
+│   ├── implementation/             # 實現文檔
+│   ├── deployment/                 # 部署文檔
+│   └── features/                   # 功能文檔
 ├── frontend/                       # 前端應用
 │   ├── next.config.js              # Next.js 配置
 │   ├── package.json                # 依賴和腳本
@@ -262,6 +268,14 @@ WatchedIt/
 ├── docker-compose.yml              # Docker Compose
 └── README.md                       # 項目說明
 ```
+
+## 📚 文檔
+
+詳細的技術文檔和實現說明請查看 [docs/](docs/) 目錄：
+
+- **[📋 實現文檔](docs/implementation/)** - 各種功能的技術實現細節
+- **[🚀 部署文檔](docs/deployment/)** - 部署指南和配置說明
+- **[✨ 功能文檔](docs/features/)** - 新功能和改進說明
 
 ## 🔍 故障排除
 

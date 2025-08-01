@@ -409,7 +409,7 @@ export default function WorkTypeManager({
                     }
                     className="w-10 h-10 rounded border"
                   />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="description-container">
                     {editingType.color}
                   </span>
                 </div>
@@ -419,9 +419,7 @@ export default function WorkTypeManager({
             <div className="flex items-center justify-between">
               <div>
                 <Label className="text-sm font-medium">啟用</Label>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  是否啟用此類型
-                </p>
+                <p className="text-xs-muted">是否啟用此類型</p>
               </div>
               <Switch
                 checked={editingType.isEnabled}
@@ -436,9 +434,7 @@ export default function WorkTypeManager({
               <div className="space-y-4 border-t pt-4">
                 <div>
                   <Label className="text-sm font-medium">集數類型設定</Label>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    設定此作品類型可用的集數類型
-                  </p>
+                  <p className="text-xs-muted">設定此作品類型可用的集數類型</p>
                 </div>
 
                 <div>

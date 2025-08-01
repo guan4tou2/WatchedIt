@@ -193,7 +193,7 @@ export default function TagManager({
                               size="sm"
                               variant="ghost"
                               onClick={() => handleDeleteTag(tag.id)}
-                              className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                              className="error-text-hover"
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>

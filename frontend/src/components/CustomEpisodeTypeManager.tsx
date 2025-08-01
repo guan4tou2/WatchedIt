@@ -239,9 +239,7 @@ export default function CustomEpisodeTypeManager({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-sm font-medium">類型名稱 *</Label>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  用於系統識別的英文名稱
-                </p>
+                <p className="text-xs-muted">用於系統識別的英文名稱</p>
                 <Input
                   value={editingType.name}
                   onChange={(e) =>
@@ -253,9 +251,7 @@ export default function CustomEpisodeTypeManager({
               </div>
               <div>
                 <Label className="text-sm font-medium">顯示標籤 *</Label>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  顯示給用戶看的中文名稱
-                </p>
+                <p className="text-xs-muted">顯示給用戶看的中文名稱</p>
                 <Input
                   value={editingType.label}
                   onChange={(e) =>
@@ -290,7 +286,7 @@ export default function CustomEpisodeTypeManager({
                     }
                     className="w-10 h-10 rounded border"
                   />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="description-container">
                     {editingType.color}
                   </span>
                 </div>
@@ -300,9 +296,7 @@ export default function CustomEpisodeTypeManager({
             <div className="flex items-center justify-between">
               <div>
                 <Label className="text-sm font-medium">啟用</Label>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  是否啟用此類型
-                </p>
+                <p className="text-xs-muted">是否啟用此類型</p>
               </div>
               <Switch
                 checked={editingType.isEnabled}

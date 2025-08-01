@@ -48,7 +48,20 @@ export default function AniListSearch({
       const results = await anilistService.searchAnime(term, 1, 10);
       setSearchResults(results);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "搜尋失敗");
+      const errorMessage = err instanceof Error ? err.message : "搜尋失敗";
+
+      // 檢查是否是後端服務不可用的錯誤
+      if (
+        errorMessage.includes("API 端點未配置") ||
+        errorMessage.includes("Failed to fetch")
+      ) {
+        setError(
+          "後端服務不可用。請設定 NEXT_PUBLIC_API_URL 環境變數或部署後端服務。目前僅支援本地儲存模式。"
+        );
+      } else {
+        setError(errorMessage);
+      }
+
       setSearchResults([]);
     } finally {
       setIsLoading(false);
@@ -168,8 +181,8 @@ ${
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-5xl max-h-[90vh] overflow-hidden">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center">
@@ -193,7 +206,7 @@ ${
         </CardHeader>
         <CardContent className="overflow-y-auto max-h-[60vh]">
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="error-container px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
@@ -208,7 +221,7 @@ ${
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {searchResults.map((anime) => (
               <Card
                 key={anime.id}
@@ -225,23 +238,23 @@ ${
                       <img
                         src={anime.coverImage.medium}
                         alt={anime.title.romaji}
-                        className="w-16 h-24 object-cover rounded"
+                        className="w-16 h-24 object-cover rounded flex-shrink-0"
                       />
                     )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-lg truncate">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <h3 className="font-semibold text-lg truncate mb-1">
                         {anilistService.getBestChineseTitle(
                           anime.title,
                           anime.synonyms
                         )}
                       </h3>
                       {anime.title.romaji && (
-                        <p className="text-sm description-text truncate">
+                        <p className="text-sm description-text truncate mb-2">
                           {anime.title.romaji}
                         </p>
                       )}
 
-                      <div className="flex items-center space-x-2 mt-2">
+                      <div className="flex flex-wrap items-center gap-1 mt-2">
                         <Badge className={getStatusColor(anime.status)}>
                           {getStatusText(anime.status)}
                         </Badge>
@@ -266,8 +279,8 @@ ${
 
                       {anime.averageScore && (
                         <div className="flex items-center mt-2">
-                          <Star className="w-4 h-4 star-icon mr-1" />
-                          <span className="text-sm description-text">
+                          <Star className="w-4 h-4 star-icon mr-1 flex-shrink-0" />
+                          <span className="text-sm description-text truncate">
                             {(anime.averageScore / 10).toFixed(1)}/10
                           </span>
                         </div>
@@ -313,7 +326,7 @@ ${
           <div className="border-t p-4 bg-gray-50 dark:bg-gray-800">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="description-container">
                   已選擇:{" "}
                   <span className="font-medium">
                     {anilistService.getBestChineseTitle(
@@ -323,7 +336,7 @@ ${
                   </span>
                 </p>
                 {selectedAnime.episodes && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs-secondary">
                     將自動創建 {selectedAnime.episodes} 集
                   </p>
                 )}

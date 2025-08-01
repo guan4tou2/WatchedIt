@@ -25,7 +25,8 @@ export const getApiBaseUrl = (): string => {
     // 如果是本地開發環境，使用 localhost:8000
     if (
       currentOrigin.includes("localhost") ||
-      currentOrigin.includes("127.0.0.1")
+      currentOrigin.includes("127.0.0.1") ||
+      currentOrigin.includes("localhost:3000")
     ) {
       return "http://localhost:8000";
     }
@@ -33,8 +34,19 @@ export const getApiBaseUrl = (): string => {
     return "/api";
   }
 
-  // 3. 預設值
+  // 3. 在伺服器端渲染時，根據環境變數判斷
+  if (process.env.NODE_ENV === "production") {
+    return "/api";
+  }
+
+  // 4. 預設值
   return "http://localhost:8000";
+};
+
+// 檢查是否有可用的後端服務
+export const hasBackendService = (): boolean => {
+  const baseUrl = getApiBaseUrl();
+  return baseUrl !== "/api" && baseUrl !== "NO_BACKEND";
 };
 
 // 導出完整的 API URL

@@ -310,7 +310,7 @@ ${
                     簡介
                   </h3>
                   <div
-                    className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
+                    className="paragraph-text"
                     dangerouslySetInnerHTML={{
                       __html: anime.description.replace(/\n/g, "<br>"),
                     }}
@@ -351,13 +351,13 @@ ${
         {/* 底部操作按鈕 */}
         <div className="border-t p-4 bg-gray-50 dark:bg-gray-800">
           {duplicateMessage && (
-            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-200 rounded">
+            <div className="error-container mb-4 p-3 rounded">
               {duplicateMessage}
             </div>
           )}
 
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="description-container">
               <p>
                 將新增作品：{" "}
                 <span className="font-medium">
@@ -368,7 +368,7 @@ ${
                 </span>
               </p>
               {anime.episodes && (
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs-secondary">
                   自動創建 {anime.episodes} 集
                 </p>
               )}

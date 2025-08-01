@@ -37,12 +37,43 @@ export default function EpisodeManager({
   const [episodeTypeLabels, setEpisodeTypeLabels] = useState<
     Record<string, string>
   >({});
+  // 計算下一集數
+  const getNextEpisodeNumber = (season: number = 1) => {
+    if (episodes.length === 0) return 1;
+
+    // 篩選出指定季的所有集數
+    const seasonEpisodes = episodes.filter((ep) => ep.season === season);
+
+    if (seasonEpisodes.length === 0) return 1;
+
+    // 找出該季的最大集數
+    const maxNumber = Math.max(...seasonEpisodes.map((ep) => ep.number));
+    return maxNumber + 1;
+  };
+
+  // 獲取預設季數
+  const getDefaultSeason = () => {
+    if (episodes.length === 0) return 1;
+
+    // 找出最常用的季數
+    const seasonCounts = episodes.reduce((acc, ep) => {
+      acc[ep.season] = (acc[ep.season] || 0) + 1;
+      return acc;
+    }, {} as Record<number, number>);
+
+    const mostCommonSeason = Object.entries(seasonCounts).sort(
+      ([, a], [, b]) => b - a
+    )[0]?.[0];
+
+    return mostCommonSeason ? parseInt(mostCommonSeason) : 1;
+  };
+
   const [newEpisode, setNewEpisode] = useState({
-    number: 1,
+    number: getNextEpisodeNumber(1),
     title: "",
     description: "",
     type: "episode" as EpisodeType,
-    season: 1,
+    season: getDefaultSeason(),
     note: "",
   });
 
@@ -72,6 +103,22 @@ export default function EpisodeManager({
       setDefaultEpisodeType("episode");
     }
   }, [type]);
+
+  // 當集數列表變化時，更新新增表單的預設集數
+  useEffect(() => {
+    setNewEpisode((prev) => ({
+      ...prev,
+      number: getNextEpisodeNumber(prev.season),
+    }));
+  }, [episodes]);
+
+  // 當季數變化時，重新計算該季的下一集數
+  useEffect(() => {
+    setNewEpisode((prev) => ({
+      ...prev,
+      number: getNextEpisodeNumber(prev.season),
+    }));
+  }, [newEpisode.season]);
 
   const getEpisodeTypeLabel = (type: string) => {
     return episodeTypeLabels[type] || type;
@@ -121,9 +168,9 @@ export default function EpisodeManager({
 
       onEpisodesChange(updatedEpisodes);
 
-      // 重置表單
+      // 重置表單，自動計算下一集數
       setNewEpisode({
-        number: newEpisode.number + 1,
+        number: getNextEpisodeNumber(newEpisode.season),
         title: "",
         description: "",
         type: defaultEpisodeType,
@@ -213,9 +260,7 @@ export default function EpisodeManager({
             <CardContent className="pt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    集數
-                  </label>
+                  <label className="label-text">集數</label>
                   <Input
                     type="number"
                     min="1"
@@ -229,9 +274,7 @@ export default function EpisodeManager({
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    季數
-                  </label>
+                  <label className="label-text">季數</label>
                   <Input
                     type="number"
                     min="1"
@@ -245,9 +288,7 @@ export default function EpisodeManager({
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    類型
-                  </label>
+                  <label className="label-text">類型</label>
                   <select
                     className="w-full px-3 py-2 border border-gray-300 rounded-md dark:text-foreground/95 dark:bg-background/95"
                     value={newEpisode.type}
@@ -266,9 +307,7 @@ export default function EpisodeManager({
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    標題 (選填)
-                  </label>
+                  <label className="label-text">標題 (選填)</label>
                   <Input
                     value={newEpisode.title}
                     onChange={(e) =>
@@ -281,9 +320,7 @@ export default function EpisodeManager({
                   />
                 </div>
                 <div className="col-span-1 sm:col-span-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    描述 (選填)
-                  </label>
+                  <label className="label-text">描述 (選填)</label>
                   <Input
                     value={newEpisode.description}
                     onChange={(e) =>
@@ -296,9 +333,7 @@ export default function EpisodeManager({
                   />
                 </div>
                 <div className="col-span-1 sm:col-span-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    備註 (選填)
-                  </label>
+                  <label className="label-text">備註 (選填)</label>
                   <Input
                     value={newEpisode.note}
                     onChange={(e) =>

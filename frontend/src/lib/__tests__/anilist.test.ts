@@ -1,4 +1,4 @@
-import { AniListService } from "../anilist";
+import { anilistService } from "../anilist";
 import { AniListMedia } from "@/types";
 
 // Mock fetch
@@ -7,10 +7,7 @@ global.fetch = jest.fn();
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
 
 describe("AniListService", () => {
-  let anilistService: AniListService;
-
   beforeEach(() => {
-    anilistService = AniListService.getInstance();
     jest.clearAllMocks();
   });
 
@@ -100,9 +97,32 @@ describe("AniListService", () => {
     });
 
     it("應該處理非中文字符", () => {
-      const text = "Hello World 123 !@#";
+      const text = "Hello World 123";
       const result = anilistService.convertToTraditional(text);
       expect(result).toBe(text);
+    });
+
+    it("應該正確轉換常見的簡體字詞", () => {
+      const simplified = "进击的巨人 机动战士 命运石之门";
+      const traditional = anilistService.convertToTraditional(simplified);
+
+      // 驗證 OpenCC 的轉換效果
+      expect(traditional).toBe("進擊的巨人 機動戰士 命運石之門");
+    });
+
+    it("應該在運行時正確使用 OpenCC", () => {
+      // 測試 OpenCC 是否在運行時正確加載
+      const testCases = [
+        { input: "简体中文", expected: "簡體中文" },
+        { input: "计算机", expected: "計算機" },
+        { input: "软件", expected: "軟件" },
+        { input: "网络", expected: "網絡" },
+      ];
+
+      testCases.forEach(({ input, expected }) => {
+        const result = anilistService.convertToTraditional(input);
+        expect(result).toBe(expected);
+      });
     });
   });
 

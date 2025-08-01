@@ -40,6 +40,18 @@ async function handleApiRequest(
     const url = new URL(request.url);
     const queryString = url.search;
 
+    // 如果 baseUrl 是相對路徑，表示沒有外部後端服務
+    if (baseUrl === "/api") {
+      return NextResponse.json(
+        {
+          error: "API 端點未配置",
+          message:
+            "請設定 NEXT_PUBLIC_API_URL 環境變數或部署後端服務。目前僅支援本地儲存模式。",
+        },
+        { status: 503 }
+      );
+    }
+
     // 構建目標 URL
     const targetUrl = `${baseUrl}/${path}${queryString}`;
 

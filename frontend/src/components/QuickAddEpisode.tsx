@@ -160,134 +160,148 @@ export default function QuickAddEpisode({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md mx-4 bg-white dark:bg-gray-800 shadow-xl">
-        <CardHeader>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <CardHeader className="border-b">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg title-text">快速新增集數</CardTitle>
+            <CardTitle className="flex items-center">
+              <Plus className="w-5 h-5 mr-2" />
+              快速新增集數
+            </CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-sm description-text">為「{workTitle}」新增集數</p>
+          <p className="text-sm description-text mt-2">
+            為「{workTitle}」新增集數
+          </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="form-label">開始集數</label>
-              <Input
-                type="number"
-                min="1"
-                value={episodeData.number}
-                onChange={(e) =>
-                  setEpisodeData({
-                    ...episodeData,
-                    number: parseInt(e.target.value) || 1,
-                  })
-                }
-                className="mt-1 form-input"
-              />
-            </div>
-            <div>
-              <label className="form-label">季數</label>
-              <Input
-                type="number"
-                min="1"
-                value={episodeData.season}
-                onChange={(e) =>
-                  setEpisodeData({
-                    ...episodeData,
-                    season: parseInt(e.target.value) || 1,
-                  })
-                }
-                className="mt-1 form-input"
-              />
-            </div>
-            <div>
-              <label className="form-label">新增數量</label>
-              <Input
-                type="number"
-                min="1"
-                max="10"
-                value={batchCount}
-                onChange={(e) =>
-                  setBatchCount(
-                    Math.max(1, Math.min(10, parseInt(e.target.value) || 1))
-                  )
-                }
-                className="mt-1 form-input"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="form-label">標題</label>
-            <Input
-              value={episodeData.title}
-              onChange={(e) =>
-                setEpisodeData({ ...episodeData, title: e.target.value })
-              }
-              placeholder="可選"
-              className="mt-1 form-input"
-            />
-          </div>
-
-          <div>
-            <label className="form-label">描述</label>
-            <Input
-              value={episodeData.description}
-              onChange={(e) =>
-                setEpisodeData({ ...episodeData, description: e.target.value })
-              }
-              placeholder="可選"
-              className="mt-1 form-input"
-            />
-          </div>
-
-          <div>
-            <label className="form-label">類型</label>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {availableEpisodeTypes.map((type) => (
-                <Badge
-                  key={type}
-                  className={`cursor-pointer ${
-                    episodeData.type === type
-                      ? getEpisodeTypeColor(type)
-                      : "badge-unselected"
-                  }`}
-                  onClick={() =>
+        <CardContent className="overflow-y-auto max-h-[70vh] p-6">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium form-label">
+                  開始集數
+                </label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={episodeData.number}
+                  onChange={(e) =>
                     setEpisodeData({
                       ...episodeData,
-                      type: type as EpisodeType,
+                      number: parseInt(e.target.value) || 1,
                     })
                   }
-                >
-                  {getEpisodeTypeLabel(type)}
-                </Badge>
-              ))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium form-label">季數</label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={episodeData.season}
+                  onChange={(e) =>
+                    setEpisodeData({
+                      ...episodeData,
+                      season: parseInt(e.target.value) || 1,
+                    })
+                  }
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium form-label">
+                  新增數量
+                </label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={batchCount}
+                  onChange={(e) =>
+                    setBatchCount(
+                      Math.max(1, Math.min(10, parseInt(e.target.value) || 1))
+                    )
+                  }
+                  className="mt-1"
+                />
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label className="form-label">備註</label>
-            <Input
-              value={episodeData.note}
-              onChange={(e) =>
-                setEpisodeData({ ...episodeData, note: e.target.value })
-              }
-              placeholder="可選"
-              className="mt-1 form-input"
-            />
-          </div>
+            <div>
+              <label className="text-sm font-medium form-label">標題</label>
+              <Input
+                value={episodeData.title}
+                onChange={(e) =>
+                  setEpisodeData({ ...episodeData, title: e.target.value })
+                }
+                placeholder="可選"
+                className="mt-1"
+              />
+            </div>
 
-          <div className="flex space-x-2">
-            <Button onClick={handleAddEpisode} className="flex-1">
-              <Check className="w-4 h-4 mr-1" />
-              新增 {batchCount} 集
-            </Button>
-            <Button variant="outline" onClick={onClose} className="flex-1">
-              取消
-            </Button>
+            <div>
+              <label className="text-sm font-medium form-label">描述</label>
+              <Input
+                value={episodeData.description}
+                onChange={(e) =>
+                  setEpisodeData({
+                    ...episodeData,
+                    description: e.target.value,
+                  })
+                }
+                placeholder="可選"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium form-label">類型</label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {availableEpisodeTypes.map((type) => (
+                  <Badge
+                    key={type}
+                    className={`cursor-pointer ${
+                      episodeData.type === type
+                        ? getEpisodeTypeColor(type)
+                        : "badge-unselected"
+                    }`}
+                    onClick={() =>
+                      setEpisodeData({
+                        ...episodeData,
+                        type: type as EpisodeType,
+                      })
+                    }
+                  >
+                    {getEpisodeTypeLabel(type)}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium form-label">備註</label>
+              <Input
+                value={episodeData.note}
+                onChange={(e) =>
+                  setEpisodeData({ ...episodeData, note: e.target.value })
+                }
+                placeholder="可選"
+                className="mt-1"
+              />
+            </div>
+
+            <div className="flex space-x-2 pt-4 border-t">
+              <Button onClick={handleAddEpisode} className="flex-1">
+                <Check className="w-4 h-4 mr-1" />
+                新增 {batchCount} 集
+              </Button>
+              <Button variant="outline" onClick={onClose} className="flex-1">
+                取消
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

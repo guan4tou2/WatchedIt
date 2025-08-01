@@ -30,7 +30,6 @@ import {
   Menu,
   Star,
   Calendar,
-  HelpCircle,
   Info,
 } from "lucide-react";
 import QuickAddEpisode from "@/components/QuickAddEpisode";
@@ -38,7 +37,6 @@ import AniListSearch from "@/components/AniListSearch";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Episode, WorkCreate } from "@/types";
 import CloudSyncStatus from "@/components/CloudSyncStatus";
-import HelpGuide from "@/components/HelpGuide";
 
 export default function HomePage() {
   const {
@@ -77,11 +75,16 @@ export default function HomePage() {
   // 移動端選單狀態
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-  // 教學說明狀態
-  const [showHelpGuide, setShowHelpGuide] = useState(false);
-
   // 資料提醒狀態
-  const [showDataReminder, setShowDataReminder] = useState(true);
+  const [showDataReminder, setShowDataReminder] = useState(() => {
+    if (typeof window !== "undefined") {
+      const dismissed = localStorage.getItem(
+        "watchedit_data_reminder_dismissed"
+      );
+      return dismissed !== "true";
+    }
+    return true;
+  });
 
   useEffect(() => {
     // 檢查是否需要數據遷移
@@ -442,18 +445,15 @@ export default function HomePage() {
                   </p>
                   <div className="flex items-center space-x-2 mt-2">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowHelpGuide(true)}
-                      className="text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700"
-                    >
-                      <HelpCircle className="w-4 h-4 mr-1" />
-                      了解更多
-                    </Button>
-                    <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setShowDataReminder(false)}
+                      onClick={() => {
+                        setShowDataReminder(false);
+                        localStorage.setItem(
+                          "watchedit_data_reminder_dismissed",
+                          "true"
+                        );
+                      }}
                       className="text-yellow-600 dark:text-yellow-400"
                     >
                       不再提醒
@@ -464,7 +464,13 @@ export default function HomePage() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowDataReminder(false)}
+                onClick={() => {
+                  setShowDataReminder(false);
+                  localStorage.setItem(
+                    "watchedit_data_reminder_dismissed",
+                    "true"
+                  );
+                }}
                 className="text-yellow-600 dark:text-yellow-400"
               >
                 <X className="w-4 h-4" />
@@ -473,18 +479,6 @@ export default function HomePage() {
           </CardContent>
         </Card>
       )}
-
-      {/* 教學按鈕 */}
-      <div className="flex justify-center mb-6">
-        <Button
-          variant="outline"
-          onClick={() => setShowHelpGuide(true)}
-          className="flex items-center space-x-2"
-        >
-          <HelpCircle className="w-4 h-4" />
-          <span>查看教學說明</span>
-        </Button>
-      </div>
 
       {/* 搜尋和篩選 */}
       <div className="mb-6 space-y-4">
@@ -734,7 +728,6 @@ export default function HomePage() {
                           </Badge>
                         ))}
                       </div>
-                      <ArrowRight className="w-4 h-4 note-text hover:text-gray-600 dark:hover:text-gray-300" />
                     </div>
                   </CardContent>
                 </Card>
@@ -778,13 +771,6 @@ export default function HomePage() {
 
       {/* 雲端同步狀態 */}
       <CloudSyncStatus />
-
-      {/* 教學說明對話框 */}
-      <HelpGuide
-        isOpen={showHelpGuide}
-        onClose={() => setShowHelpGuide(false)}
-        stats={stats || undefined}
-      />
     </div>
   );
 }

@@ -81,7 +81,7 @@ export default function PlatformInfo() {
             </span>
           </div>
         </div>
-        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        <div className="text-xs-secondary mt-2">
           <div>User Agent:</div>
           <div className="break-all">{platformInfo.userAgent}</div>
         </div>
