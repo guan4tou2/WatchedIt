@@ -1,32 +1,24 @@
-const CACHE_NAME = "watchedit-v3";
-const STATIC_CACHE = "watchedit-static-v3";
-const DYNAMIC_CACHE = "watchedit-dynamic-v3";
-
-// 根據環境決定基礎路徑
-const isProduction =
-  self.location.hostname !== "localhost" &&
-  self.location.hostname !== "127.0.0.1";
-const basePath = isProduction ? "/WatchedIt" : "";
+// Service Worker for PWA
+const CACHE_NAME = "watchedit-v1";
+const STATIC_CACHE = "watchedit-static-v1";
+const DYNAMIC_CACHE = "watchedit-dynamic-v1";
 
 const urlsToCache = [
-  basePath + "/",
-  basePath + "/manifest.json",
-  basePath + "/icons/icon-192x192.png",
-  basePath + "/icons/icon-512x512.png",
-  basePath + "/icons/icon-72x72.png",
-  basePath + "/icons/icon-96x96.png",
-  basePath + "/icons/icon-128x128.png",
-  basePath + "/icons/icon-144x144.png",
-  basePath + "/icons/icon-152x152.png",
-  basePath + "/icons/icon-384x384.png",
+  "/",
+  "/manifest.json",
+  "/icons/icon-192x192.png",
+  "/icons/icon-512x512.png",
 ];
 
-// 安裝 Service Worker
+// 移除硬編碼的路徑前綴
+const basePath = "";
+
+// 安裝事件
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
       console.log("Opened static cache");
-      return cache.addAll(urlsToCache);
+      return cache.addAll(urlsToCache.map((url) => basePath + url));
     })
   );
   self.skipWaiting();

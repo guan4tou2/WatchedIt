@@ -1,3 +1,5 @@
+import { getApiBaseUrl } from "./config";
+
 interface AniListMedia {
   id: number;
   title: {
@@ -59,9 +61,7 @@ class AniListService {
 
   private constructor() {
     // 使用與 api.ts 相同的 API 基礎 URL
-    this.baseUrl =
-      (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") +
-      "/search/anime";
+    this.baseUrl = getApiBaseUrl() + "/search/anime";
   }
 
   static getInstance(): AniListService {

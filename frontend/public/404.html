@@ -1,59 +1,72 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WatchedIt - 看過了</title>
-    <script type="text/javascript">
-      // 單頁應用路由處理
-      (function () {
-        let redirect = sessionStorage.redirect;
-        delete sessionStorage.redirect;
-        if (redirect && redirect != location.href) {
-          history.replaceState(null, null, redirect);
-        }
-      })();
-    </script>
-    <script type="text/javascript">
-      // 處理 SPA 路由重定向
-      (function (l) {
-        if (l.search[1] === "/") {
-          var decoded = l.search
-            .slice(1)
-            .split("&")
-            .map(function (s) {
-              return s.replace(/~and~/g, "&");
-            })
-            .join("?");
-          window.history.replaceState(
-            null,
-            null,
-            l.pathname.slice(0, -1) + decoded + l.hash
-          );
-        }
-      })(window.location);
-    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>頁面未找到 - WatchedIt</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      .container {
+        text-align: center;
+        padding: 2rem;
+        max-width: 500px;
+      }
+      h1 {
+        font-size: 3rem;
+        margin: 0 0 1rem 0;
+        font-weight: 300;
+      }
+      p {
+        font-size: 1.2rem;
+        margin: 0 0 2rem 0;
+        opacity: 0.9;
+      }
+      .btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+        font-size: 1rem;
+      }
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+      }
+      .error-code {
+        font-size: 6rem;
+        font-weight: 100;
+        margin: 0;
+        opacity: 0.5;
+      }
+    </style>
   </head>
   <body>
-    <div id="root">
-      <div
-        style="
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          font-family: Arial, sans-serif;
-        "
-      >
-        <div style="text-align: center">
-          <h1 style="color: #3b82f6; margin-bottom: 1rem">WatchedIt</h1>
-          <p style="color: #666">載入中...</p>
-        </div>
-      </div>
+    <div class="container">
+      <div class="error-code">404</div>
+      <h1>頁面未找到</h1>
+      <p>抱歉，您要尋找的頁面不存在。</p>
+      <a href="/" class="btn">返回首頁</a>
     </div>
     <script>
-      // 重定向到主頁面
-      window.location.href = "/WatchedIt/";
+      // 自動重定向到首頁
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 5000);
     </script>
   </body>
 </html>

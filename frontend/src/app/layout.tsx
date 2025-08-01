@@ -10,9 +10,8 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// 根據環境決定基礎路徑
-const isProduction = process.env.NODE_ENV === "production";
-const basePath = isProduction ? "/WatchedIt" : "";
+// 移除硬編碼的路徑前綴，讓 Vercel 自動處理
+const basePath = "";
 
 export const metadata: Metadata = {
   title: "WatchedIt - 看過了",
@@ -25,6 +24,9 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
   },
   icons: {
     icon: [
@@ -79,10 +81,8 @@ export default function RootLayout({
               // PWA 初始化
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  // 根據環境決定 Service Worker 路徑
-                  const swPath = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                    ? '/sw.js' 
-                    : '/WatchedIt/sw.js';
+                  // 使用相對路徑，讓瀏覽器自動處理
+                  const swPath = '/sw.js';
                   
                   navigator.serviceWorker.register(swPath)
                     .then(function(registration) {

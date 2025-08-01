@@ -30,12 +30,15 @@ import {
   Menu,
   Star,
   Calendar,
+  HelpCircle,
+  Info,
 } from "lucide-react";
 import QuickAddEpisode from "@/components/QuickAddEpisode";
 import AniListSearch from "@/components/AniListSearch";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Episode, WorkCreate } from "@/types";
 import CloudSyncStatus from "@/components/CloudSyncStatus";
+import HelpGuide from "@/components/HelpGuide";
 
 export default function HomePage() {
   const {
@@ -73,6 +76,12 @@ export default function HomePage() {
 
   // 移動端選單狀態
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+  // 教學說明狀態
+  const [showHelpGuide, setShowHelpGuide] = useState(false);
+
+  // 資料提醒狀態
+  const [showDataReminder, setShowDataReminder] = useState(true);
 
   useEffect(() => {
     // 檢查是否需要數據遷移
@@ -417,6 +426,66 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* 資料提醒 */}
+      {showDataReminder && (
+        <Card className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start space-x-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-yellow-800 dark:text-yellow-200">
+                    重要提醒
+                  </h3>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                    您的資料僅儲存在本地設備中。清除瀏覽器資料會導致資料遺失，建議定期備份。
+                  </p>
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowHelpGuide(true)}
+                      className="text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700"
+                    >
+                      <HelpCircle className="w-4 h-4 mr-1" />
+                      了解更多
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowDataReminder(false)}
+                      className="text-yellow-600 dark:text-yellow-400"
+                    >
+                      不再提醒
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDataReminder(false)}
+                className="text-yellow-600 dark:text-yellow-400"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 教學按鈕 */}
+      <div className="flex justify-center mb-6">
+        <Button
+          variant="outline"
+          onClick={() => setShowHelpGuide(true)}
+          className="flex items-center space-x-2"
+        >
+          <HelpCircle className="w-4 h-4" />
+          <span>查看教學說明</span>
+        </Button>
+      </div>
+
       {/* 搜尋和篩選 */}
       <div className="mb-6 space-y-4">
         {/* 搜尋欄 */}
@@ -709,6 +778,13 @@ export default function HomePage() {
 
       {/* 雲端同步狀態 */}
       <CloudSyncStatus />
+
+      {/* 教學說明對話框 */}
+      <HelpGuide
+        isOpen={showHelpGuide}
+        onClose={() => setShowHelpGuide(false)}
+        stats={stats || undefined}
+      />
     </div>
   );
 }

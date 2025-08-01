@@ -669,6 +669,22 @@ export default function SettingsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* 資料儲存說明 */}
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                <div className="flex items-center space-x-2 mb-2">
+                  <AlertTriangle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                  <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                    重要提醒
+                  </span>
+                </div>
+                <div className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+                  <p>• 所有資料儲存在您的瀏覽器本地</p>
+                  <p>• 清除瀏覽器資料會導致資料遺失</p>
+                  <p>• 建議定期備份重要資料</p>
+                  <p>• 不同設備間資料不會自動同步</p>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between">
                 <Label htmlFor="storageMode">儲存模式</Label>
                 <select
@@ -815,6 +831,62 @@ export default function SettingsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* 資料統計 */}
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                <div className="flex items-center space-x-2 mb-3">
+                  <Database className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                    資料統計
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-700 dark:text-blue-300">
+                      作品總數:
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className="text-blue-700 dark:text-blue-300"
+                    >
+                      {works.length}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-700 dark:text-blue-300">
+                      標籤總數:
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className="text-blue-700 dark:text-blue-300"
+                    >
+                      {tags.length}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-700 dark:text-blue-300">
+                      進行中:
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className="text-blue-700 dark:text-blue-300"
+                    >
+                      {works.filter((w) => w.status === "進行中").length}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-700 dark:text-blue-300">
+                      已完結:
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className="text-blue-700 dark:text-blue-300"
+                    >
+                      {works.filter((w) => w.status === "已完結").length}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between">
                 <Label htmlFor="dataBackup">自動備份</Label>
                 <Switch

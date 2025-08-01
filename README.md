@@ -49,6 +49,20 @@ npm run dev
 docker-compose up -d
 ```
 
+### 方式四：環境變數配置
+
+如果需要自定義 API 網址，可以創建 `.env.local` 檔案：
+
+```bash
+# 複製環境變數範例
+cp frontend/env.example frontend/.env.local
+
+# 編輯配置
+# NEXT_PUBLIC_API_URL=http://localhost:8000  # 開發環境
+# NEXT_PUBLIC_API_URL=https://your-api.com   # 生產環境
+# NEXT_PUBLIC_API_URL=                       # 使用相對路徑
+```
+
 ### 方式四：GitHub Pages 部署（已移除）
 
 GitHub Pages 部署已被移除，推薦使用 Vercel 部署。

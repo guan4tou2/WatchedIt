@@ -1,14 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 生產環境配置
-  basePath:
-    process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_BASE_PATH
-      ? process.env.NEXT_PUBLIC_BASE_PATH
-      : "",
-  assetPrefix:
-    process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_BASE_PATH
-      ? process.env.NEXT_PUBLIC_BASE_PATH
-      : "",
+  // 生產環境配置 - 移除 basePath 設定，避免在 Vercel 部署時添加路徑前綴
+  // basePath:
+  //   process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_BASE_PATH
+  //     ? process.env.NEXT_PUBLIC_BASE_PATH
+  //     : "",
+  // assetPrefix:
+  //   process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_BASE_PATH
+  //     ? process.env.NEXT_PUBLIC_BASE_PATH
+  //     : "",
 
   images: {
     domains: ["s4.anilist.co"], // 允許 AniList 圖片
@@ -66,15 +66,22 @@ const nextConfig = {
     ];
   },
 
-  // 重定向配置
-  async redirects() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: process.env.NEXT_PUBLIC_API_URL + "/:path*",
-        permanent: false,
-      },
-    ];
+  // API 代理配置
+  async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    // 如果設定了環境變數，使用代理
+    if (apiUrl && apiUrl !== "http://localhost:8000") {
+      return [
+        {
+          source: "/api/:path*",
+          destination: `${apiUrl}/:path*`,
+        },
+      ];
+    }
+
+    // 否則返回空陣列，讓 Next.js 處理本地 API
+    return [];
   },
 };
 

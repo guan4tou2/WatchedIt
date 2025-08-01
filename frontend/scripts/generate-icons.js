@@ -1,16 +1,9 @@
 const fs = require("fs");
 const path = require("path");
 
-// 建立圖標目錄
-const iconsDir = path.join(__dirname, "../public/icons");
-if (!fs.existsSync(iconsDir)) {
-  fs.mkdirSync(iconsDir, { recursive: true });
-}
-
-// 圖標尺寸列表
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
 
-// 建立 SVG 圖標內容
+// 創建一個簡單的 SVG 圖標
 const svgContent = `
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="512" height="512" rx="128" fill="#3B82F6"/>
@@ -20,45 +13,26 @@ const svgContent = `
 </svg>
 `;
 
-// 建立一個簡單的 HTML 文件來生成圖標
-const htmlContent = `
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Icon Generator</title>
-</head>
-<body>
-  <div id="icons"></div>
-  <script>
-    const svg = \`${svgContent}\`;
-    const sizes = [${sizes.join(", ")}];
-    
-    sizes.forEach(size => {
-      const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      
-      const img = new Image();
-      img.onload = function() {
-        ctx.drawImage(img, 0, 0, size, size);
-        
-        const link = document.createElement('a');
-        link.download = \`icon-\${size}x\${size}.png\`;
-        link.href = canvas.toDataURL();
-        link.click();
-      };
-      img.src = 'data:image/svg+xml;base64,' + btoa(svg);
-    });
-  </script>
-</body>
-</html>
-`;
+function generateIcon(size) {
+  const iconPath = path.join(
+    __dirname,
+    "../public/icons",
+    `icon-${size}x${size}.png`
+  );
 
-// 寫入 HTML 文件
-const htmlPath = path.join(__dirname, "icon-generator.html");
-fs.writeFileSync(htmlPath, htmlContent);
+  // 創建一個簡單的 base64 編碼的圖片（藍色背景）
+  const iconBase64 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`;
+  
+  const buffer = Buffer.from(iconBase64, "base64");
+  fs.writeFileSync(iconPath, buffer);
 
-console.log("圖標生成器已建立:", htmlPath);
-console.log("請在瀏覽器中打開此文件來生成圖標");
-console.log("然後將生成的圖標移動到 public/icons/ 目錄");
+  console.log(`Generated icon-${size}x${size}.png`);
+}
+
+// 生成所有圖標
+sizes.forEach((size) => {
+  generateIcon(size);
+});
+
+console.log("All icons generated successfully!");
+console.log("Note: These are placeholder icons. For production, use proper image generation tools.");

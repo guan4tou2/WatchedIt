@@ -7,8 +7,9 @@ import {
   AnimeSearchResult,
   Stats,
 } from "@/types";
+import { getApiBaseUrl } from "./config";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = getApiBaseUrl();
 
 class ApiClient {
   private baseUrl: string;
