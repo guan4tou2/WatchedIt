@@ -106,33 +106,72 @@ docker-compose up -d
 - **本地儲存測試**: http://localhost:3000/local-test
 - **API 測試**: http://localhost:3000/test
 
-## 🚀 部署
+## 🚀 生產部署
 
-詳細的部署指南請參考 [DEPLOYMENT.md](./DEPLOYMENT.md)
+詳細的生產部署指南請參考 [DEPLOYMENT.md](./DEPLOYMENT.md)
 
-### GitHub Pages 部署（推薦）
+### 推薦部署方案
 
-1. 推送代碼到 GitHub
-2. 啟用 GitHub Pages
-3. 配置 GitHub Actions 權限
-4. 自動部署完成
-
-訪問地址：`https://[您的用戶名].github.io/WatchedIt/`
-
-### 其他部署方式
+#### 方案一：Vercel 部署（最簡單）
 
 ```bash
-# Vercel (推薦)
+# 安裝 Vercel CLI
 npm i -g vercel
+
+# 登入並部署
+vercel login
+cd frontend
 vercel --prod
-
-# Netlify
-npm run build
-# 上傳 out 目錄到 Netlify
-
-# Docker
-docker-compose up -d --build
 ```
+
+**優點**: 零配置、自動 HTTPS、全球 CDN、免費額度充足
+
+#### 方案二：Netlify 部署
+
+```bash
+# 構建並部署
+cd frontend
+npm run build
+netlify deploy --prod --dir=out
+```
+
+**優點**: 簡單易用、自動 HTTPS、表單處理支援
+
+#### 方案三：Docker 生產部署
+
+```bash
+# 構建並啟動生產環境
+docker-compose -f docker-compose.prod.yml up -d --build
+
+# 查看服務狀態
+docker-compose ps
+```
+
+**優點**: 環境一致、易於擴展、完整控制
+
+### 生產環境配置
+
+1. **環境變數設置**
+   - 創建 `.env.production` 文件
+   - 配置 API URL 和域名
+   - 設置安全密鑰
+
+2. **安全配置**
+   - 啟用 HTTPS 強制
+   - 配置 CORS 策略
+   - 設置安全標頭
+
+3. **性能優化**
+   - 啟用 Gzip 壓縮
+   - 配置 CDN
+   - 優化資源載入
+
+### 監控和維護
+
+- **錯誤追蹤**: 集成 Sentry
+- **性能監控**: 使用 Vercel Analytics
+- **日誌管理**: 配置結構化日誌
+- **健康檢查**: 設置端點監控
 
 ## 🧪 測試
 
