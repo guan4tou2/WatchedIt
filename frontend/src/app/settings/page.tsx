@@ -657,6 +657,22 @@ export default function SettingsPage() {
                     <RefreshCw className="w-4 h-4 mr-2" />
                     檢查更新
                   </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      localStorage.removeItem("watchedit_install_prompt_shown");
+                      localStorage.removeItem("watchedit_pwa_installed");
+                      setMessage({
+                        type: "success",
+                        text: "已重置 PWA 安裝提示狀態",
+                      });
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    重置安裝提示
+                  </Button>
                 </div>
 
                 <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">

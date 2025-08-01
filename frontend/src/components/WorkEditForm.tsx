@@ -167,7 +167,7 @@ export default function WorkEditForm({
       <div>
         <label className="form-label">評分</label>
         <div className="flex items-center space-x-2 mt-2">
-          {[1, 2, 3, 4, 5].map((rating) => (
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
             <button
               key={rating}
               type="button"
@@ -190,7 +190,7 @@ export default function WorkEditForm({
           ))}
           {formData.rating && (
             <span className="text-sm description-text ml-2">
-              {formData.rating}/5
+              {formData.rating}/10
             </span>
           )}
         </div>

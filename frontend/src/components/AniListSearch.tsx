@@ -85,7 +85,7 @@ export default function AniListSearch({
     setDetailModalOpen(true);
   };
 
-  const handleConfirmSelection = () => {
+  const handleConfirmSelection = async () => {
     if (!selectedAnime) return;
 
     const workData: WorkCreate = {
@@ -125,11 +125,13 @@ ${
 
     try {
       // 新增作品（store 會自動檢查重複）
-      const newWork = createWork(workData);
+      const newWork = await createWork(workData);
+      console.log("新增作品成功:", newWork);
       onClose();
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "新增作品失敗";
+      console.error("新增作品失敗:", error);
       alert(errorMessage);
       // 不關閉視窗，讓用戶看到錯誤訊息
     }

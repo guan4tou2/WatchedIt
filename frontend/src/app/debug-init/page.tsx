@@ -1,250 +1,225 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useWorkStore } from "@/store/useWorkStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useWorkStore } from "@/store/useWorkStore";
-import { workStorage, tagStorage } from "@/lib/indexedDB";
-
-// 設定為動態渲染，避免服務器端渲染問題
-export const dynamic = "force-dynamic";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Work, WorkCreate, Tag } from "@/types";
+import { getFullPath } from "@/lib/utils";
+import { ArrowLeft, Save, Star, Plus } from "lucide-react";
 
 export default function DebugInitPage() {
+  const {
+    works,
+    tags,
+    stats,
+    loading,
+    error,
+    initialize,
+    fetchWorks,
+    createWork,
+  } = useWorkStore();
+
   const [debugInfo, setDebugInfo] = useState<any>({});
-  const [logs, setLogs] = useState<string[]>([]);
-  const { resetSampleDataFlag } = useWorkStore();
-
-  const addLog = (message: string) => {
-    const timestamp = new Date().toLocaleTimeString();
-    setLogs((prev) => [...prev, `[${timestamp}] ${message}`]);
-  };
-
-  const checkInitializationStatus = async () => {
-    try {
-      addLog("開始檢查初始化狀態...");
-
-      // 檢查 localStorage 標記
-      const hasInitialized = localStorage.getItem(
-        "watchedit_sample_initialized"
-      );
-      addLog(`localStorage 標記: ${hasInitialized ? "已初始化" : "未初始化"}`);
-
-      // 檢查 IndexedDB 數據
-      const works = await workStorage.getAll();
-      const tags = await tagStorage.getAll();
-      addLog(`IndexedDB 作品數量: ${works.length}`);
-      addLog(`IndexedDB 標籤數量: ${tags.length}`);
-
-      // 檢查作品詳情
-      const workTitles = works.map((w) => w.title);
-      addLog(`作品標題: ${workTitles.join(", ")}`);
-
-      setDebugInfo({
-        hasInitialized: !!hasInitialized,
-        worksCount: works.length,
-        tagsCount: tags.length,
-        workTitles,
-        works,
-        tags,
-      });
-    } catch (error) {
-      addLog(`檢查失敗: ${error}`);
-    }
-  };
-
-  const clearAllData = async () => {
-    try {
-      addLog("開始清除所有數據...");
-
-      await workStorage.clearAll();
-      await tagStorage.clearAll();
-
-      addLog("數據已清除");
-      await checkInitializationStatus();
-    } catch (error) {
-      addLog(`清除失敗: ${error}`);
-    }
-  };
-
-  const resetFlag = () => {
-    try {
-      addLog("重置初始化標記...");
-      resetSampleDataFlag();
-      addLog("標記已重置");
-      checkInitializationStatus();
-    } catch (error) {
-      addLog(`重置失敗: ${error}`);
-    }
-  };
-
-  const simulatePageReload = async () => {
-    try {
-      addLog("模擬頁面重新載入...");
-
-      // 清除當前狀態
-      setDebugInfo({});
-      setLogs([]);
-
-      // 重新初始化
-      const { initialize } = useWorkStore.getState();
-      await initialize();
-
-      addLog("重新初始化完成");
-      await checkInitializationStatus();
-    } catch (error) {
-      addLog(`模擬失敗: ${error}`);
-    }
-  };
-
-  const forceInitialize = async () => {
-    try {
-      addLog("強制初始化示例數據...");
-
-      // 清除標記
-      resetSampleDataFlag();
-
-      // 清除數據
-      await workStorage.clearAll();
-      await tagStorage.clearAll();
-
-      // 重新初始化
-      const { initialize } = useWorkStore.getState();
-      await initialize();
-
-      addLog("強制初始化完成");
-      await checkInitializationStatus();
-    } catch (error) {
-      addLog(`強制初始化失敗: ${error}`);
-    }
-  };
+  const [testWork, setTestWork] = useState<WorkCreate>({
+    title: "測試作品",
+    type: "動畫",
+    status: "進行中",
+    year: 2024,
+    rating: 4,
+    review: "測試評論",
+    note: "測試備註",
+    source: "手動測試",
+    tags: [],
+    episodes: [],
+  });
 
   useEffect(() => {
-    checkInitializationStatus();
-  }, []);
+    // 初始化
+    initialize();
+    fetchWorks();
+  }, [initialize, fetchWorks]);
+
+  useEffect(() => {
+    // 更新調試資訊
+    setDebugInfo({
+      worksCount: works.length,
+      works: works,
+      loading,
+      error,
+      stats,
+      tagsCount: tags.length,
+      tags: tags,
+    });
+  }, [works, loading, error, stats, tags]);
+
+  const handleCreateTestWork = async () => {
+    try {
+      const newWork = await createWork(testWork);
+      console.log("新增的作品:", newWork);
+      alert(`作品新增成功！ID: ${newWork.id}`);
+    } catch (error) {
+      console.error("新增作品失敗:", error);
+      alert(`新增作品失敗: ${error}`);
+    }
+  };
+
+  const handleRefresh = async () => {
+    await fetchWorks();
+  };
 
   return (
-    <div className="container mx-auto p-4 space-y-4">
-      <h1 className="text-2xl font-bold">🔍 初始化調試工具</h1>
+    <div className="container mx-auto p-6">
+      <div className="flex items-center mb-6">
+        <Button
+          variant="outline"
+          onClick={() => window.history.back()}
+          className="mr-4"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          返回
+        </Button>
+        <h1 className="text-2xl font-bold">調試初始化</h1>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>📊 當前狀態</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <p>
-            <strong>已初始化標記:</strong>{" "}
-            {debugInfo.hasInitialized ? "✅ 是" : "❌ 否"}
-          </p>
-          <p>
-            <strong>作品數量:</strong> {debugInfo.worksCount || 0}
-          </p>
-          <p>
-            <strong>標籤數量:</strong> {debugInfo.tagsCount || 0}
-          </p>
-          <p>
-            <strong>作品標題:</strong>{" "}
-            {debugInfo.workTitles?.join(", ") || "無"}
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>🛠️ 操作工具</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Button onClick={checkInitializationStatus} className="w-full">
-            重新檢查狀態
-          </Button>
-          <Button
-            onClick={clearAllData}
-            variant="destructive"
-            className="w-full"
-          >
-            清除所有數據
-          </Button>
-          <Button onClick={resetFlag} variant="outline" className="w-full">
-            重置初始化標記
-          </Button>
-          <Button
-            onClick={simulatePageReload}
-            variant="secondary"
-            className="w-full"
-          >
-            模擬頁面重新載入
-          </Button>
-          <Button
-            onClick={forceInitialize}
-            variant="default"
-            className="w-full"
-          >
-            強制初始化示例數據
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>📝 調試日誌</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-gray-100 p-4 rounded max-h-60 overflow-y-auto">
-            {logs.map((log, index) => (
-              <div key={index} className="text-sm font-mono">
-                {log}
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>💡 測試步驟</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <p>
-            <strong>問題重現步驟:</strong>
-          </p>
-          <ol className="list-decimal list-inside space-y-1">
-            <li>點擊「清除所有數據」</li>
-            <li>點擊「模擬頁面重新載入」</li>
-            <li>檢查是否還會出現預設作品</li>
-            <li>如果出現，說明修復無效</li>
-          </ol>
-
-          <p className="mt-4">
-            <strong>預期結果:</strong>
-          </p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>清除數據後，作品數量應該為 0</li>
-            <li>重新載入後，如果標記存在，不應該重新初始化</li>
-            <li>只有重置標記後重新載入才會初始化示例數據</li>
-          </ul>
-        </CardContent>
-      </Card>
-
-      {debugInfo.works && debugInfo.works.length > 0 && (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 調試資訊 */}
         <Card>
           <CardHeader>
-            <CardTitle>📋 作品詳情</CardTitle>
+            <CardTitle>調試資訊</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {debugInfo.works.map((work: any) => (
-                <div key={work.id} className="p-2 border rounded">
-                  <p>
-                    <strong>{work.title}</strong>
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    ID: {work.id} | 類型: {work.type} | 來源: {work.source}
-                  </p>
-                </div>
-              ))}
+              <p>
+                <strong>作品數量:</strong> {debugInfo.worksCount}
+              </p>
+              <p>
+                <strong>載入狀態:</strong> {loading ? "載入中" : "已完成"}
+              </p>
+              <p>
+                <strong>錯誤:</strong> {error || "無"}
+              </p>
+              <p>
+                <strong>標籤數量:</strong> {debugInfo.tagsCount}
+              </p>
+            </div>
+
+            <Button onClick={handleRefresh} className="mt-4">
+              重新載入
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* 測試新增作品 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>測試新增作品</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">標題</label>
+                <Input
+                  value={testWork.title}
+                  onChange={(e) =>
+                    setTestWork({ ...testWork, title: e.target.value })
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">類型</label>
+                <select
+                  value={testWork.type}
+                  onChange={(e) =>
+                    setTestWork({
+                      ...testWork,
+                      type: e.target.value as Work["type"],
+                    })
+                  }
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="動畫">動畫</option>
+                  <option value="電影">電影</option>
+                  <option value="電視劇">電視劇</option>
+                  <option value="小說">小說</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">狀態</label>
+                <select
+                  value={testWork.status}
+                  onChange={(e) =>
+                    setTestWork({
+                      ...testWork,
+                      status: e.target.value as Work["status"],
+                    })
+                  }
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="進行中">進行中</option>
+                  <option value="已完結">已完結</option>
+                  <option value="暫停">暫停</option>
+                  <option value="放棄">放棄</option>
+                </select>
+              </div>
+
+              <Button onClick={handleCreateTestWork} className="w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                新增測試作品
+              </Button>
             </div>
           </CardContent>
         </Card>
-      )}
+      </div>
+
+      {/* 作品列表 */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>作品列表 ({works.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {works.length === 0 ? (
+            <p className="text-gray-500">沒有作品</p>
+          ) : (
+            <div className="space-y-2">
+              {works.map((work) => (
+                <div
+                  key={work.id}
+                  className="p-3 border rounded flex justify-between items-center"
+                >
+                  <div>
+                    <h3 className="font-medium">{work.title}</h3>
+                    <p className="text-sm text-gray-600">
+                      {work.type} • {work.status} • {work.year}
+                    </p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Badge variant="outline">{work.type}</Badge>
+                    <Badge variant="outline">{work.status}</Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 原始數據 */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>原始數據</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto">
+            {JSON.stringify(debugInfo, null, 2)}
+          </pre>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { AniListMedia, anilistService } from "@/lib/anilist";
 import { WorkCreate } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
+import { useToast } from "@/components/ui/toast";
 import {
   X,
   Star,
@@ -37,6 +38,7 @@ export default function AnimeDetailModal({
   const [isAdding, setIsAdding] = useState(false);
   const [duplicateMessage, setDuplicateMessage] = useState<string | null>(null);
   const { createWork } = useWorkStore();
+  const { showToast } = useToast();
 
   if (!isOpen || !anime) return null;
 
@@ -80,6 +82,9 @@ ${
       // 新增作品（store 會自動檢查重複）
       const newWork = await createWork(workData);
 
+      // 顯示成功提示
+      showToast("作品新增成功！", "success");
+
       // 只有在成功新增後才關閉彈窗
       onClose();
 
@@ -92,6 +97,7 @@ ${
           ? error.message
           : "新增作品時發生錯誤，請稍後再試。";
       setDuplicateMessage(errorMessage);
+      showToast("新增作品失敗", "error");
       // 不關閉彈窗，讓用戶看到錯誤訊息
     } finally {
       setIsAdding(false);

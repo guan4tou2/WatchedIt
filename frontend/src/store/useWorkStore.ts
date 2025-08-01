@@ -144,6 +144,10 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
       const stats = await workStorage.getStats();
 
       set({ works, stats, loading: false });
+      console.log("createWork: 新增作品成功，更新狀態", {
+        worksCount: works.length,
+        newWork,
+      });
       return newWork;
     } catch (error) {
       const errorMessage =

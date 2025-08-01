@@ -151,7 +151,7 @@ export default function SearchFilter({
     selectedYear ||
     selectedTags.length > 0 ||
     ratingRange.min !== 0 ||
-    ratingRange.max !== 5 ||
+    ratingRange.max !== 10 ||
     progressFilter;
 
   // 快速篩選選項
@@ -193,7 +193,7 @@ export default function SearchFilter({
     },
     {
       label: "高評分",
-      action: () => onRatingChange({ min: 4, max: 5 }),
+      action: () => onRatingChange({ min: 8, max: 10 }),
       icon: Star,
       color:
         "bg-yellow-100 dark:bg-yellow-900/20 hover:bg-yellow-200 dark:hover:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200",
@@ -397,7 +397,7 @@ export default function SearchFilter({
               標籤: {tag.name}
             </Badge>
           ))}
-          {(ratingRange.min !== 0 || ratingRange.max !== 5) && (
+          {(ratingRange.min !== 0 || ratingRange.max !== 10) && (
             <Badge
               variant="secondary"
               className="bg-yellow-100 dark:bg-yellow-800"
@@ -536,7 +536,7 @@ export default function SearchFilter({
                             <input
                               type="range"
                               min="0"
-                              max="5"
+                              max="10"
                               step="0.5"
                               value={ratingRange.min}
                               onChange={(e) =>
@@ -552,7 +552,7 @@ export default function SearchFilter({
                             <input
                               type="range"
                               min="0"
-                              max="5"
+                              max="10"
                               step="0.5"
                               value={ratingRange.max}
                               onChange={(e) =>
@@ -567,7 +567,7 @@ export default function SearchFilter({
                           </div>
                         </div>
                         <div className="flex items-center justify-center space-x-2">
-                          {[0, 1, 2, 3, 4, 5].map((rating) => (
+                          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
                             <button
                               key={rating}
                               onClick={() =>

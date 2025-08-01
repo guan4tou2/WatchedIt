@@ -32,7 +32,7 @@ export default function WorkDetailClient() {
 
   useEffect(() => {
     const loadWork = async () => {
-      const id = searchParams?.get('id');
+      const id = searchParams?.get("id");
       if (id) {
         setIsLoading(true);
         try {
@@ -206,7 +206,7 @@ export default function WorkDetailClient() {
                 <div>
                   <label className="form-label">評分</label>
                   <p className="mt-1 title-text">
-                    {work.rating ? `${work.rating}/5` : "未評分"}
+                    {work.rating ? `${work.rating}/10` : "未評分"}
                   </p>
                 </div>
                 <div>

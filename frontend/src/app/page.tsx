@@ -43,6 +43,7 @@ import BatchEditModal from "@/components/BatchEditModal";
 import BatchDeleteModal from "@/components/BatchDeleteModal";
 import { Episode, WorkCreate, Tag } from "@/types";
 import CloudSyncStatus from "@/components/CloudSyncStatus";
+import { useToast } from "@/components/ui/toast";
 
 export default function HomePage() {
   const {
@@ -72,7 +73,7 @@ export default function HomePage() {
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [ratingRange, setRatingRange] = useState<{ min: number; max: number }>({
     min: 0,
-    max: 5,
+    max: 10,
   });
   const [progressFilter, setProgressFilter] = useState<string>("");
 
@@ -83,6 +84,9 @@ export default function HomePage() {
   );
   const [showBatchEditModal, setShowBatchEditModal] = useState(false);
   const [showBatchDeleteModal, setShowBatchDeleteModal] = useState(false);
+
+  // Toast 通知
+  const { showToast, ToastContainer } = useToast();
 
   // 遷移狀態
   const [migrationStatus, setMigrationStatus] = useState<{
@@ -119,7 +123,7 @@ export default function HomePage() {
 
     // 註冊 PWA 服務
     pwaService.registerServiceWorker();
-  }, [initialize, fetchWorks, fetchStats]);
+  }, []);
 
   const checkMigrationStatus = async () => {
     try {
@@ -235,77 +239,86 @@ export default function HomePage() {
   };
 
   // 篩選作品
-  const filteredWorks = works.filter((work) => {
-    // 搜尋篩選
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      const matchesTitle = work.title.toLowerCase().includes(searchLower);
-      const matchesReview =
-        work.review?.toLowerCase().includes(searchLower) || false;
-      const matchesNote =
-        work.note?.toLowerCase().includes(searchLower) || false;
-      const matchesTags =
-        work.tags?.some((tag) =>
-          tag.name.toLowerCase().includes(searchLower)
-        ) || false;
-      if (!matchesTitle && !matchesReview && !matchesNote && !matchesTags)
-        return false;
-    }
-
-    // 類型篩選
-    if (selectedType && work.type !== selectedType) return false;
-
-    // 狀態篩選
-    if (selectedStatus && work.status !== selectedStatus) return false;
-
-    // 年份篩選
-    if (selectedYear && work.year?.toString() !== selectedYear) return false;
-
-    // 標籤篩選
-    if (selectedTags.length > 0) {
-      const workTagIds = work.tags?.map((tag) => tag.id) || [];
-      const hasSelectedTag = selectedTags.some((tag) =>
-        workTagIds.includes(tag.id)
-      );
-      if (!hasSelectedTag) return false;
-    }
-
-    // 評分篩選
-    if (work.rating) {
-      if (work.rating < ratingRange.min || work.rating > ratingRange.max) {
-        return false;
+  const filteredWorks = works
+    .filter((work) => {
+      // 搜尋篩選
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const matchesTitle = work.title.toLowerCase().includes(searchLower);
+        const matchesReview =
+          work.review?.toLowerCase().includes(searchLower) || false;
+        const matchesNote =
+          work.note?.toLowerCase().includes(searchLower) || false;
+        const matchesTags =
+          work.tags?.some((tag) =>
+            tag.name.toLowerCase().includes(searchLower)
+          ) || false;
+        if (!matchesTitle && !matchesReview && !matchesNote && !matchesTags)
+          return false;
       }
-    }
 
-    // 進度篩選
-    if (progressFilter && work.episodes && work.episodes.length > 0) {
-      const watchedCount = work.episodes.filter((ep) => ep.watched).length;
-      const totalEpisodes = work.episodes.length;
-      const progress =
-        totalEpisodes > 0 ? (watchedCount / totalEpisodes) * 100 : 0;
+      // 類型篩選
+      if (selectedType && work.type !== selectedType) return false;
 
-      switch (progressFilter) {
-        case "未開始":
-          if (watchedCount > 0) return false;
-          break;
-        case "進行中":
-          if (watchedCount === 0 || watchedCount === totalEpisodes)
-            return false;
-          break;
-        case "已完成":
-          if (watchedCount !== totalEpisodes) return false;
-          break;
-        case "高進度":
-          if (progress < 80) return false;
-          break;
-        case "低進度":
-          if (progress >= 20) return false;
-          break;
+      // 狀態篩選
+      if (selectedStatus && work.status !== selectedStatus) return false;
+
+      // 年份篩選
+      if (selectedYear && work.year?.toString() !== selectedYear) return false;
+
+      // 標籤篩選
+      if (selectedTags.length > 0) {
+        const workTagIds = work.tags?.map((tag) => tag.id) || [];
+        const hasSelectedTag = selectedTags.some((tag) =>
+          workTagIds.includes(tag.id)
+        );
+        if (!hasSelectedTag) return false;
       }
-    }
 
-    return true;
-  });
+      // 評分篩選
+      if (work.rating) {
+        // 檢查評分是否在範圍內
+        const rating = work.rating;
+        if (rating < ratingRange.min || rating > ratingRange.max) {
+          return false;
+        }
+      }
+
+      // 進度篩選
+      if (progressFilter && work.episodes && work.episodes.length > 0) {
+        const watchedCount = work.episodes.filter((ep) => ep.watched).length;
+        const totalEpisodes = work.episodes.length;
+        const progress =
+          totalEpisodes > 0 ? (watchedCount / totalEpisodes) * 100 : 0;
+
+        switch (progressFilter) {
+          case "未開始":
+            if (watchedCount > 0) return false;
+            break;
+          case "進行中":
+            if (watchedCount === 0 || watchedCount === totalEpisodes)
+              return false;
+            break;
+          case "已完成":
+            if (watchedCount !== totalEpisodes) return false;
+            break;
+          case "高進度":
+            if (progress < 80) return false;
+            break;
+          case "低進度":
+            if (progress >= 20) return false;
+            break;
+        }
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      // 按新增時間排序，最新的在前面
+      const dateA = new Date(a.date_added || 0);
+      const dateB = new Date(b.date_added || 0);
+      return dateB.getTime() - dateA.getTime();
+    });
 
   // 清除所有篩選
   const clearFilters = () => {
@@ -314,7 +327,7 @@ export default function HomePage() {
     setSelectedStatus("");
     setSelectedYear("");
     setSelectedTags([]);
-    setRatingRange({ min: 0, max: 5 });
+    setRatingRange({ min: 0, max: 10 });
     setProgressFilter("");
   };
 
@@ -680,7 +693,7 @@ export default function HomePage() {
               selectedYear ||
               selectedTags.length > 0 ||
               ratingRange.min !== 0 ||
-              ratingRange.max !== 5 ||
+              ratingRange.max !== 10 ||
               progressFilter
                 ? "搜尋結果"
                 : "最近作品"}
@@ -767,7 +780,7 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {filteredWorks.slice(0, 6).map((work) => {
+            {filteredWorks.map((work) => {
               const episodes = work.episodes || [];
               const watchedCount = episodes.filter((ep) => ep.watched).length;
               const totalEpisodes = episodes.length;
@@ -858,7 +871,7 @@ export default function HomePage() {
                     {work.rating && (
                       <div className="flex items-center justify-end">
                         <Star className="w-4 h-4 star-icon mr-1" />
-                        <span className="text-sm">{work.rating}/5</span>
+                        <span className="text-sm">{work.rating}/10</span>
                       </div>
                     )}
 
@@ -900,16 +913,6 @@ export default function HomePage() {
             })}
           </div>
         )}
-
-        {/* 查看更多按鈕 */}
-        {filteredWorks.length > 6 && (
-          <div className="text-center">
-            <Button variant="outline">
-              查看更多作品
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* 快速新增集數對話框 */}
@@ -930,7 +933,21 @@ export default function HomePage() {
       {/* AniList 搜尋對話框 */}
       <AniListSearch
         onSelectAnime={handleAniListSelect}
-        onClose={() => setShowAniListSearch(false)}
+        onClose={async () => {
+          setShowAniListSearch(false);
+          // 重新載入數據以顯示新增的作品
+          try {
+            console.log("AniListSearch onClose: 開始重新載入數據");
+            await fetchWorks();
+            await fetchStats();
+            console.log("AniListSearch onClose: 重新載入數據完成");
+            // 顯示成功提示
+            showToast("作品新增成功！", "success");
+          } catch (error) {
+            console.error("重新載入數據失敗:", error);
+            showToast("重新載入數據失敗", "error");
+          }
+        }}
         isOpen={showAniListSearch}
       />
 
@@ -977,6 +994,9 @@ export default function HomePage() {
         selectedWorks={selectedWorks}
         onBatchDelete={handleBatchDelete}
       />
+
+      {/* Toast 通知容器 */}
+      <ToastContainer />
     </div>
   );
 }

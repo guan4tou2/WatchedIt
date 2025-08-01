@@ -75,12 +75,16 @@ export const workStorage = {
       reminder_enabled: workData.reminder_enabled ?? false,
       date_added: getCurrentTimestamp(),
       date_updated: undefined,
-      tags: [],
+      tags: workData.tags || [],
       episodes: workData.episodes || [],
     };
 
     works.push(newWork);
     localStorage.setItem(STORAGE_KEYS.WORKS, JSON.stringify(works));
+    console.log("workStorage.create: 新增作品", {
+      newWork,
+      totalWorks: works.length,
+    });
     return newWork;
   },
 

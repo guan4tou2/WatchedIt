@@ -12,6 +12,7 @@ import { useWorkStore } from "@/store/useWorkStore";
 import TagSelector from "@/components/TagSelector";
 import { getFullPath } from "@/lib/utils";
 import { ArrowLeft, Save, Star, Plus } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 
 export default function NewWorkPage() {
   const router = useRouter();
@@ -30,6 +31,9 @@ export default function NewWorkPage() {
   });
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+
+  // Toast 通知
+  const { showToast, ToastContainer } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,10 +55,14 @@ export default function NewWorkPage() {
 
       const createdWork = await createWork(newWork);
 
-      // 導航到新創建的作品詳情頁面
-      router.push(getFullPath(`/works/detail?id=${createdWork.id}`));
+      // 顯示成功提示
+      showToast("作品新增成功！", "success");
+
+      // 導航回主頁面
+      router.push(getFullPath("/"));
     } catch (error) {
       console.error("創建作品失敗:", error);
+      showToast("創建作品失敗", "error");
     } finally {
       setIsLoading(false);
     }
@@ -232,7 +240,7 @@ export default function NewWorkPage() {
                     評分
                   </label>
                   <div className="flex items-center space-x-2 mt-2">
-                    {[1, 2, 3, 4, 5].map((rating) => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
                       <button
                         key={rating}
                         type="button"
@@ -255,7 +263,7 @@ export default function NewWorkPage() {
                     ))}
                     {formData.rating && (
                       <span className="text-sm status-text ml-2">
-                        {formData.rating}/5
+                        {formData.rating}/10
                       </span>
                     )}
                   </div>
@@ -370,7 +378,7 @@ export default function NewWorkPage() {
               {formData.rating && (
                 <div className="flex items-center text-sm">
                   <Star className="w-4 h-4 mr-1 text-yellow-500" />
-                  評分: {formData.rating}/5
+                  評分: {formData.rating}/10
                 </div>
               )}
 
@@ -425,6 +433,9 @@ export default function NewWorkPage() {
           </Card>
         </div>
       </div>
+
+      {/* Toast 通知容器 */}
+      <ToastContainer />
     </div>
   );
 }

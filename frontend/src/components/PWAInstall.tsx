@@ -9,17 +9,34 @@ export default function PWAInstall() {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
   useEffect(() => {
+    // 檢查是否已經顯示過安裝提示或已安裝
+    const hasShownInstallPrompt = localStorage.getItem(
+      "watchedit_install_prompt_shown"
+    );
+    const hasInstalledPWA = localStorage.getItem("watchedit_pwa_installed");
+
+    // 如果已經安裝過，直接返回
+    if (hasInstalledPWA) {
+      return;
+    }
+
     // 監聽 beforeinstallprompt 事件
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShowInstallPrompt(true);
+
+      // 只有在首次使用時才顯示安裝提示
+      if (!hasShownInstallPrompt) {
+        setShowInstallPrompt(true);
+      }
     };
 
     // 監聽 appinstalled 事件
     const handleAppInstalled = () => {
       setShowInstallPrompt(false);
       setDeferredPrompt(null);
+      // 標記已安裝
+      localStorage.setItem("watchedit_pwa_installed", "true");
       console.log("PWA was installed");
     };
 
@@ -43,15 +60,21 @@ export default function PWAInstall() {
 
     if (outcome === "accepted") {
       console.log("User accepted the install prompt");
+      // 標記已安裝
+      localStorage.setItem("watchedit_pwa_installed", "true");
     } else {
       console.log("User dismissed the install prompt");
     }
 
+    // 標記已顯示過安裝提示
+    localStorage.setItem("watchedit_install_prompt_shown", "true");
     setDeferredPrompt(null);
     setShowInstallPrompt(false);
   };
 
   const handleDismiss = () => {
+    // 標記已顯示過安裝提示
+    localStorage.setItem("watchedit_install_prompt_shown", "true");
     setShowInstallPrompt(false);
   };
 
