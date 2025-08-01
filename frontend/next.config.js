@@ -21,6 +21,12 @@ const nextConfig = {
 
   // 輸出配置 - 使用 export 以支援 GitHub Pages
   output: "export",
+
+  // 確保靜態資源正確處理
+  trailingSlash: true,
+
+  // 處理 GitHub Pages 的路由
+  skipTrailingSlashRedirect: true,
 };
 
 module.exports = nextConfig;

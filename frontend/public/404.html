@@ -1,20 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
   <head>
-    <meta charset="utf-8">
-    <title>404 - Page Not Found</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WatchedIt - 看過了</title>
     <script type="text/javascript">
-      // Don't redirect on localhost
-      if (window.location.hostname !== 'localhost') {
-        var path = window.location.pathname;
-        var repo = '/WatchedIt'; // Change this to your repository name
-
-        // Redirect to the correct path
-        window.location.href = repo + '/?path=' + path.substring(repo.length);
-      }
+      // 單頁應用路由處理
+      (function () {
+        let redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect != location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
+    <script type="text/javascript">
+      // 處理 GitHub Pages 的路由
+      (function (l) {
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      })(window.location);
     </script>
   </head>
   <body>
-    <p>If you are not redirected automatically, follow this <a id="redirect-link" href="/WatchedIt/">link to the home page</a>.</p>
+    <div id="root">
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          font-family: Arial, sans-serif;
+        "
+      >
+        <div style="text-align: center">
+          <h1 style="color: #3b82f6; margin-bottom: 1rem">WatchedIt</h1>
+          <p style="color: #666">載入中...</p>
+        </div>
+      </div>
+    </div>
+    <script>
+      // 重定向到主頁面
+      window.location.href = "/WatchedIt/";
+    </script>
   </body>
 </html>

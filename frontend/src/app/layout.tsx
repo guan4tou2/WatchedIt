@@ -9,10 +9,14 @@ import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
+// 根據環境決定基礎路徑
+const isProduction = process.env.NODE_ENV === "production";
+const basePath = isProduction ? "/WatchedIt" : "";
+
 export const metadata: Metadata = {
   title: "WatchedIt - 看過了",
   description: "記錄和管理看過的動畫、電影、電視劇、小說等作品",
-  manifest: "/manifest.json",
+  manifest: `${basePath}/manifest.json`,
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -23,11 +27,23 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+      {
+        url: `${basePath}/icons/icon-192x192.png`,
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: `${basePath}/icons/icon-512x512.png`,
+        sizes: "512x512",
+        type: "image/png",
+      },
     ],
     apple: [
-      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      {
+        url: `${basePath}/icons/icon-192x192.png`,
+        sizes: "192x192",
+        type: "image/png",
+      },
     ],
   },
 };
@@ -61,7 +77,12 @@ export default function RootLayout({
               // PWA 初始化
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js')
+                  // 根據環境決定 Service Worker 路徑
+                  const swPath = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                    ? '/sw.js' 
+                    : '/WatchedIt/sw.js';
+                  
+                  navigator.serviceWorker.register(swPath)
                     .then(function(registration) {
                       console.log('SW registered: ', registration);
                     })

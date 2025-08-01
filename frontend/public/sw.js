@@ -1,18 +1,24 @@
-const CACHE_NAME = "watchedit-v2";
-const STATIC_CACHE = "watchedit-static-v2";
-const DYNAMIC_CACHE = "watchedit-dynamic-v2";
+const CACHE_NAME = "watchedit-v3";
+const STATIC_CACHE = "watchedit-static-v3";
+const DYNAMIC_CACHE = "watchedit-dynamic-v3";
+
+// 根據環境決定基礎路徑
+const isProduction =
+  self.location.hostname !== "localhost" &&
+  self.location.hostname !== "127.0.0.1";
+const basePath = isProduction ? "/WatchedIt" : "";
 
 const urlsToCache = [
-  "/",
-  "/manifest.json",
-  "/icons/icon-192x192.png",
-  "/icons/icon-512x512.png",
-  "/icons/icon-72x72.png",
-  "/icons/icon-96x96.png",
-  "/icons/icon-128x128.png",
-  "/icons/icon-144x144.png",
-  "/icons/icon-152x152.png",
-  "/icons/icon-384x384.png",
+  basePath + "/",
+  basePath + "/manifest.json",
+  basePath + "/icons/icon-192x192.png",
+  basePath + "/icons/icon-512x512.png",
+  basePath + "/icons/icon-72x72.png",
+  basePath + "/icons/icon-96x96.png",
+  basePath + "/icons/icon-128x128.png",
+  basePath + "/icons/icon-144x144.png",
+  basePath + "/icons/icon-152x152.png",
+  basePath + "/icons/icon-384x384.png",
 ];
 
 // 安裝 Service Worker
@@ -75,7 +81,7 @@ self.addEventListener("fetch", (event) => {
           }
           // 如果沒有快取，返回離線頁面
           if (request.destination === "document") {
-            return caches.match("/");
+            return caches.match(basePath + "/");
           }
         });
       })
@@ -110,8 +116,8 @@ self.addEventListener("sync", (event) => {
 self.addEventListener("push", (event) => {
   const options = {
     body: event.data ? event.data.text() : "你有新的提醒！",
-    icon: "/icons/icon-192x192.png",
-    badge: "/icons/icon-72x72.png",
+    icon: basePath + "/icons/icon-192x192.png",
+    badge: basePath + "/icons/icon-72x72.png",
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -121,12 +127,12 @@ self.addEventListener("push", (event) => {
       {
         action: "explore",
         title: "查看作品",
-        icon: "/icons/icon-72x72.png",
+        icon: basePath + "/icons/icon-72x72.png",
       },
       {
         action: "close",
         title: "關閉",
-        icon: "/icons/icon-72x72.png",
+        icon: basePath + "/icons/icon-72x72.png",
       },
     ],
     requireInteraction: true,
@@ -153,7 +159,7 @@ self.addEventListener("notificationclick", (event) => {
         }
         // 否則開啟新視窗
         if (clients.openWindow) {
-          return clients.openWindow("/");
+          return clients.openWindow(basePath + "/");
         }
       })
     );
