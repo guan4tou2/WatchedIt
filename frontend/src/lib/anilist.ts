@@ -55,9 +55,14 @@ interface AniListMediaResponse {
 
 class AniListService {
   private static instance: AniListService;
-  private baseUrl = "/api/search";
+  private baseUrl: string;
 
-  private constructor() {}
+  private constructor() {
+    // 使用與 api.ts 相同的 API 基礎 URL
+    this.baseUrl =
+      (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") +
+      "/search/anime";
+  }
 
   static getInstance(): AniListService {
     if (!AniListService.instance) {
@@ -70,10 +75,7 @@ class AniListService {
     try {
       // 構建查詢參數
       const params = new URLSearchParams();
-      if (variables.search) params.append("q", variables.search);
-      if (variables.page) params.append("page", variables.page.toString());
-      if (variables.perPage)
-        params.append("perPage", variables.perPage.toString());
+      if (variables.search) params.append("query", variables.search);
 
       const response = await fetch(`${this.baseUrl}?${params.toString()}`, {
         method: "GET",
@@ -105,100 +107,104 @@ class AniListService {
     page: number = 1,
     perPage: number = 10
   ): Promise<AniListMedia[]> {
-    const query = `
-      query ($search: String, $page: Int, $perPage: Int) {
-        Page(page: $page, perPage: $perPage) {
-          media(search: $search, type: ANIME, sort: [POPULARITY_DESC, SCORE_DESC]) {
-            id
-            title {
-              romaji
-              english
-              native
-            }
-            type
-            format
-            episodes
-            duration
-            status
-            season
-            seasonYear
-            description
-            genres
-            averageScore
-            coverImage {
-              large
-              medium
-            }
-            bannerImage
-            startDate {
-              year
-              month
-              day
-            }
-            endDate {
-              year
-              month
-              day
-            }
-            synonyms
-            countryOfOrigin
-          }
-        }
-      }
-    `;
-
-    const response = await this.query<AniListSearchResponse>(query, {
+    // 直接使用後端 API，不需要 GraphQL 查詢
+    const response = await this.query<any>(searchTerm, {
       search: searchTerm,
-      page,
-      perPage,
     });
 
-    return response.data.Page.media;
+    // 轉換後端 API 回應格式為 AniListMedia 格式
+    return response.map((item: any) => ({
+      id: item.id,
+      title: {
+        romaji: item.title,
+        english: item.title,
+        native: item.title,
+      },
+      type: "ANIME",
+      format: item.type || "TV",
+      episodes: item.episodes,
+      duration: null,
+      status: item.status,
+      season: null,
+      seasonYear: item.year,
+      description: item.description,
+      genres: item.genres || [],
+      averageScore: item.rating,
+      coverImage: {
+        large: item.cover_image,
+        medium: item.cover_image,
+      },
+      bannerImage: null,
+      startDate: {
+        year: item.year,
+        month: null,
+        day: null,
+      },
+      endDate: {
+        year: null,
+        month: null,
+        day: null,
+      },
+      synonyms: [],
+      countryOfOrigin: null,
+    }));
   }
 
   async getAnimeById(id: number): Promise<AniListMedia> {
-    const query = `
-      query ($id: Int) {
-        Media(id: $id, type: ANIME) {
-          id
-          title {
-            romaji
-            english
-            native
-          }
-          type
-          format
-          episodes
-          duration
-          status
-          season
-          seasonYear
-          description
-          genres
-          averageScore
-          coverImage {
-            large
-            medium
-          }
-          bannerImage
-          startDate {
-            year
-            month
-            day
-          }
-          endDate {
-            year
-            month
-            day
-          }
-          synonyms
-          countryOfOrigin
-        }
-      }
-    `;
+    // 使用後端 API 獲取動畫詳情
+    const baseUrl =
+      (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") +
+      "/search/anime";
+    const response = await fetch(`${baseUrl}/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
 
-    const response = await this.query<AniListMediaResponse>(query, { id });
-    return response.data.Media;
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // 轉換為 AniListMedia 格式
+    return {
+      id: data.id,
+      title: {
+        romaji: data.title,
+        english: data.title,
+        native: data.title,
+      },
+      type: "ANIME",
+      format: data.type || "TV",
+      episodes: data.episodes,
+      duration: null,
+      status: data.status,
+      season: null,
+      seasonYear: data.year,
+      description: data.description,
+      genres: data.genres || [],
+      averageScore: data.rating,
+      coverImage: {
+        large: data.cover_image,
+        medium: data.cover_image,
+      },
+      bannerImage: null,
+      startDate: {
+        year: data.year,
+        month: null,
+        day: null,
+      },
+      endDate: {
+        year: null,
+        month: null,
+        day: null,
+      },
+      synonyms: [],
+      countryOfOrigin: null,
+    };
   }
 
   // 將 AniList 狀態轉換為我們的狀態

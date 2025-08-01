@@ -16,6 +16,13 @@ async def search_anime(
     return search_service.search_anime(query)
 
 
+@router.get("/anime/{anime_id}")
+async def get_anime_by_id(anime_id: int, db: Session = Depends(get_db)):
+    """根據 ID 獲取動畫詳情"""
+    search_service = SearchService(db)
+    return search_service.get_anime_by_id(anime_id)
+
+
 @router.get("/suggestions")
 async def get_suggestions(
     query: str = Query(..., description="搜尋關鍵字"), db: Session = Depends(get_db)

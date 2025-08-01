@@ -93,6 +93,17 @@ export default function RootLayout({
                     });
                 });
               }
+              
+              // 改善 Service Worker 通訊錯誤處理
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.addEventListener('message', function(event) {
+                  console.log('SW message received:', event.data);
+                });
+                
+                navigator.serviceWorker.addEventListener('error', function(event) {
+                  console.error('SW error:', event.error);
+                });
+              }
             `,
           }}
         />

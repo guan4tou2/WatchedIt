@@ -86,6 +86,79 @@ class SearchService:
             print(f"搜尋動畫時發生錯誤: {e}")
             return []
 
+    async def get_anime_by_id(self, anime_id: int) -> Dict[str, Any]:
+        """根據 ID 獲取動畫詳情（使用 AniList API）"""
+        # GraphQL 查詢
+        graphql_query = """
+        query ($id: Int) {
+          Media(id: $id, type: ANIME) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            type
+            format
+            episodes
+            duration
+            season
+            seasonYear
+            status
+            description
+            coverImage {
+              large
+              medium
+            }
+            genres
+            averageScore
+          }
+        }
+        """
+
+        variables = {"id": anime_id}
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    self.anilist_url,
+                    json={"query": graphql_query, "variables": variables},
+                    headers={"Content-Type": "application/json"},
+                )
+
+                if response.status_code == 200:
+                    data = response.json()
+                    media = data.get("data", {}).get("Media")
+
+                    if media:
+                        title = (
+                            media["title"].get("english")
+                            or media["title"].get("romaji")
+                            or media["title"].get("native")
+                        )
+
+                        return {
+                            "id": media["id"],
+                            "title": title,
+                            "type": "動畫",
+                            "year": media.get("seasonYear"),
+                            "episodes": media.get("episodes"),
+                            "status": media.get("status"),
+                            "description": media.get("description"),
+                            "cover_image": media.get("coverImage", {}).get("large"),
+                            "genres": media.get("genres", []),
+                            "rating": media.get("averageScore"),
+                            "source": "AniList",
+                        }
+                    else:
+                        return {}
+                else:
+                    return {}
+
+        except Exception as e:
+            print(f"獲取動畫詳情時發生錯誤: {e}")
+            return {}
+
     def get_suggestions(self, query: str) -> List[str]:
         """取得搜尋建議"""
         # 從本地資料庫搜尋現有作品標題
