@@ -146,7 +146,7 @@ class AniListService {
         day: null,
       },
       synonyms: [],
-      countryOfOrigin: null,
+      countryOfOrigin: undefined,
     }));
   }
 
@@ -203,7 +203,7 @@ class AniListService {
         day: null,
       },
       synonyms: [],
-      countryOfOrigin: null,
+      countryOfOrigin: undefined,
     };
   }
 
