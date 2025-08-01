@@ -4,8 +4,11 @@
 
 ## 📋 文檔列表
 
+### 快速開始
+- **[QUICK_DEPLOY.md](./QUICK_DEPLOY.md)** - ⚡ 快速部署指南（5分鐘完成）
+
 ### Vercel 部署
-- **[VERCEL_DEPLOYMENT_GUIDE.md](./VERCEL_DEPLOYMENT_GUIDE.md)** - Vercel 部署完整指南
+- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Vercel 部署完整指南
 - **[VERCEL_API_FIX.md](./VERCEL_API_FIX.md)** - Vercel API 修復方案
 - **[VERCEL_GIT_INTEGRATION.md](./VERCEL_GIT_INTEGRATION.md)** - Vercel Git 整合
 
