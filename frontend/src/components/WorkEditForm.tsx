@@ -173,7 +173,7 @@ export default function WorkEditForm({
               type="button"
               onClick={() => handleRatingClick(rating)}
               className={`p-2 rounded-md transition-colors ${
-                parseInt(formData.rating || "0") >= rating
+                parseInt(String(formData.rating || "0")) >= rating
                   ? "star-icon bg-yellow-50 dark:bg-yellow-900/20"
                   : "star-icon-unselected"
               }`}
@@ -181,7 +181,7 @@ export default function WorkEditForm({
               <Star
                 className="w-5 h-5"
                 fill={
-                  parseInt(formData.rating || "0") >= rating
+                  parseInt(String(formData.rating || "0")) >= rating
                     ? "currentColor"
                     : "none"
                 }

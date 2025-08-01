@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/Logo";
 import { pwaService } from "@/lib/pwa";
+import { getFullPath } from "@/lib/utils";
 import {
   checkMigrationNeeded,
   migrateFromLocalStorage,
@@ -314,13 +315,13 @@ export default function HomePage() {
             <Search className="w-4 h-4 mr-1" />
             搜尋動畫
           </Button>
-          <Link href="/settings">
+          <Link href={getFullPath("/settings")}>
             <Button variant="outline" size="sm">
               <Settings className="w-4 h-4 mr-1" />
               設定
             </Button>
           </Link>
-          <Link href="/works/new">
+          <Link href={getFullPath("/works/new")}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               新增作品
@@ -356,13 +357,13 @@ export default function HomePage() {
               <Search className="w-4 h-4 mr-1" />
               搜尋動畫
             </Button>
-            <Link href="/settings">
+            <Link href={getFullPath("/settings")}>
               <Button variant="outline" size="sm" className="w-full">
                 <Settings className="w-4 h-4 mr-1" />
                 設定
               </Button>
             </Link>
-            <Link href="/works/new">
+            <Link href={getFullPath("/works/new")}>
               <Button className="w-full">
                 <Plus className="w-4 h-4 mr-2" />
                 新增作品
@@ -589,7 +590,9 @@ export default function HomePage() {
                 <Card
                   key={work.id}
                   className="hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => (window.location.href = `/works/${work.id}`)}
+                  onClick={() =>
+                    (window.location.href = getFullPath(`/works/${work.id}`))
+                  }
                 >
                   <CardHeader className="pb-3">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-2 sm:space-y-0">

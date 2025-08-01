@@ -9,6 +9,7 @@ import { Work, Episode, WorkUpdate } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
 import EpisodeManager from "@/components/EpisodeManager";
 import WorkEditForm from "@/components/WorkEditForm";
+import { getFullPath } from "@/lib/utils";
 import {
   ArrowLeft,
   Edit,
@@ -87,7 +88,7 @@ export default function WorkDetailPage() {
 
     if (confirm("確定要刪除這個作品嗎？")) {
       await deleteWork(work.id);
-      router.push("/");
+      router.push(getFullPath("/"));
     }
   };
 
@@ -112,7 +113,10 @@ export default function WorkDetailPage() {
             <div className="text-gray-600 dark:text-gray-400 mb-4">
               作品不存在
             </div>
-            <Button variant="outline" onClick={() => router.push("/")}>
+            <Button
+              variant="outline"
+              onClick={() => router.push(getFullPath("/"))}
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               返回首頁
             </Button>

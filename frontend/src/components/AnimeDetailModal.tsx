@@ -78,7 +78,7 @@ ${
       };
 
       // 新增作品（store 會自動檢查重複）
-      const newWork = createWork(workData);
+      const newWork = await createWork(workData);
 
       // 只有在成功新增後才關閉彈窗
       onClose();

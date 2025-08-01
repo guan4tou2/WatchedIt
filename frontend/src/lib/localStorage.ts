@@ -285,7 +285,7 @@ export const initializeSampleData = () => {
     workStorage.create({
       title: "進擊的巨人",
       type: "動畫",
-      status: "已完成",
+      status: "已完結",
       year: 2013,
       rating: 5,
       review: "經典神作！",
@@ -366,7 +366,7 @@ export const initializeSampleData = () => {
     workStorage.create({
       title: "哈利波特與魔法石",
       type: "小說",
-      status: "已完成",
+      status: "已完結",
       year: 1997,
       rating: 5,
       review: "魔法世界的開始",

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Work, WorkCreate, Tag } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
 import TagSelector from "@/components/TagSelector";
+import { getFullPath } from "@/lib/utils";
 import { ArrowLeft, Save, Star, Plus } from "lucide-react";
 
 export default function NewWorkPage() {
@@ -51,7 +52,7 @@ export default function NewWorkPage() {
       const createdWork = await createWork(newWork);
 
       // 導航到新創建的作品詳情頁面
-      router.push(`/works/${createdWork.id}`);
+      router.push(getFullPath(`/works/${createdWork.id}`));
     } catch (error) {
       console.error("創建作品失敗:", error);
     } finally {
