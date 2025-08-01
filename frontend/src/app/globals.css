@@ -181,4 +181,29 @@
   .subtitle-text {
     @apply text-gray-700 dark:text-gray-300;
   }
+
+  /* 快速新增集數按鈕 */
+  .quick-add-episode-btn {
+    @apply bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 
+           text-white border-green-500 hover:border-green-600 dark:border-green-600 dark:hover:border-green-700
+           transition-colors duration-200 ease-in-out;
+  }
+
+  .quick-add-episode-btn:focus {
+    @apply ring-2 ring-green-500 ring-offset-2 dark:ring-offset-gray-800;
+  }
+
+  .quick-add-episode-btn:active {
+    @apply bg-green-700 dark:bg-green-800;
+  }
+
+  /* 快速新增集數按鈕圖標 */
+  .quick-add-episode-icon {
+    @apply text-white;
+  }
+
+  /* 快速新增集數按鈕文字 */
+  .quick-add-episode-text {
+    @apply text-white font-medium;
+  }
 }
