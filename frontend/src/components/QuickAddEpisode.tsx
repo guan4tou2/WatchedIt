@@ -164,22 +164,14 @@ export default function QuickAddEpisode({
       <Card className="w-full max-w-md mx-4">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">快速新增集數</CardTitle>
+            <CardTitle className="text-lg title-text">快速新增集數</CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            為「{workTitle}」新增集數
-          </p>
+          <p className="text-sm description-text">為「{workTitle}」新增集數</p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <p className="text-sm description-text">
-              為「{workTitle}」新增集數
-            </p>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="form-label">開始集數</label>
@@ -193,7 +185,7 @@ export default function QuickAddEpisode({
                     number: parseInt(e.target.value) || 1,
                   })
                 }
-                className="mt-1"
+                className="mt-1 form-input"
               />
             </div>
             <div>
@@ -208,7 +200,7 @@ export default function QuickAddEpisode({
                     season: parseInt(e.target.value) || 1,
                   })
                 }
-                className="mt-1"
+                className="mt-1 form-input"
               />
             </div>
             <div>
@@ -223,7 +215,7 @@ export default function QuickAddEpisode({
                     Math.max(1, Math.min(10, parseInt(e.target.value) || 1))
                   )
                 }
-                className="mt-1"
+                className="mt-1 form-input"
               />
             </div>
           </div>
@@ -236,7 +228,7 @@ export default function QuickAddEpisode({
                 setEpisodeData({ ...episodeData, title: e.target.value })
               }
               placeholder="可選"
-              className="mt-1"
+              className="mt-1 form-input"
             />
           </div>
 
@@ -248,7 +240,7 @@ export default function QuickAddEpisode({
                 setEpisodeData({ ...episodeData, description: e.target.value })
               }
               placeholder="可選"
-              className="mt-1"
+              className="mt-1 form-input"
             />
           </div>
 
@@ -284,7 +276,7 @@ export default function QuickAddEpisode({
                 setEpisodeData({ ...episodeData, note: e.target.value })
               }
               placeholder="可選"
-              className="mt-1"
+              className="mt-1 form-input"
             />
           </div>
 
