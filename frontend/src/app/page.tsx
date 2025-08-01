@@ -604,7 +604,7 @@ export default function HomePage() {
                       <div className="flex items-center space-x-2">
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="default"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -614,7 +614,7 @@ export default function HomePage() {
                               work.type
                             );
                           }}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
                         >
                           <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                           <span className="hidden sm:inline">新增集數</span>
