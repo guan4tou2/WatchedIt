@@ -2,6 +2,25 @@
     "name": "watchedit-frontend",
     "version": "1.0.0",
     "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/guantou/WatchedIt.git"
+    },
+    "homepage": "https://watchedit-psi.vercel.app",
+    "bugs": {
+        "url": "https://github.com/guantou/WatchedIt/issues"
+    },
+    "keywords": [
+        "media-tracking",
+        "anime",
+        "movie",
+        "tv-series",
+        "novel",
+        "pwa",
+        "nextjs",
+        "typescript",
+        "tailwindcss"
+    ],
     "scripts": {
         "dev": "next dev",
         "build": "next build",

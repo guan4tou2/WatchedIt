@@ -1,7 +1,29 @@
 [project]
 name = "watchedit"
 version = "0.1.0"
-description = "Add your description here"
+description = "A self-hosted media tracking web app for anime, movies, TV series, and novels"
 readme = "README.md"
 requires-python = ">=3.11"
+authors = [
+    {name = "guantou", email = "guantou@example.com"}
+]
+license = {text = "MIT"}
+keywords = ["media-tracking", "anime", "movie", "tv-series", "novel", "fastapi", "python"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/guantou/WatchedIt"
+Repository = "https://github.com/guantou/WatchedIt"
+Documentation = "https://github.com/guantou/WatchedIt#readme"
+"Bug Tracker" = "https://github.com/guantou/WatchedIt/issues"

@@ -2,6 +2,11 @@
 
 一個自架的媒體追蹤 Web App，幫助你記錄和管理看過的動畫、電影、電視劇、小說等作品。
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=flat-square&logo=github)](https://github.com/guantou/WatchedIt)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+
 ## ✨ 功能特色
 
 - 📺 **多媒體支援**: 動畫、電影、電視劇、小說等
@@ -301,6 +306,36 @@ WatchedIt/
 
 歡迎提交 Issue 和 Pull Request！
 
+### 參與貢獻
+
+1. **Fork 本專案**
+2. **創建功能分支** (`git checkout -b feature/AmazingFeature`)
+3. **提交變更** (`git commit -m 'Add some AmazingFeature'`)
+4. **推送到分支** (`git push origin feature/AmazingFeature`)
+5. **開啟 Pull Request**
+
+### 開發環境設置
+
+```bash
+# 克隆專案
+git clone https://github.com/guantou/WatchedIt.git
+cd WatchedIt
+
+# 安裝依賴
+cd frontend && npm install
+cd ../backend && uv sync
+
+# 啟動開發環境
+cd ../frontend && npm run dev
+```
+
 ## 📄 授權
 
-MIT License
+本專案採用 MIT 授權條款 - 詳見 [LICENSE](LICENSE) 檔案
+
+## 🔗 相關連結
+
+- **GitHub Repository**: https://github.com/guantou/WatchedIt
+- **線上 Demo**: https://watchedit-psi.vercel.app
+- **問題回報**: https://github.com/guantou/WatchedIt/issues
+- **功能請求**: https://github.com/guantou/WatchedIt/issues/new
