@@ -328,12 +328,14 @@ export default function RemindersPage() {
                   </div>
                   <Badge
                     variant={
+                      typeof Notification !== "undefined" &&
                       Notification.permission === "granted"
                         ? "default"
                         : "destructive"
                     }
                   >
-                    {Notification.permission === "granted"
+                    {typeof Notification !== "undefined" &&
+                    Notification.permission === "granted"
                       ? "已授權"
                       : "未授權"}
                   </Badge>

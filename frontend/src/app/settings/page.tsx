@@ -119,17 +119,38 @@ export default function SettingsPage() {
     }
 
     // 初始化 PWA 信息
-    updatePWAInfo();
+    try {
+      updatePWAInfo();
+    } catch (error) {
+      console.error("初始化 PWA 資訊失敗:", error);
+    }
   }, []);
 
   const updatePWAInfo = () => {
-    if (typeof window !== "undefined") {
-      const platformInfo = pwaService.getPlatformInfo();
+    try {
+      if (typeof window !== "undefined") {
+        const platformInfo = pwaService.getPlatformInfo();
+        setPwaInfo({
+          ...platformInfo,
+          canInstall: false, // 將在 beforeinstallprompt 事件中更新
+          isInstalled: platformInfo.isPWA,
+          notificationPermission:
+            typeof Notification !== "undefined"
+              ? Notification.permission
+              : "default",
+        });
+      }
+    } catch (error) {
+      console.error("更新 PWA 資訊失敗:", error);
       setPwaInfo({
-        ...platformInfo,
-        canInstall: false, // 將在 beforeinstallprompt 事件中更新
-        isInstalled: platformInfo.isPWA,
-        notificationPermission: Notification.permission,
+        isPWA: false,
+        isMobile: false,
+        isIOS: false,
+        isAndroid: false,
+        isDesktop: true,
+        canInstall: false,
+        isInstalled: false,
+        notificationPermission: "default",
       });
     }
   };
@@ -368,6 +389,15 @@ export default function SettingsPage() {
   // PWA 相關功能
   const requestNotificationPermission = async () => {
     try {
+      if (
+        typeof window === "undefined" ||
+        typeof Notification === "undefined"
+      ) {
+        setMessage({ type: "error", text: "此瀏覽器不支援通知功能" });
+        setTimeout(() => setMessage(null), 3000);
+        return;
+      }
+
       const permission = await pwaService.requestNotificationPermission();
       updatePWAInfo();
 
@@ -378,6 +408,7 @@ export default function SettingsPage() {
       }
       setTimeout(() => setMessage(null), 3000);
     } catch (error) {
+      console.error("請求通知權限失敗:", error);
       setMessage({ type: "error", text: "請求通知權限失敗" });
       setTimeout(() => setMessage(null), 3000);
     }
@@ -399,11 +430,16 @@ export default function SettingsPage() {
   };
 
   const getInstallInstructions = () => {
-    if (pwaInfo.isIOS) {
-      return "點擊 Safari 的分享按鈕，選擇「加入主畫面」";
-    } else if (pwaInfo.isAndroid) {
-      return "點擊瀏覽器選單，選擇「安裝應用程式」";
-    } else {
+    try {
+      if (pwaInfo.isIOS) {
+        return "點擊 Safari 的分享按鈕，選擇「加入主畫面」";
+      } else if (pwaInfo.isAndroid) {
+        return "點擊瀏覽器選單，選擇「安裝應用程式」";
+      } else {
+        return "點擊瀏覽器地址欄旁的安裝圖示";
+      }
+    } catch (error) {
+      console.error("取得安裝說明失敗:", error);
       return "點擊瀏覽器地址欄旁的安裝圖示";
     }
   };

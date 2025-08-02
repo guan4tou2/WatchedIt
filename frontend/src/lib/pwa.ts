@@ -76,27 +76,47 @@ export class PWAService {
 
   // 檢查是否為 PWA 模式
   isPWA(): boolean {
-    return (
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone === true
-    );
+    try {
+      return (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as any).standalone === true
+      );
+    } catch (error) {
+      console.error("檢查 PWA 模式失敗:", error);
+      return false;
+    }
   }
 
   // 檢查是否為行動裝置
   isMobile(): boolean {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
+    try {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+    } catch (error) {
+      console.error("檢查行動裝置失敗:", error);
+      return false;
+    }
   }
 
   // 檢查是否為 iOS
   isIOS(): boolean {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+    try {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent);
+    } catch (error) {
+      console.error("檢查 iOS 失敗:", error);
+      return false;
+    }
   }
 
   // 檢查是否為 Android
   isAndroid(): boolean {
-    return /Android/.test(navigator.userAgent);
+    try {
+      return /Android/.test(navigator.userAgent);
+    } catch (error) {
+      console.error("檢查 Android 失敗:", error);
+      return false;
+    }
   }
 
   // 檢查是否為桌面
@@ -106,14 +126,26 @@ export class PWAService {
 
   // 取得平台資訊
   getPlatformInfo() {
-    return {
-      isPWA: this.isPWA(),
-      isMobile: this.isMobile(),
-      isIOS: this.isIOS(),
-      isAndroid: this.isAndroid(),
-      isDesktop: this.isDesktop(),
-      userAgent: navigator.userAgent,
-    };
+    try {
+      return {
+        isPWA: this.isPWA(),
+        isMobile: this.isMobile(),
+        isIOS: this.isIOS(),
+        isAndroid: this.isAndroid(),
+        isDesktop: this.isDesktop(),
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+      };
+    } catch (error) {
+      console.error("取得平台資訊失敗:", error);
+      return {
+        isPWA: false,
+        isMobile: false,
+        isIOS: false,
+        isAndroid: false,
+        isDesktop: true,
+        userAgent: "",
+      };
+    }
   }
 
   // 背景同步

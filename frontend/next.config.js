@@ -30,7 +30,7 @@ const nextConfig = {
   reactStrictMode: process.env.NODE_ENV === "production",
 
   // 輸出配置 - 使用標準輸出模式，與 Vercel 兼容
-  output: "standalone",
+  // output: "standalone", // 註解掉以避免 Vercel 部署問題
 
   // 確保靜態資源正確處理
   trailingSlash: true,
