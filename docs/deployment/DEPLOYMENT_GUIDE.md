@@ -62,7 +62,7 @@ docker-compose ps
 #### 自動部署
 1. **連接 GitHub Repository**
    - 在 Vercel 控制台連接 GitHub
-   - 選擇 `guantou/WatchedIt` repository
+   - 選擇 `guan4tou2/WatchedIt` repository
    - 設定根目錄為 `frontend`
 
 2. **環境變數設定**
@@ -80,7 +80,7 @@ docker-compose ps
 #### 手動部署
 ```bash
 # 1. 克隆專案
-git clone https://github.com/guantou/WatchedIt.git
+git clone https://github.com/guan4tou2/WatchedIt.git
 cd WatchedIt
 
 # 2. 安裝依賴
@@ -406,7 +406,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 ### 支援資源
 
-- **GitHub Issues**: https://github.com/guantou/WatchedIt/issues
+- **GitHub Issues**: https://github.com/guan4tou2/WatchedIt/issues
 - **Vercel 文檔**: https://vercel.com/docs
 - **Next.js 文檔**: https://nextjs.org/docs
 - **FastAPI 文檔**: https://fastapi.tiangolo.com

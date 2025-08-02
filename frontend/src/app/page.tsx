@@ -194,10 +194,14 @@ export default function HomePage() {
     });
 
     await updateWork(work.id, { episodes: updatedEpisodes });
+
+    // 重新獲取數據以確保UI更新
+    await fetchWorks();
+    await fetchStats();
   };
 
   // 批量添加集數的函數
-  const handleBatchEpisodesAdded = (episodes: Episode[]) => {
+  const handleBatchEpisodesAdded = async (episodes: Episode[]) => {
     if (!quickAddEpisode) return;
 
     const work = works.find((w) => w.id === quickAddEpisode.workId);
@@ -226,7 +230,11 @@ export default function HomePage() {
       }
     );
 
-    updateWork(work.id, { episodes: updatedEpisodes });
+    await updateWork(work.id, { episodes: updatedEpisodes });
+
+    // 重新獲取數據以確保UI更新
+    await fetchWorks();
+    await fetchStats();
   };
 
   const handleQuickAddClose = () => {
@@ -969,7 +977,7 @@ export default function HomePage() {
       {/* GitHub 連結 */}
       <div className="fixed bottom-4 right-4 z-50">
         <a
-          href="https://github.com/guantou/WatchedIt"
+          href="https://github.com/guan4tou2/WatchedIt"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center w-12 h-12 bg-gray-900 hover:bg-gray-800 text-white rounded-full shadow-lg transition-colors duration-200"

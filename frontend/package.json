@@ -4,11 +4,11 @@
     "private": true,
     "repository": {
         "type": "git",
-        "url": "https://github.com/guantou/WatchedIt.git"
+        "url": "https://github.com/guan4tou2/WatchedIt.git"
     },
     "homepage": "https://watchedit-psi.vercel.app",
     "bugs": {
-        "url": "https://github.com/guantou/WatchedIt/issues"
+        "url": "https://github.com/guan4tou2/WatchedIt/issues"
     },
     "keywords": [
         "media-tracking",

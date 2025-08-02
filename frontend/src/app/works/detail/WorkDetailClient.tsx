@@ -49,7 +49,7 @@ export default function WorkDetailClient() {
     loadWork();
   }, [searchParams, getWork]);
 
-  const handleEpisodesChange = (episodes: Episode[]) => {
+  const handleEpisodesChange = async (episodes: Episode[]) => {
     if (!work) return;
 
     try {
@@ -64,7 +64,11 @@ export default function WorkDetailClient() {
       console.log("更新作品:", updatedWork);
 
       setWork(updatedWork);
-      updateWork(work.id, { episodes });
+      await updateWork(work.id, { episodes });
+
+      // 更新完成後重新獲取統計數據
+      const { fetchStats } = useWorkStore.getState();
+      await fetchStats();
     } catch (error) {
       console.error("處理集數變更失敗:", error);
     }

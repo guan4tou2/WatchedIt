@@ -9,7 +9,7 @@
 1. **準備專案**
    ```bash
    # 克隆專案
-   git clone https://github.com/guantou/WatchedIt.git
+   git clone https://github.com/guan4tou2/WatchedIt.git
    cd WatchedIt
    ```
 
@@ -39,7 +39,7 @@
 **適合有 GitHub 帳號的使用者**
 
 1. **Fork 專案**
-   - 前往 https://github.com/guantou/WatchedIt
+   - 前往 https://github.com/guan4tou2/WatchedIt
    - 點擊右上角的 "Fork" 按鈕
 
 2. **連接 Vercel**
@@ -62,7 +62,7 @@
 
 1. **準備專案**
    ```bash
-   git clone https://github.com/guantou/WatchedIt.git
+   git clone https://github.com/guan4tou2/WatchedIt.git
    cd WatchedIt/frontend
    ```
 

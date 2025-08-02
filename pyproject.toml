@@ -23,7 +23,7 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/guantou/WatchedIt"
-Repository = "https://github.com/guantou/WatchedIt"
-Documentation = "https://github.com/guantou/WatchedIt#readme"
-"Bug Tracker" = "https://github.com/guantou/WatchedIt/issues"
+Homepage = "https://github.com/guan4tou2/WatchedIt"
+Repository = "https://github.com/guan4tou2/WatchedIt"
+Documentation = "https://github.com/guan4tou2/WatchedIt#readme"
+"Bug Tracker" = "https://github.com/guan4tou2/WatchedIt/issues"
