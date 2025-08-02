@@ -941,6 +941,18 @@ export default function HomePage() {
             await fetchWorks();
             await fetchStats();
             console.log("AniListSearch onClose: 重新載入數據完成");
+          } catch (error) {
+            console.error("重新載入數據失敗:", error);
+            showToast("重新載入數據失敗", "error");
+          }
+        }}
+        onWorkAdded={async () => {
+          // 作品新增成功時的回調
+          try {
+            console.log("作品新增成功，開始重新載入數據");
+            await fetchWorks();
+            await fetchStats();
+            console.log("作品新增成功，重新載入數據完成");
             // 顯示成功提示
             showToast("作品新增成功！", "success");
           } catch (error) {

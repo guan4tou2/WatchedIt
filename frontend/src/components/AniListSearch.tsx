@@ -15,12 +15,14 @@ import AnimeDetailModal from "./AnimeDetailModal";
 interface AniListSearchProps {
   onSelectAnime: (workData: WorkCreate) => void;
   onClose: () => void;
+  onWorkAdded?: () => void; // 新增作品成功時的回調
   isOpen: boolean;
 }
 
 export default function AniListSearch({
   onSelectAnime,
   onClose,
+  onWorkAdded,
   isOpen,
 }: AniListSearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -127,6 +129,12 @@ ${
       // 新增作品（store 會自動檢查重複）
       const newWork = await createWork(workData);
       console.log("新增作品成功:", newWork);
+
+      // 通知主頁面作品新增成功
+      if (onWorkAdded) {
+        onWorkAdded();
+      }
+
       onClose();
     } catch (error) {
       const errorMessage =
