@@ -45,10 +45,8 @@ async def get_works(
 async def get_work(work_id: str, db: Session = Depends(get_db)):
     """取得單一作品"""
     work_service = WorkService(db)
-    work = work_service.get_work(work_id)
-    if not work:
-        raise HTTPException(status_code=404, detail="作品不存在")
-    return work
+    # WorkService.get_work now raises WorkNotFoundException if not found
+    return work_service.get_work(work_id)
 
 
 @router.put("/{work_id}", response_model=WorkResponse)

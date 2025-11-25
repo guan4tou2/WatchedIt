@@ -28,9 +28,9 @@ export default function Logo({
   };
 
   const logoContent = (
-    <div className={`flex items-center space-x-3 ${className}`}>
+    <div className={`flex items-center space-x-3 ${className} animate-fade-in-up`}>
       {/* Icon */}
-      <div className={`${sizeClasses[size]} flex-shrink-0`}>
+      <div className={`${sizeClasses[size]} flex-shrink-0 transition-transform duration-300 hover:scale-110`}>
         <svg
           viewBox="0 0 512 512"
           xmlns="http://www.w3.org/2000/svg"
@@ -46,11 +46,11 @@ export default function Logo({
             >
               <stop
                 offset="0%"
-                style={{ stopColor: "#667eea", stopOpacity: 1 }}
+                style={{ stopColor: "#3b82f6", stopOpacity: 1 }}
               />
               <stop
                 offset="100%"
-                style={{ stopColor: "#764ba2", stopOpacity: 1 }}
+                style={{ stopColor: "#8b5cf6", stopOpacity: 1 }}
               />
             </linearGradient>
             <linearGradient
@@ -125,13 +125,13 @@ export default function Logo({
       {showText && (
         <div className={`flex flex-col ${textSizeClasses[size]}`}>
           <div className="flex items-center">
-            <span className="font-bold bg-gradient-to-r from-gray-700 to-blue-600 bg-clip-text text-transparent">
+            <span className="font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent dark:from-blue-400 dark:via-purple-400 dark:to-blue-400">
               Watched
             </span>
-            <span className="font-light text-green-500 ml-1">It</span>
+            <span className="font-light text-green-500 ml-1 dark:text-green-400">It</span>
           </div>
           {size === "lg" && (
-            <span className="text-xs text-gray-500 mt-1">
+            <span className="text-xs text-gray-500 mt-1 dark:text-gray-400">
               追蹤你的媒體觀看紀錄
             </span>
           )}
@@ -144,7 +144,7 @@ export default function Logo({
     return (
       <Link
         href={getFullPath("/")}
-        className="hover:opacity-80 transition-opacity"
+        className="hover:opacity-90 transition-all duration-300"
       >
         {logoContent}
       </Link>

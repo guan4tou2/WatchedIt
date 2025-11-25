@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class WorkCreate(BaseModel):
@@ -21,6 +21,46 @@ class WorkCreate(BaseModel):
         None, description="daily, weekly, monthly"
     )
     tag_ids: Optional[List[int]] = Field(None, description="標籤ID列表")
+
+    @validator("title")
+    def title_not_empty(cls, v):
+        """Validate title is not empty or whitespace only."""
+        if not v or not v.strip():
+            raise ValueError("Title cannot be empty")
+        return v.strip()
+
+    @validator("status")
+    def validate_status(cls, v):
+        """Validate status is one of the allowed values."""
+        valid_statuses = ["進行中", "已完結", "暫停", "放棄"]
+        if v not in valid_statuses:
+            raise ValueError(
+                f"Invalid status: {v}. Must be one of: {', '.join(valid_statuses)}"
+            )
+        return v
+
+    @validator("reminder_frequency")
+    def validate_reminder_frequency(cls, v, values):
+        """Validate reminder frequency when reminder is enabled."""
+        if values.get("reminder_enabled") and not v:
+            raise ValueError("Reminder frequency is required when reminder is enabled")
+        if v and v not in ["daily", "weekly", "monthly"]:
+            raise ValueError("Reminder frequency must be daily, weekly, or monthly")
+        return v
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "title": "鬼滅之刃",
+                "type": "動畫",
+                "status": "已完結",
+                "year": 2019,
+                "rating": 5,
+                "review": "畫面優美，故事精彩",
+                "tag_ids": [1, 2],
+            }
+        }
+
 
 
 class WorkUpdate(BaseModel):

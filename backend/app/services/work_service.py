@@ -1,10 +1,17 @@
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 from ..models.tag import Tag, WorkTag
 from ..models.work import Work
 from ..schemas.work import WorkCreate, WorkList, WorkResponse, WorkUpdate
+from ..exceptions import (
+    WorkNotFoundException,
+    TagNotFoundException,
+    DatabaseException,
+)
+from ..utils.logger import logger
 
 
 class WorkService:
@@ -13,33 +20,48 @@ class WorkService:
 
     def create_work(self, work_data: WorkCreate) -> WorkResponse:
         """建立新作品"""
-        # 建立作品
-        work = Work(
-            title=work_data.title,
-            type=work_data.type,
-            status=work_data.status,
-            year=work_data.year,
-            progress=work_data.progress,
-            rating=work_data.rating,
-            review=work_data.review,
-            note=work_data.note,
-            source=work_data.source,
-            reminder_enabled=work_data.reminder_enabled,
-            reminder_frequency=work_data.reminder_frequency,
-        )
+        logger.info(f"Creating work: {work_data.title}")
+        
+        try:
+            # 建立作品
+            work = Work(
+                title=work_data.title,
+                type=work_data.type,
+                status=work_data.status,
+                year=work_data.year,
+                progress=work_data.progress,
+                rating=work_data.rating,
+                review=work_data.review,
+                note=work_data.note,
+                source=work_data.source,
+                reminder_enabled=work_data.reminder_enabled,
+                reminder_frequency=work_data.reminder_frequency,
+            )
 
-        self.db.add(work)
-        self.db.commit()
-        self.db.refresh(work)
-
-        # 處理標籤關聯
-        if work_data.tag_ids:
-            for tag_id in work_data.tag_ids:
-                work_tag = WorkTag(work_id=work.id, tag_id=tag_id)
-                self.db.add(work_tag)
+            self.db.add(work)
             self.db.commit()
+            self.db.refresh(work)
 
-        return self._work_to_response(work)
+            # 處理標籤關聯
+            if work_data.tag_ids:
+                for tag_id in work_data.tag_ids:
+                    # 驗證標籤是否存在
+                    tag = self.db.query(Tag).filter(Tag.id == tag_id).first()
+                    if not tag:
+                        logger.warning(f"Tag {tag_id} not found, skipping")
+                        continue
+                    
+                    work_tag = WorkTag(work_id=work.id, tag_id=tag_id)
+                    self.db.add(work_tag)
+                self.db.commit()
+
+            logger.info(f"Work created successfully: {work.id}")
+            return self._work_to_response(work)
+            
+        except SQLAlchemyError as e:
+            logger.error(f"Database error creating work: {str(e)}")
+            self.db.rollback()
+            raise DatabaseException(f"Failed to create work: {str(e)}")
 
     def get_works(
         self,
@@ -80,10 +102,14 @@ class WorkService:
 
     def get_work(self, work_id: str) -> Optional[WorkResponse]:
         """取得單一作品"""
+        logger.debug(f"Fetching work: {work_id}")
+        
         work = self.db.query(Work).filter(Work.id == work_id).first()
-        if work:
-            return self._work_to_response(work)
-        return None
+        if not work:
+            logger.warning(f"Work not found: {work_id}")
+            raise WorkNotFoundException(work_id)
+        
+        return self._work_to_response(work)
 
     def update_work(
         self, work_id: str, work_data: WorkUpdate

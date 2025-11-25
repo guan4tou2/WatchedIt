@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AniListMedia, anilistService } from "@/lib/anilist";
 import { WorkCreate } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
-import { Search, X, Star, Calendar, Play, Plus, Loader2 } from "lucide-react";
+import { Search, X, Star, Calendar, Play, Plus, Loader2, ExternalLink, Info } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import AnimeDetailModal from "./AnimeDetailModal";
 
@@ -102,26 +103,24 @@ export default function AniListSearch({
       review: anilistService.cleanDescription(selectedAnime.description),
       note: `來自 AniList (ID: ${selectedAnime.id})
 格式: ${anilistService.convertFormat(selectedAnime.format)}
-${
-  selectedAnime.season && selectedAnime.seasonYear
-    ? `播出時間: ${anilistService.convertSeason(selectedAnime.season)} ${
-        selectedAnime.seasonYear
-      }年`
-    : ""
-}
+${selectedAnime.season && selectedAnime.seasonYear
+          ? `播出時間: ${anilistService.convertSeason(selectedAnime.season)} ${selectedAnime.seasonYear
+          }年`
+          : ""
+        }
 其他標題: ${anilistService
-        .getAllTitles(selectedAnime.title, selectedAnime.synonyms)
-        .slice(1)
-        .join(", ")}`,
+          .getAllTitles(selectedAnime.title, selectedAnime.synonyms)
+          .slice(1)
+          .join(", ")}`,
       source: "AniList",
       episodes: selectedAnime.episodes
         ? Array.from({ length: selectedAnime.episodes }, (_, i) => ({
-            id: `ep-${selectedAnime.id}-${i + 1}`,
-            number: i + 1,
-            type: "episode" as const,
-            season: 1,
-            watched: false,
-          }))
+          id: `ep-${selectedAnime.id}-${i + 1}`,
+          number: i + 1,
+          type: "episode" as const,
+          season: 1,
+          watched: false,
+        }))
         : [],
     };
 
@@ -216,30 +215,117 @@ ${
         </CardHeader>
         <CardContent className="overflow-y-auto max-h-[60vh]">
           {error && (
-            <div className="error-container px-4 py-3 rounded mb-4">
-              {error}
+            <div className="error-container px-4 py-3 rounded mb-4 space-y-3">
+              <div className="flex items-start gap-2">
+                <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-medium mb-1">搜尋遇到問題</p>
+                  <p className="text-sm">{error}</p>
+                </div>
+              </div>
+              {error.includes("後端服務不可用") && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open('https://anilist.co', '_blank')}
+                  className="w-full"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  在 AniList 網站搜尋
+                </Button>
+              )}
             </div>
           )}
 
-          {searchResults.length === 0 && !isLoading && searchTerm && (
-            <div className="text-center py-8 empty-state">沒有找到相關動畫</div>
+          {searchResults.length === 0 && !isLoading && searchTerm && !error && (
+            <div className="text-center py-8 space-y-4 animate-fade-in-up">
+              <div className="text-muted-foreground">
+                <p className="text-lg font-medium mb-2">沒有找到相關動畫</p>
+                <p className="text-sm">試試以下方法：</p>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-4 text-left max-w-md mx-auto space-y-2">
+                <p className="text-sm flex items-start gap-2">
+                  <span className="text-primary">•</span>
+                  <span>使用日文原名（例如：ワンピース、鬼滅の刃）</span>
+                </p>
+                <p className="text-sm flex items-start gap-2">
+                  <span className="text-primary">•</span>
+                  <span>使用英文名稱（例如：One Piece、Demon Slayer）</span>
+                </p>
+                <p className="text-sm flex items-start gap-2">
+                  <span className="text-primary">•</span>
+                  <span>檢查拼寫是否正確</span>
+                </p>
+                <p className="text-sm flex items-start gap-2">
+                  <span className="text-primary">•</span>
+                  <span>嘗試使用較短的關鍵字</span>
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => window.open('https://anilist.co', '_blank')}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                在 AniList 網站搜尋
+              </Button>
+            </div>
           )}
 
           {!searchTerm && (
-            <div className="text-center py-8 empty-state">
-              輸入動畫名稱開始搜尋
+            <div className="text-center py-8 space-y-3 animate-fade-in-up">
+              <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
+                <Search className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-lg font-medium mb-1">搜尋 AniList 動畫</p>
+                <p className="text-sm text-muted-foreground">輸入動畫名稱開始搜尋</p>
+              </div>
+              <div className="bg-muted/30 rounded-lg p-3 max-w-sm mx-auto">
+                <p className="text-xs text-muted-foreground">
+                  💡 提示：支援中文、日文、英文搜尋
+                </p>
+              </div>
             </div>
           )}
 
+          {/* Loading Skeletons */}
+          {isLoading && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-4">
+                    <div className="flex space-x-4">
+                      <Skeleton className="w-16 h-24 flex-shrink-0 rounded" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                        <div className="flex gap-2">
+                          <Skeleton className="h-6 w-16" />
+                          <Skeleton className="h-6 w-16" />
+                          <Skeleton className="h-6 w-20" />
+                        </div>
+                        <Skeleton className="h-4 w-full" />
+                        <div className="flex gap-1">
+                          <Skeleton className="h-5 w-12" />
+                          <Skeleton className="h-5 w-12" />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Search Results */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {searchResults.map((anime) => (
+            {!isLoading && searchResults.map((anime) => (
               <Card
                 key={anime.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedAnime?.id === anime.id
+                className={`cursor-pointer transition-all hover:shadow-md ${selectedAnime?.id === anime.id
                     ? "ring-2 ring-blue-500 selected-bg"
                     : ""
-                }`}
+                  }`}
                 onClick={() => handleViewDetail(anime)}
               >
                 <CardContent className="p-4">
