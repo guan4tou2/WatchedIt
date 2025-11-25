@@ -1,16 +1,18 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import PWAInstall from "@/components/PWAInstall";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { pwaService } from "@/lib/pwa";
 import SPARedirect from "@/components/SPARedirect";
 import { Suspense } from "react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 
 const inter = Inter({ subsets: ["latin"] });
 
-// 移除硬編碼的路徑前綴，讓 Vercel 自動處理
+// 移除硬編碼的路徑前綴,讓 Vercel 自動處理
 const basePath = "";
 
 export const metadata: Metadata = {
@@ -64,21 +66,27 @@ export const viewport: Viewport = {
   themeColor: "#3b82f6",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params: { locale }
 }: {
   children: React.ReactNode;
+  params: { locale: string };
 }) {
+  const messages = await getMessages();
+
   return (
-    <html lang="zh-TW" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider>
-          <Suspense fallback={<div>Loading...</div>}>
-            <SPARedirect />
-            {children}
-          </Suspense>
-          <PWAInstall />
-        </ThemeProvider>
+        <NextIntlClientProvider messages={messages}>
+          <ThemeProvider>
+            <Suspense fallback={<div>Loading...</div>}>
+              <SPARedirect />
+              {children}
+            </Suspense>
+            <PWAInstall />
+          </ThemeProvider>
+        </NextIntlClientProvider>
         <SpeedInsights />
         <script
           dangerouslySetInnerHTML={{
@@ -86,7 +94,7 @@ export default function RootLayout({
               // PWA 初始化
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  // 使用相對路徑，讓瀏覽器自動處理
+                  // 使用相對路徑,讓瀏覽器自動處理
                   const swPath = '/sw.js';
                   
                   navigator.serviceWorker.register(swPath)

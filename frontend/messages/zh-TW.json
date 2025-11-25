@@ -1,0 +1,47 @@
+{
+    "Common": {
+        "loading": "載入中...",
+        "error": "錯誤",
+        "save": "儲存",
+        "cancel": "取消",
+        "delete": "刪除",
+        "edit": "編輯",
+        "confirm": "確認",
+        "search": "搜尋",
+        "filter": "篩選",
+        "clear": "清除",
+        "add": "新增",
+        "close": "關閉"
+    },
+    "Home": {
+        "title": "WatchedIt",
+        "subtitle": "記錄你看過的作品",
+        "totalWorks": "總作品數",
+        "inProgress": "進行中",
+        "completed": "已完結",
+        "addWork": "新增作品",
+        "batchSelect": "批量選擇",
+        "batchEdit": "批量編輯",
+        "batchDelete": "批量刪除",
+        "noWorks": "沒有找到作品",
+        "searchPlaceholder": "搜尋標題、心得、備註、標籤..."
+    },
+    "Work": {
+        "status": {
+            "ongoing": "進行中",
+            "completed": "已完結",
+            "paused": "暫停",
+            "dropped": "放棄",
+            "notStarted": "未播出",
+            "cancelled": "已取消"
+        },
+        "type": {
+            "anime": "動畫",
+            "movie": "電影",
+            "tv": "電視劇",
+            "novel": "小說",
+            "manga": "漫畫",
+            "game": "遊戲"
+        }
+    }
+}

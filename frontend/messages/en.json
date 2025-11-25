@@ -1,0 +1,47 @@
+{
+    "Common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "confirm": "Confirm",
+        "search": "Search",
+        "filter": "Filter",
+        "clear": "Clear",
+        "add": "Add",
+        "close": "Close"
+    },
+    "Home": {
+        "title": "WatchedIt",
+        "subtitle": "Track your watched media",
+        "totalWorks": "Total Works",
+        "inProgress": "In Progress",
+        "completed": "Completed",
+        "addWork": "Add Work",
+        "batchSelect": "Batch Select",
+        "batchEdit": "Batch Edit",
+        "batchDelete": "Batch Delete",
+        "noWorks": "No works found",
+        "searchPlaceholder": "Search title, review, note, tags..."
+    },
+    "Work": {
+        "status": {
+            "ongoing": "In Progress",
+            "completed": "Completed",
+            "paused": "Paused",
+            "dropped": "Dropped",
+            "notStarted": "Not Started",
+            "cancelled": "Cancelled"
+        },
+        "type": {
+            "anime": "Anime",
+            "movie": "Movie",
+            "tv": "TV Series",
+            "novel": "Novel",
+            "manga": "Manga",
+            "game": "Game"
+        }
+    }
+}
