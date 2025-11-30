@@ -1,6 +1,5 @@
 import React from "react";
-import Link from "next/link";
-import { getFullPath } from "@/lib/utils";
+import { Link } from "@/navigation";
 
 interface LogoProps {
   className?: string;
@@ -142,10 +141,7 @@ export default function Logo({
 
   if (clickable) {
     return (
-      <Link
-        href={getFullPath("/")}
-        className="hover:opacity-90 transition-all duration-300"
-      >
+      <Link href="/" className="hover:opacity-90 transition-all duration-300">
         {logoContent}
       </Link>
     );

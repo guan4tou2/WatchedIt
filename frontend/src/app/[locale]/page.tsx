@@ -5,13 +5,13 @@ import { useWorkStore } from "@/store/useWorkStore";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 import { pwaService } from "@/lib/pwa";
-import { getFullPath } from "@/lib/utils";
 import {
   checkMigrationNeeded,
   migrateFromLocalStorage,
   clearLocalStorageData,
 } from "@/lib/migration";
-import Link from "next/link";
+import { Link } from "@/navigation";
+import { useTranslations } from "next-intl";
 import {
   Search,
   Settings,
@@ -108,6 +108,10 @@ export default function HomePage() {
 
   // Toast
   const { showToast, ToastContainer } = useToast();
+  const commonT = useTranslations("Common");
+  const homeActionsT = useTranslations("Home.actions");
+  const homeLabelsT = useTranslations("Home.labels");
+  const homeMigrationT = useTranslations("Home.migration");
 
   // Migration State
   const [migrationStatus, setMigrationStatus] = useState<{
@@ -135,7 +139,7 @@ export default function HomePage() {
     fetchWorks();
     fetchStats();
     pwaService.registerServiceWorker();
-  }, []);
+  }, [initialize, fetchWorks, fetchStats]);
 
   // Handlers
   const checkMigrationStatus = async () => {
@@ -254,10 +258,21 @@ export default function HomePage() {
     )
   ).map((tagStr) => JSON.parse(tagStr));
 
+  const hasActiveFilters = Boolean(
+    searchTerm ||
+    selectedType ||
+    selectedStatus ||
+    selectedYear ||
+    selectedTags.length > 0 ||
+    ratingRange.min !== 0 ||
+    ratingRange.max !== 10 ||
+    progressFilter
+  );
+
   if (loading) {
     return (
       <div className="container mx-auto p-6">
-        <div className="text-center">載入中...</div>
+        <div className="text-center">{commonT("loading")}</div>
       </div>
     );
   }
@@ -266,7 +281,7 @@ export default function HomePage() {
     return (
       <div className="container mx-auto p-6">
         <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-200 px-4 py-3 rounded">
-          錯誤: {error}
+          {commonT("error")}: {error}
         </div>
       </div>
     );
@@ -288,22 +303,22 @@ export default function HomePage() {
             className="active:scale-95 transition-transform"
           >
             <Search className="w-4 h-4 mr-1" />
-            搜尋動畫
+            {homeActionsT("searchAnime")}
           </Button>
-          <Link href={getFullPath("/settings")}>
+          <Link href="/settings">
             <Button
               variant="outline"
               size="sm"
               className="active:scale-95 transition-transform"
             >
               <Settings className="w-4 h-4 mr-1" />
-              設定
+              {homeActionsT("settings")}
             </Button>
           </Link>
-          <Link href={getFullPath("/works/new")}>
+          <Link href="/works/new">
             <Button className="active:scale-95 transition-transform">
               <Plus className="w-4 h-4 mr-2" />
-              新增作品
+              {homeActionsT("addWork")}
             </Button>
           </Link>
         </div>
@@ -335,18 +350,18 @@ export default function HomePage() {
               }}
             >
               <Search className="w-4 h-4 mr-1" />
-              搜尋動畫
+              {homeActionsT("searchAnime")}
             </Button>
-            <Link href={getFullPath("/settings")}>
+            <Link href="/settings">
               <Button variant="outline" size="sm" className="w-full">
                 <Settings className="w-4 h-4 mr-1" />
-                設定
+                {homeActionsT("settings")}
               </Button>
             </Link>
-            <Link href={getFullPath("/works/new")}>
+            <Link href="/works/new">
               <Button className="w-full">
                 <Plus className="w-4 h-4 mr-2" />
-                新增作品
+                {homeActionsT("addWork")}
               </Button>
             </Link>
           </div>
@@ -396,7 +411,7 @@ export default function HomePage() {
         <div className="bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-400 dark:border-yellow-800 text-yellow-700 dark:text-yellow-200 px-4 py-3 rounded mb-6 flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 animate-fade-in-up">
           <div className="flex items-center">
             <AlertTriangle className="w-5 h-5 mr-2 flex-shrink-0" />
-            <span className="text-sm">發現舊版數據，建議進行數據遷移。</span>
+            <span className="text-sm">{homeMigrationT("notice")}</span>
           </div>
           <Button
             variant="outline"
@@ -405,7 +420,7 @@ export default function HomePage() {
             disabled={isMigrating}
             className="flex-shrink-0"
           >
-            {isMigrating ? "遷移中..." : "立即遷移"}
+            {isMigrating ? homeMigrationT("inProgress") : homeMigrationT("button")}
           </Button>
         </div>
       )}
@@ -415,16 +430,7 @@ export default function HomePage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
           <div className="flex items-center space-x-4">
             <h2 className="text-lg sm:text-xl font-semibold dark:text-foreground/98">
-              {searchTerm ||
-                selectedType ||
-                selectedStatus ||
-                selectedYear ||
-                selectedTags.length > 0 ||
-                ratingRange.min !== 0 ||
-                ratingRange.max !== 10 ||
-                progressFilter
-                ? "搜尋結果"
-                : "最近作品"}
+              {homeLabelsT(hasActiveFilters ? "searchResults" : "recentWorks")}
             </h2>
 
             {/* Batch Actions */}
@@ -439,12 +445,12 @@ export default function HomePage() {
                   {isBatchMode ? (
                     <>
                       <CheckSquare className="w-4 h-4 mr-1" />
-                      批量模式
+                      {homeActionsT("batchMode")}
                     </>
                   ) : (
                     <>
                       <Square className="w-4 h-4 mr-1" />
-                      批量選擇
+                      {homeActionsT("batchSelect")}
                     </>
                   )}
                 </Button>
@@ -456,10 +462,10 @@ export default function HomePage() {
                       size="sm"
                       onClick={() => selectAllWorks(filteredWorks)}
                     >
-                      全選
+                      {homeActionsT("selectAll")}
                     </Button>
                     <Button variant="outline" size="sm" onClick={clearSelection}>
-                      清除
+                      {homeActionsT("clearSelection")}
                     </Button>
                     {selectedWorkIds.size > 0 && (
                       <>
@@ -468,7 +474,9 @@ export default function HomePage() {
                           onClick={() => setShowBatchEditModal(true)}
                         >
                           <Edit3 className="w-4 h-4 mr-1" />
-                          批量編輯 ({selectedWorkIds.size})
+                          {homeActionsT("batchEditCount", {
+                            count: selectedWorkIds.size,
+                          })}
                         </Button>
                         <Button
                           size="sm"
@@ -476,7 +484,9 @@ export default function HomePage() {
                           onClick={() => setShowBatchDeleteModal(true)}
                         >
                           <Trash2 className="w-4 h-4 mr-1" />
-                          批量刪除 ({selectedWorkIds.size})
+                          {homeActionsT("batchDeleteCount", {
+                            count: selectedWorkIds.size,
+                          })}
                         </Button>
                       </>
                     )}
@@ -488,11 +498,15 @@ export default function HomePage() {
 
           {filteredWorks.length > 0 && (
             <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-              <span>共 {filteredWorks.length} 個作品</span>
+              <span>
+                {homeLabelsT("itemsCount", { count: filteredWorks.length })}
+              </span>
               {works.length !== filteredWorks.length && (
-                <span>（從 {works.length} 個中篩選）</span>
+                <span>{homeLabelsT("filteredFrom", { total: works.length })}</span>
               )}
-              {searchTerm && <span>搜尋：「{searchTerm}」</span>}
+              {searchTerm && (
+                <span>{homeLabelsT("searchTerm", { term: searchTerm })}</span>
+              )}
             </div>
           )}
         </div>
@@ -573,7 +587,8 @@ export default function HomePage() {
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center w-12 h-12 bg-gray-900 hover:bg-gray-800 text-white rounded-full shadow-lg transition-colors duration-200"
-          title="查看 GitHub Repository"
+          title={homeActionsT("viewGithub")}
+          aria-label={homeActionsT("viewGithub")}
         >
           <svg
             className="w-6 h-6"

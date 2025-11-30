@@ -37,3 +37,26 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
   disconnect: jest.fn(),
 }));
+
+// Mock indexedDB
+const indexedDBMock = {
+  open: jest.fn().mockReturnValue({
+    result: {
+      createObjectStore: jest.fn(),
+      transaction: jest.fn(),
+    },
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    onsuccess: null,
+    onerror: null,
+  }),
+  deleteDatabase: jest.fn(),
+};
+global.indexedDB = indexedDBMock;
+
+// Mock next-intl
+jest.mock("next-intl", () => ({
+  useTranslations: () => (key) => key,
+  useLocale: () => "zh-TW",
+  NextIntlClientProvider: ({ children }) => children,
+}));

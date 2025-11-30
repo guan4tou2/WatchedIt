@@ -21,6 +21,45 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Tag } from "@/types";
+import { useTranslations } from "next-intl";
+
+type WorkStatusKey =
+  | "ongoing"
+  | "completed"
+  | "paused"
+  | "dropped"
+  | "notStarted"
+  | "cancelled";
+
+type WorkTypeKey = "anime" | "movie" | "tv" | "novel" | "manga" | "game";
+
+const WORK_STATUS_KEY_MAP: Record<string, WorkStatusKey> = {
+  進行中: "ongoing",
+  已完結: "completed",
+  暫停: "paused",
+  放棄: "dropped",
+  未播出: "notStarted",
+  已取消: "cancelled",
+};
+
+const WORK_TYPE_KEY_MAP: Record<string, WorkTypeKey> = {
+  動畫: "anime",
+  電影: "movie",
+  電視劇: "tv",
+  小說: "novel",
+  漫畫: "manga",
+  遊戲: "game",
+};
+
+const PROGRESS_KEY_MAP: Record<string, string> = {
+  未開始: "notStarted",
+  進行中: "inProgress",
+  已完成: "completed",
+  高進度: "highProgress",
+  低進度: "lowProgress",
+  "高進度 (80%+)": "highProgress",
+  "低進度 (20%+)": "lowProgress",
+};
 
 interface SearchFilterProps {
   searchTerm: string;
@@ -79,6 +118,29 @@ export default function SearchFilter({
     }
     return [];
   });
+
+  const t = useTranslations("SearchFilter");
+  const commonT = useTranslations("Common");
+  const workStatusT = useTranslations("Work.status");
+  const workTypeT = useTranslations("Work.type");
+
+  const getStatusLabel = (status: string) => {
+    const key = WORK_STATUS_KEY_MAP[status];
+    return key ? workStatusT(key) : status;
+  };
+
+  const getTypeLabel = (type: string) => {
+    const key = WORK_TYPE_KEY_MAP[type];
+    return key ? workTypeT(key) : type;
+  };
+
+  const getProgressLabel = (value: string) => {
+    const key = PROGRESS_KEY_MAP[value];
+    if (key) {
+      return t(`progress.${key}`, { defaultMessage: value });
+    }
+    return value;
+  };
 
   // 點擊外部收起來標籤選擇器
   useEffect(() => {
@@ -157,56 +219,56 @@ export default function SearchFilter({
   // 快速篩選選項
   const quickFilters = [
     {
-      label: "全部",
+      label: t("quickFilters.all", { defaultMessage: "全部" }),
       action: () => onClearFilters(),
       icon: null,
       color:
         "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700",
     },
     {
-      label: "進行中",
+      label: workStatusT("ongoing"),
       action: () => onStatusChange("進行中"),
       icon: Play,
       color:
         "bg-blue-100 dark:bg-blue-900/20 hover:bg-blue-200 dark:hover:bg-blue-900/30 text-blue-800 dark:text-blue-200",
     },
     {
-      label: "已完結",
+      label: workStatusT("completed"),
       action: () => onStatusChange("已完結"),
       icon: CheckCircle,
       color:
         "bg-green-100 dark:bg-green-900/20 hover:bg-green-200 dark:hover:bg-green-900/30 text-green-800 dark:text-green-200",
     },
     {
-      label: "動畫",
+      label: workTypeT("anime"),
       action: () => onTypeChange("動畫"),
       icon: null,
       color:
         "bg-purple-100 dark:bg-purple-900/20 hover:bg-purple-200 dark:hover:bg-purple-900/30 text-purple-800 dark:text-purple-200",
     },
     {
-      label: "電影",
+      label: workTypeT("movie"),
       action: () => onTypeChange("電影"),
       icon: null,
       color:
         "bg-red-100 dark:bg-red-900/20 hover:bg-red-200 dark:hover:bg-red-900/30 text-red-800 dark:text-red-200",
     },
     {
-      label: "高評分",
+      label: t("quickFilters.highRating", { defaultMessage: "高評分" }),
       action: () => onRatingChange({ min: 8, max: 10 }),
       icon: Star,
       color:
         "bg-yellow-100 dark:bg-yellow-900/20 hover:bg-yellow-200 dark:hover:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200",
     },
     {
-      label: "未開始",
+      label: t("quickFilters.notStarted", { defaultMessage: "未開始" }),
       action: () => onProgressChange("未開始"),
       icon: AlertCircle,
       color:
         "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700",
     },
     {
-      label: "已完成",
+      label: t("quickFilters.completed", { defaultMessage: "已完成" }),
       action: () => onProgressChange("已完成"),
       icon: CheckCircle,
       color:
@@ -222,7 +284,10 @@ export default function SearchFilter({
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
-            placeholder="搜尋作品標題、評論、備註或標籤..."
+            placeholder={t(
+              "placeholder",
+              { defaultMessage: "搜尋作品標題、評論、備註或標籤..." }
+            )}
             value={searchTerm}
             onChange={(e) => {
               onSearchChange(e.target.value);
@@ -253,7 +318,7 @@ export default function SearchFilter({
               {showSearchSuggestions && searchSuggestions().length > 0 && (
                 <div>
                   <div className="px-4 py-2 text-xs font-medium text-gray-500 border-b border-gray-100 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
-                    搜尋建議
+                    {t("suggestions.title", { defaultMessage: "搜尋建議" })}
                   </div>
                   {searchSuggestions().map((suggestion, index) => (
                     <button
@@ -279,12 +344,12 @@ export default function SearchFilter({
               {showSearchHistory && searchHistory.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between px-4 py-2 text-xs font-medium text-gray-500 border-b border-gray-100 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
-                    <span>搜尋歷史</span>
+                    <span>{t("history.title", { defaultMessage: "搜尋歷史" })}</span>
                     <button
                       onClick={clearSearchHistory}
                       className="text-red-500 hover:text-red-700 transition-colors"
                     >
-                      清除
+                      {t("history.clear", { defaultMessage: "清除" })}
                     </button>
                   </div>
                   {searchHistory.map((term, index) => (
@@ -318,7 +383,9 @@ export default function SearchFilter({
             className="flex-1 lg:flex-none h-11 px-4"
           >
             <Filter className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">篩選</span>
+            <span className="hidden sm:inline">
+              {t("buttons.filter", { defaultMessage: "篩選" })}
+            </span>
             {showFilters ? (
               <ChevronUp className="w-4 h-4 ml-2" />
             ) : (
@@ -333,7 +400,9 @@ export default function SearchFilter({
               className="h-11 px-4"
             >
               <X className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">清除</span>
+              <span className="hidden sm:inline">
+                {commonT("clear", { defaultMessage: "清除" })}
+              </span>
             </Button>
           )}
         </div>
@@ -360,11 +429,11 @@ export default function SearchFilter({
       {hasActiveFilters && (
         <div className="flex flex-wrap items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
-            活動篩選:
+            {t("active.title", { defaultMessage: "活動篩選" })}:
           </span>
           {searchTerm && (
             <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-800">
-              搜尋: {searchTerm}
+              {t("active.search", { term: searchTerm, defaultMessage: `搜尋: ${searchTerm}` })}
             </Badge>
           )}
           {selectedType && (
@@ -372,12 +441,18 @@ export default function SearchFilter({
               variant="secondary"
               className="bg-purple-100 dark:bg-purple-800"
             >
-              類型: {selectedType}
+              {t("active.type", {
+                type: getTypeLabel(selectedType),
+                defaultMessage: `類型: ${selectedType}`,
+              })}
             </Badge>
           )}
           {selectedStatus && (
             <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-800">
-              狀態: {selectedStatus}
+              {t("active.status", {
+                status: getStatusLabel(selectedStatus),
+                defaultMessage: `狀態: ${selectedStatus}`,
+              })}
             </Badge>
           )}
           {selectedYear && (
@@ -385,7 +460,10 @@ export default function SearchFilter({
               variant="secondary"
               className="bg-green-100 dark:bg-green-800"
             >
-              年份: {selectedYear}
+              {t("active.year", {
+                year: selectedYear,
+                defaultMessage: `年份: ${selectedYear}`,
+              })}
             </Badge>
           )}
           {selectedTags.map((tag) => (
@@ -394,7 +472,10 @@ export default function SearchFilter({
               variant="secondary"
               className="bg-orange-100 dark:bg-orange-800"
             >
-              標籤: {tag.name}
+              {t("active.tag", {
+                tag: tag.name,
+                defaultMessage: `標籤: ${tag.name}`,
+              })}
             </Badge>
           ))}
           {(ratingRange.min !== 0 || ratingRange.max !== 10) && (
@@ -402,7 +483,11 @@ export default function SearchFilter({
               variant="secondary"
               className="bg-yellow-100 dark:bg-yellow-800"
             >
-              評分: {ratingRange.min}-{ratingRange.max}
+              {t("active.rating", {
+                min: ratingRange.min,
+                max: ratingRange.max,
+                defaultMessage: `評分: ${ratingRange.min}-${ratingRange.max}`,
+              })}
             </Badge>
           )}
           {progressFilter && (
@@ -410,7 +495,10 @@ export default function SearchFilter({
               variant="secondary"
               className="bg-indigo-100 dark:bg-indigo-800"
             >
-              進度: {progressFilter}
+              {t("active.progress", {
+                progress: getProgressLabel(progressFilter),
+                defaultMessage: `進度: ${progressFilter}`,
+              })}
             </Badge>
           )}
         </div>
@@ -422,7 +510,7 @@ export default function SearchFilter({
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center space-x-2 text-lg">
               <Filter className="w-5 h-5" />
-              <span>詳細篩選</span>
+              <span>{t("details.title", { defaultMessage: "詳細篩選" })}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -431,23 +519,29 @@ export default function SearchFilter({
               <div>
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center space-x-2">
                   <TagIcon className="w-4 h-4" />
-                  <span>基本篩選</span>
+                  <span>{t("details.basic.title", { defaultMessage: "基本篩選" })}</span>
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* 類型篩選 */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      作品類型
+                    <label
+                      htmlFor="type-filter"
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      {t("details.basic.typeLabel", { defaultMessage: "作品類型" })}
                     </label>
                     <select
+                      id="type-filter"
                       value={selectedType}
                       onChange={(e) => onTypeChange(e.target.value)}
                       className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     >
-                      <option value="">全部類型</option>
+                      <option value="">
+                        {t("details.basic.typeAll", { defaultMessage: "全部類型" })}
+                      </option>
                       {availableTypes.map((type) => (
                         <option key={type} value={type}>
-                          {type}
+                          {getTypeLabel(type)}
                         </option>
                       ))}
                     </select>
@@ -455,18 +549,24 @@ export default function SearchFilter({
 
                   {/* 狀態篩選 */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      觀看狀態
+                    <label
+                      htmlFor="status-filter"
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      {t("details.basic.statusLabel", { defaultMessage: "觀看狀態" })}
                     </label>
                     <select
+                      id="status-filter"
                       value={selectedStatus}
                       onChange={(e) => onStatusChange(e.target.value)}
                       className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     >
-                      <option value="">全部狀態</option>
+                      <option value="">
+                        {t("details.basic.statusAll", { defaultMessage: "全部狀態" })}
+                      </option>
                       {availableStatuses.map((status) => (
                         <option key={status} value={status}>
-                          {status}
+                          {getStatusLabel(status)}
                         </option>
                       ))}
                     </select>
@@ -474,15 +574,21 @@ export default function SearchFilter({
 
                   {/* 年份篩選 */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      發行年份
+                    <label
+                      htmlFor="year-filter"
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      {t("details.basic.yearLabel", { defaultMessage: "發行年份" })}
                     </label>
                     <select
+                      id="year-filter"
                       value={selectedYear}
                       onChange={(e) => onYearChange(e.target.value)}
                       className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     >
-                      <option value="">全部年份</option>
+                      <option value="">
+                        {t("details.basic.yearAll", { defaultMessage: "全部年份" })}
+                      </option>
                       {availableYears.map((year) => (
                         <option key={year} value={year}>
                           {year}
@@ -493,20 +599,42 @@ export default function SearchFilter({
 
                   {/* 進度篩選 */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      觀看進度
+                    <label
+                      htmlFor="progress-filter"
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      {t("details.basic.progressLabel", { defaultMessage: "觀看進度" })}
                     </label>
                     <select
+                      id="progress-filter"
                       value={progressFilter}
                       onChange={(e) => onProgressChange(e.target.value)}
                       className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     >
-                      <option value="">全部進度</option>
-                      <option value="未開始">未開始</option>
-                      <option value="進行中">進行中</option>
-                      <option value="已完成">已完成</option>
-                      <option value="高進度">高進度 (80%+)</option>
-                      <option value="低進度">低進度 (20%+)</option>
+                      <option value="">
+                        {t("details.basic.progressAll", { defaultMessage: "全部進度" })}
+                      </option>
+                      <option value="未開始">
+                        {t("progress.notStarted", { defaultMessage: "未開始" })}
+                      </option>
+                      <option value="進行中">
+                        {t("progress.inProgress", { defaultMessage: "進行中" })}
+                      </option>
+                      <option value="已完成">
+                        {t("progress.completed", { defaultMessage: "已完成" })}
+                      </option>
+                      <option value="高進度">
+                        {t(
+                          "details.basic.progressOptions.high",
+                          { defaultMessage: "高進度 (80%+)" }
+                        )}
+                      </option>
+                      <option value="低進度">
+                        {t(
+                          "details.basic.progressOptions.low",
+                          { defaultMessage: "低進度 (20%+)" }
+                        )}
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -516,23 +644,35 @@ export default function SearchFilter({
               <div>
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center space-x-2">
                   <Star className="w-4 h-4" />
-                  <span>進階篩選</span>
+                  <span>{t("details.advanced.title", { defaultMessage: "進階篩選" })}</span>
                 </h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* 評分篩選 */}
                   <div className="space-y-4">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      評分範圍
+                      {t("details.advanced.ratingLabel", { defaultMessage: "評分範圍" })}
                     </label>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                        <span>{ratingRange.min} 分</span>
-                        <span>{ratingRange.max} 分</span>
+                        <span>
+                          {t("details.advanced.ratingMinValue", {
+                            value: ratingRange.min,
+                            defaultMessage: `${ratingRange.min} 分`,
+                          })}
+                        </span>
+                        <span>
+                          {t("details.advanced.ratingMaxValue", {
+                            value: ratingRange.max,
+                            defaultMessage: `${ratingRange.max} 分`,
+                          })}
+                        </span>
                       </div>
                       <div className="space-y-4">
                         <div className="flex items-center justify-center space-x-4">
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs text-gray-500">最小</span>
+                            <span className="text-xs text-gray-500">
+                              {t("details.advanced.minLabel", { defaultMessage: "最小" })}
+                            </span>
                             <input
                               type="range"
                               min="0"
@@ -563,7 +703,9 @@ export default function SearchFilter({
                               }
                               className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                             />
-                            <span className="text-xs text-gray-500">最大</span>
+                            <span className="text-xs text-gray-500">
+                              {t("details.advanced.maxLabel", { defaultMessage: "最大" })}
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center justify-center space-x-2">
@@ -573,12 +715,11 @@ export default function SearchFilter({
                               onClick={() =>
                                 onRatingChange({ min: rating, max: rating })
                               }
-                              className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${
-                                ratingRange.min === rating &&
+                              className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${ratingRange.min === rating &&
                                 ratingRange.max === rating
-                                  ? "bg-blue-500 text-white shadow-lg"
-                                  : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
-                              }`}
+                                ? "bg-blue-500 text-white shadow-lg"
+                                : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+                                }`}
                             >
                               {rating}
                             </button>
@@ -591,7 +732,7 @@ export default function SearchFilter({
                   {/* 標籤篩選 */}
                   <div className="space-y-4">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      標籤篩選
+                      {t("details.tags.label", { defaultMessage: "標籤篩選" })}
                     </label>
                     <div className="space-y-3">
                       {/* 已選擇的標籤 */}
@@ -629,8 +770,11 @@ export default function SearchFilter({
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           {selectedTags.length === 0
-                            ? "選擇標籤"
-                            : `已選擇 ${selectedTags.length} 個標籤`}
+                            ? t("details.tags.select", { defaultMessage: "選擇標籤" })
+                            : t("details.tags.selectedCount", {
+                              count: selectedTags.length,
+                              defaultMessage: `已選擇 ${selectedTags.length} 個標籤`,
+                            })}
                           {showTagSelector ? (
                             <ChevronUp className="w-4 h-4 ml-auto" />
                           ) : (
@@ -642,7 +786,7 @@ export default function SearchFilter({
                           <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
                             {allTags.length === 0 ? (
                               <div className="p-4 text-sm text-gray-500 text-center">
-                                沒有可用的標籤
+                                {t("details.tags.empty", { defaultMessage: "沒有可用的標籤" })}
                               </div>
                             ) : (
                               <div className="p-2 space-y-1">
@@ -663,26 +807,24 @@ export default function SearchFilter({
                                         onTagsChange([...selectedTags, tag]);
                                       }
                                     }}
-                                    className={`w-full text-left p-3 rounded-lg flex items-center space-x-3 transition-all ${
-                                      selectedTags.some((t) => t.id === tag.id)
-                                        ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
-                                        : "hover:bg-gray-50 dark:hover:bg-gray-700"
-                                    }`}
+                                    className={`w-full text-left p-3 rounded-lg flex items-center space-x-3 transition-all ${selectedTags.some((t) => t.id === tag.id)
+                                      ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
+                                      : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                                      }`}
                                   >
                                     <div
-                                      className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                                        selectedTags.some(
-                                          (t) => t.id === tag.id
-                                        )
-                                          ? "bg-blue-500 border-blue-500"
-                                          : "border-gray-300 dark:border-gray-600"
-                                      }`}
+                                      className={`w-4 h-4 rounded border-2 flex items-center justify-center ${selectedTags.some(
+                                        (t) => t.id === tag.id
+                                      )
+                                        ? "bg-blue-500 border-blue-500"
+                                        : "border-gray-300 dark:border-gray-600"
+                                        }`}
                                     >
                                       {selectedTags.some(
                                         (t) => t.id === tag.id
                                       ) && (
-                                        <CheckCircle className="w-3 h-3 text-white" />
-                                      )}
+                                          <CheckCircle className="w-3 h-3 text-white" />
+                                        )}
                                     </div>
                                     <span className="text-sm">{tag.name}</span>
                                   </button>
@@ -701,34 +843,34 @@ export default function SearchFilter({
               <div>
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center space-x-2">
                   <Play className="w-4 h-4" />
-                  <span>快速進度篩選</span>
+                  <span>{t("quickProgress.title", { defaultMessage: "快速進度篩選" })}</span>
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
                     {
                       value: "未開始",
-                      label: "未開始",
+                      label: t("progress.notStarted", { defaultMessage: "未開始" }),
                       color:
                         "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700",
                       icon: AlertCircle,
                     },
                     {
                       value: "進行中",
-                      label: "進行中",
+                      label: t("progress.inProgress", { defaultMessage: "進行中" }),
                       color:
                         "bg-blue-100 dark:bg-blue-900/20 hover:bg-blue-200 dark:hover:bg-blue-900/30",
                       icon: Play,
                     },
                     {
                       value: "已完成",
-                      label: "已完成",
+                      label: t("progress.completed", { defaultMessage: "已完成" }),
                       color:
                         "bg-green-100 dark:bg-green-900/20 hover:bg-green-200 dark:hover:bg-green-900/30",
                       icon: CheckCircle,
                     },
                     {
                       value: "高進度",
-                      label: "高進度",
+                      label: t("progress.highProgress", { defaultMessage: "高進度" }),
                       color:
                         "bg-purple-100 dark:bg-purple-900/20 hover:bg-purple-200 dark:hover:bg-purple-900/30",
                       icon: Star,
@@ -743,11 +885,10 @@ export default function SearchFilter({
                             progressFilter === option.value ? "" : option.value
                           )
                         }
-                        className={`p-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center space-x-2 ${
-                          progressFilter === option.value
-                            ? `${option.color} border-2 border-current`
-                            : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
-                        }`}
+                        className={`p-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center space-x-2 ${progressFilter === option.value
+                          ? `${option.color} border-2 border-current`
+                          : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+                          }`}
                       >
                         <Icon className="w-4 h-4" />
                         <span>{option.label}</span>
@@ -767,7 +908,7 @@ export default function SearchFilter({
                 className="px-6 py-2"
               >
                 <X className="w-4 h-4 mr-2" />
-                清除所有篩選
+                {t("buttons.clearAll", { defaultMessage: "清除所有篩選" })}
               </Button>
             </div>
           </CardContent>

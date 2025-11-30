@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,6 @@ import { Work, Episode, WorkUpdate } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
 import EpisodeManager from "@/components/EpisodeManager";
 import WorkEditForm from "@/components/WorkEditForm";
-import { getFullPath } from "@/lib/utils";
 import {
   ArrowLeft,
   Edit,
@@ -20,6 +20,25 @@ import {
   Save,
   X,
 } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+
+const WORK_STATUS_KEY_MAP: Record<Work["status"], string> = {
+  進行中: "ongoing",
+  已完結: "completed",
+  暫停: "paused",
+  放棄: "dropped",
+  未播出: "notStarted",
+  已取消: "cancelled",
+};
+
+const WORK_TYPE_KEY_MAP: Record<string, string> = {
+  動畫: "anime",
+  電影: "movie",
+  電視劇: "tv",
+  小說: "novel",
+  漫畫: "manga",
+  遊戲: "game",
+};
 
 export default function WorkDetailClient() {
   const router = useRouter();
@@ -29,6 +48,11 @@ export default function WorkDetailClient() {
   const [isEditing, setIsEditing] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const t = useTranslations("WorkDetail");
+  const commonT = useTranslations("Common");
+  const workStatusT = useTranslations("Work.status");
+  const workTypeT = useTranslations("Work.type");
+  const locale = useLocale();
 
   useEffect(() => {
     const loadWork = async () => {
@@ -91,9 +115,9 @@ export default function WorkDetailClient() {
   const handleDelete = async () => {
     if (!work) return;
 
-    if (confirm("確定要刪除這個作品嗎？")) {
+    if (confirm(t("confirmDelete", { defaultMessage: "確定要刪除這個作品嗎？" }))) {
       await deleteWork(work.id);
-      router.push(getFullPath("/"));
+      router.push("/");
     }
   };
 
@@ -103,7 +127,9 @@ export default function WorkDetailClient() {
         <div className="flex items-center justify-center min-h-[200px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <div className="text-gray-600 dark:text-gray-400">載入中...</div>
+            <div className="text-gray-600 dark:text-gray-400">
+              {t("loading", { defaultMessage: "載入中..." })}
+            </div>
           </div>
         </div>
       </div>
@@ -116,14 +142,11 @@ export default function WorkDetailClient() {
         <div className="flex items-center justify-center min-h-[200px]">
           <div className="text-center">
             <div className="text-gray-600 dark:text-gray-400 mb-4">
-              作品不存在
+              {t("notFound", { defaultMessage: "作品不存在" })}
             </div>
-            <Button
-              variant="outline"
-              onClick={() => router.push(getFullPath("/"))}
-            >
+            <Button variant="outline" onClick={() => router.push("/")}>
               <ArrowLeft className="w-4 h-4 mr-2" />
-              返回首頁
+              {t("actions.backHome", { defaultMessage: "返回首頁" })}
             </Button>
           </div>
         </div>
@@ -136,6 +159,12 @@ export default function WorkDetailClient() {
   const totalEpisodes = episodes.length;
   const completionRate =
     totalEpisodes > 0 ? Math.round((watchedCount / totalEpisodes) * 100) : 0;
+  const statusKey = WORK_STATUS_KEY_MAP[work.status];
+  const statusLabel = statusKey ? workStatusT(statusKey) : work.status;
+  const typeKey = WORK_TYPE_KEY_MAP[work.type];
+  const typeLabel = typeKey ? workTypeT(typeKey) : work.type;
+  const formatDate = (value: string) =>
+    new Date(value).toLocaleDateString(locale);
 
   return (
     <div className="container mx-auto p-4 sm:p-6">
@@ -144,7 +173,7 @@ export default function WorkDetailClient() {
         <div className="flex items-center space-x-4">
           <Button variant="outline" size="sm" onClick={() => router.back()}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            返回
+            {commonT("back", { defaultMessage: "返回" })}
           </Button>
           <h1 className="text-xl sm:text-2xl font-bold">{work.title}</h1>
         </div>
@@ -156,7 +185,7 @@ export default function WorkDetailClient() {
             className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
           >
             <Trash2 className="w-4 h-4 mr-2" />
-            刪除
+            {t("actions.delete", { defaultMessage: "刪除" })}
           </Button>
         </div>
       </div>
@@ -168,65 +197,81 @@ export default function WorkDetailClient() {
           <Card>
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                <CardTitle>基本資訊</CardTitle>
+                <CardTitle>{t("sections.basic.title", { defaultMessage: "基本資訊" })}</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowEditForm(!showEditForm)}
                 >
                   <Edit className="w-4 h-4 mr-2" />
-                  {showEditForm ? "取消編輯" : "編輯作品"}
+                  {showEditForm
+                    ? t("actions.cancelEdit", { defaultMessage: "取消編輯" })
+                    : t("actions.edit", { defaultMessage: "編輯作品" })}
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="form-label">類型</label>
+                  <label className="form-label">
+                    {t("labels.type", { defaultMessage: "類型" })}
+                  </label>
                   <div className="mt-1">
-                    <Badge variant="secondary">{work.type}</Badge>
+                    <Badge variant="secondary">{typeLabel}</Badge>
                   </div>
                 </div>
                 <div>
-                  <label className="form-label">狀態</label>
+                  <label className="form-label">
+                    {t("labels.status", { defaultMessage: "狀態" })}
+                  </label>
                   <div className="mt-1">
                     <Badge
                       variant={
                         work.status === "已完結"
                           ? "default"
                           : work.status === "進行中"
-                          ? "secondary"
-                          : "outline"
+                            ? "secondary"
+                            : "outline"
                       }
                     >
-                      {work.status}
+                      {WORK_STATUS_KEY_MAP[work.status]
+                        ? workStatusT(WORK_STATUS_KEY_MAP[work.status])
+                        : work.status}
                     </Badge>
                   </div>
                 </div>
                 <div>
-                  <label className="form-label">年份</label>
-                  <p className="mt-1 title-text">{work.year || "未知"}</p>
+                  <label className="form-label">
+                    {t("labels.year", { defaultMessage: "年份" })}
+                  </label>
+                  <p className="mt-1 title-text">
+                    {work.year || t("labels.unknown", { defaultMessage: "未知" })}
+                  </p>
                 </div>
                 <div>
-                  <label className="form-label">評分</label>
+                  <label className="form-label">
+                    {t("labels.rating", { defaultMessage: "評分" })}
+                  </label>
                   <p className="mt-1 title-text">
-                    {work.rating ? `${work.rating}/10` : "未評分"}
+                    {work.rating
+                      ? `${work.rating}/10`
+                      : t("labels.notRated", { defaultMessage: "未評分" })}
                   </p>
                 </div>
                 <div>
                   <label className="form-label flex items-center">
                     <Calendar className="w-4 h-4 mr-1" />
-                    新增時間
+                    {t("labels.addedAt", { defaultMessage: "新增時間" })}
                   </label>
-                  <p className="mt-1 title-text">
-                    {new Date(work.date_added).toLocaleDateString("zh-TW")}
-                  </p>
+                  <p className="mt-1 title-text">{formatDate(work.date_added)}</p>
                 </div>
                 {work.date_updated && (
                   <div>
-                    <label className="form-label">更新時間</label>
+                    <label className="form-label">
+                      {t("labels.updatedAt", { defaultMessage: "更新時間" })}
+                    </label>
                     <p className="mt-1 title-text">
-                      {new Date(work.date_updated).toLocaleDateString("zh-TW")}
+                      {formatDate(work.date_updated)}
                     </p>
                   </div>
                 )}
@@ -234,21 +279,27 @@ export default function WorkDetailClient() {
 
               {work.review && (
                 <div>
-                  <label className="form-label">評論</label>
+                  <label className="form-label">
+                    {t("labels.review", { defaultMessage: "評論" })}
+                  </label>
                   <p className="mt-1 description-text">{work.review}</p>
                 </div>
               )}
 
               {work.note && (
                 <div>
-                  <label className="form-label">備註</label>
+                  <label className="form-label">
+                    {t("labels.note", { defaultMessage: "備註" })}
+                  </label>
                   <p className="mt-1 description-text">{work.note}</p>
                 </div>
               )}
 
               {work.source && (
                 <div>
-                  <label className="form-label">來源</label>
+                  <label className="form-label">
+                    {t("labels.source", { defaultMessage: "來源" })}
+                  </label>
                   <p className="mt-1 description-text">{work.source}</p>
                 </div>
               )}
@@ -257,7 +308,7 @@ export default function WorkDetailClient() {
                 <div>
                   <label className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
                     <Tag className="w-4 h-4 mr-1" />
-                    標籤
+                    {t("labels.tags", { defaultMessage: "標籤" })}
                   </label>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {work.tags.map((tag) => (
@@ -267,7 +318,6 @@ export default function WorkDetailClient() {
                 </div>
               )}
 
-              {/* 編輯作品表單 */}
               {showEditForm && work && (
                 <div className="mt-6 p-4 border-2 border-dashed border-blue-200 dark:border-blue-800 rounded-lg">
                   <WorkEditForm
@@ -297,7 +347,7 @@ export default function WorkDetailClient() {
         <div className="space-y-4 sm:space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>集數統計</CardTitle>
+              <CardTitle>{t("sections.stats.title", { defaultMessage: "集數統計" })}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -305,17 +355,23 @@ export default function WorkDetailClient() {
                   <div className="font-semibold title-text">
                     {totalEpisodes}
                   </div>
-                  <div className="description-text">總集數</div>
+                  <div className="description-text">
+                    {t("sections.stats.totalEpisodes", { defaultMessage: "總集數" })}
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="font-semibold title-text">{watchedCount}</div>
-                  <div className="description-text">季數</div>
+                  <div className="description-text">
+                    {t("sections.stats.watchedEpisodes", { defaultMessage: "已觀看" })}
+                  </div>
                 </div>
               </div>
 
               {episodes.length > 0 && (
                 <div className="space-y-2">
-                  <div className="text-sm font-medium title-text">集數類型</div>
+                  <div className="text-sm font-medium title-text">
+                    {t("sections.stats.episodeTypes", { defaultMessage: "集數類型" })}
+                  </div>
                   <div className="space-y-1">
                     {Object.entries(
                       episodes.reduce((acc, ep) => {
@@ -337,20 +393,24 @@ export default function WorkDetailClient() {
           {/* 時間資訊 */}
           <Card>
             <CardHeader>
-              <CardTitle>時間資訊</CardTitle>
+              <CardTitle>{t("sections.time.title", { defaultMessage: "時間資訊" })}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm description-text">新增時間</span>
+                <span className="text-sm description-text">
+                  {t("labels.addedAt", { defaultMessage: "新增時間" })}
+                </span>
                 <span className="text-sm title-text">
-                  {new Date(work.date_added).toLocaleDateString("zh-TW")}
+                  {formatDate(work.date_added)}
                 </span>
               </div>
               {work.date_updated && (
                 <div className="flex justify-between">
-                  <span className="text-sm description-text">更新時間</span>
+                  <span className="text-sm description-text">
+                    {t("labels.updatedAt", { defaultMessage: "更新時間" })}
+                  </span>
                   <span className="text-sm title-text">
-                    {new Date(work.date_updated).toLocaleDateString("zh-TW")}
+                    {formatDate(work.date_updated)}
                   </span>
                 </div>
               )}

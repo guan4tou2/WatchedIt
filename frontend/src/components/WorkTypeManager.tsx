@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,12 +48,7 @@ export default function WorkTypeManager({
     text: string;
   } | null>(null);
 
-  useEffect(() => {
-    loadWorkTypes();
-    loadEpisodeTypes();
-  }, []);
-
-  const loadWorkTypes = () => {
+  const loadWorkTypes = useCallback(() => {
     try {
       const types = workTypeStorage.getAll();
       setWorkTypes(types);
@@ -62,7 +57,7 @@ export default function WorkTypeManager({
       console.error("載入作品類型失敗:", error);
       setWorkTypes(DEFAULT_WORK_TYPES);
     }
-  };
+  }, [onTypesChange]);
 
   const loadEpisodeTypes = () => {
     try {
@@ -324,11 +319,10 @@ export default function WorkTypeManager({
       {/* 訊息顯示 */}
       {message && (
         <div
-          className={`p-3 rounded-md flex items-center gap-2 ${
-            message.type === "success"
-              ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800"
-              : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
-          }`}
+          className={`p-3 rounded-md flex items-center gap-2 ${message.type === "success"
+            ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800"
+            : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
+            }`}
         >
           {message.type === "success" ? (
             <CheckCircle className="w-4 h-4" />
@@ -457,12 +451,12 @@ export default function WorkTypeManager({
                                 type.name
                               )
                                 ? editingEpisodeMapping.episodeTypes.filter(
-                                    (t) => t !== type.name
-                                  )
+                                  (t) => t !== type.name
+                                )
                                 : [
-                                    ...editingEpisodeMapping.episodeTypes,
-                                    type.name,
-                                  ];
+                                  ...editingEpisodeMapping.episodeTypes,
+                                  type.name,
+                                ];
 
                             setEditingEpisodeMapping({
                               ...editingEpisodeMapping,

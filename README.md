@@ -115,6 +115,22 @@ npm install
 npm run dev
 ```
 
+### 🧪 Testing
+
+#### Unit Tests
+Run unit tests using Jest:
+```bash
+cd frontend
+npm test
+```
+
+#### End-to-End (E2E) Tests
+Run E2E tests using Playwright:
+```bash
+cd frontend
+npx playwright test
+```
+
 ### Building for Production
 ```bash
 cd frontend

@@ -2,13 +2,10 @@ import { getRequestConfig } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
 export default getRequestConfig(async ({ locale }) => {
-    // Validate that the incoming locale is valid
-    if (!locale || !['en', 'zh-TW'].includes(locale)) {
-        notFound();
-    }
-
+    const resolvedLocale = locale && ['en', 'zh-TW'].includes(locale) ? locale : 'zh-TW';
     return {
-        locale,
-        messages: (await import(`../../messages/${locale}.json`)).default
+        locale: resolvedLocale,
+        messages: (await import(`../../messages/${resolvedLocale}.json`)).default
     };
 });
+

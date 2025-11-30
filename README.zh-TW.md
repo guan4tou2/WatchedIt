@@ -115,6 +115,22 @@ npm install
 npm run dev
 ```
 
+### 🧪 測試
+
+#### 單元測試
+使用 Jest 執行單元測試：
+```bash
+cd frontend
+npm test
+```
+
+#### 端對端 (E2E) 測試
+使用 Playwright 執行 E2E 測試：
+```bash
+cd frontend
+npx playwright test
+```
+
 ### 建置正式版本
 ```bash
 cd frontend

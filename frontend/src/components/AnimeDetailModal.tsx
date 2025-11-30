@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,26 +57,24 @@ export default function AnimeDetailModal({
         review: anilistService.cleanDescription(anime.description),
         note: `來自 AniList (ID: ${anime.id})
 格式: ${anilistService.convertFormat(anime.format)}
-${
-  anime.season && anime.seasonYear
-    ? `播出時間: ${anilistService.convertSeason(anime.season)} ${
-        anime.seasonYear
-      }年`
-    : ""
-}
+${anime.season && anime.seasonYear
+            ? `播出時間: ${anilistService.convertSeason(anime.season)} ${anime.seasonYear
+            }年`
+            : ""
+          }
 其他標題: ${anilistService
-          .getAllTitles(anime.title, anime.synonyms)
-          .slice(1)
-          .join(", ")}`,
+            .getAllTitles(anime.title, anime.synonyms)
+            .slice(1)
+            .join(", ")}`,
         source: "AniList",
         episodes: anime.episodes
           ? Array.from({ length: anime.episodes }, (_, i) => ({
-              id: `ep-${anime.id}-${i + 1}`,
-              number: i + 1,
-              type: "episode" as const,
-              season: 1,
-              watched: false,
-            }))
+            id: `ep-${anime.id}-${i + 1}`,
+            number: i + 1,
+            type: "episode" as const,
+            season: 1,
+            watched: false,
+          }))
           : [],
       };
 
@@ -168,7 +167,7 @@ ${
               <Globe className="w-5 h-5 mr-2" />
               動畫詳情
             </CardTitle>
-            <Button variant="ghost" size="sm" onClick={onClose}>
+            <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close">
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -179,18 +178,27 @@ ${
             {/* 左側：封面圖片 */}
             <div className="lg:col-span-1">
               {anime.coverImage?.large && (
-                <div className="sticky top-0">
-                  <img
-                    src={anime.coverImage.large}
-                    alt={anime.title.romaji}
-                    className="w-full rounded-lg shadow-lg"
-                  />
-                  {anime.bannerImage && (
-                    <img
-                      src={anime.bannerImage}
-                      alt="Banner"
-                      className="w-full h-32 object-cover rounded-lg mt-4"
+                <div className="sticky top-0 space-y-4">
+                  <div className="relative w-full aspect-[2/3]">
+                    <Image
+                      src={anime.coverImage.large}
+                      alt={anime.title.romaji || "Anime Cover"}
+                      fill
+                      className="object-cover rounded-lg shadow-lg"
+                      sizes="(max-width: 1024px) 100vw, 33vw"
+                      priority
                     />
+                  </div>
+                  {anime.bannerImage && (
+                    <div className="relative w-full h-32">
+                      <Image
+                        src={anime.bannerImage}
+                        alt="Banner"
+                        fill
+                        className="object-cover rounded-lg"
+                        sizes="(max-width: 1024px) 100vw, 33vw"
+                      />
+                    </div>
                   )}
                 </div>
               )}

@@ -11,7 +11,8 @@
         "filter": "Filter",
         "clear": "Clear",
         "add": "Add",
-        "close": "Close"
+        "close": "Close",
+        "back": "Back"
     },
     "Home": {
         "title": "WatchedIt",
@@ -24,7 +25,38 @@
         "batchEdit": "Batch Edit",
         "batchDelete": "Batch Delete",
         "noWorks": "No works found",
-        "searchPlaceholder": "Search title, review, note, tags..."
+        "searchPlaceholder": "Search title, review, note, tags...",
+        "actions": {
+            "searchAnime": "Search Anime",
+            "settings": "Settings",
+            "addWork": "Add Work",
+            "batchSelect": "Batch Select",
+            "batchMode": "Batch Mode",
+            "selectAll": "Select All",
+            "clearSelection": "Clear",
+            "batchEditCount": "Batch Edit ({count})",
+            "batchDeleteCount": "Batch Delete ({count})",
+            "migrationNow": "Migrate Now",
+            "migrationInProgress": "Migrating...",
+            "viewGithub": "View GitHub Repository"
+        },
+        "labels": {
+            "recentWorks": "Recent Works",
+            "searchResults": "Search Results",
+            "itemsCount": "Total {count} works",
+            "filteredFrom": "(filtered from {total})",
+            "searchTerm": "Search: \"{term}\""
+        },
+        "dataReminder": {
+            "title": "Important Reminder",
+            "description": "Your data is stored locally only. Clearing your browser data will delete it. Please back up regularly.",
+            "dismiss": "Don't remind me"
+        },
+        "migration": {
+            "notice": "Legacy data detected. Please migrate.",
+            "button": "Migrate Now",
+            "inProgress": "Migrating..."
+        }
     },
     "Work": {
         "status": {
@@ -42,6 +74,550 @@
             "novel": "Novel",
             "manga": "Manga",
             "game": "Game"
+        }
+    },
+    "WorkCard": {
+        "buttons": {
+            "quickAddFull": "Add Episode",
+            "quickAddShort": "Add"
+        },
+        "labels": {
+            "unknownYear": "Unknown Year"
+        }
+    },
+    "WorkDetail": {
+        "loading": "Loading...",
+        "notFound": "Work not found",
+        "confirmDelete": "Are you sure you want to delete this work?",
+        "actions": {
+            "backHome": "Back to Home",
+            "delete": "Delete",
+            "edit": "Edit Work",
+            "cancelEdit": "Cancel Edit"
+        },
+        "sections": {
+            "basic": {
+                "title": "Basic Information"
+            },
+            "stats": {
+                "title": "Episode Stats",
+                "totalEpisodes": "Total episodes",
+                "watchedEpisodes": "Watched",
+                "episodeTypes": "Episode types"
+            },
+            "time": {
+                "title": "Time Information"
+            }
+        },
+        "labels": {
+            "type": "Type",
+            "status": "Status",
+            "year": "Year",
+            "rating": "Rating",
+            "addedAt": "Added on",
+            "updatedAt": "Updated on",
+            "review": "Review",
+            "note": "Notes",
+            "source": "Source",
+            "tags": "Tags",
+            "unknown": "Unknown",
+            "notRated": "Not rated"
+        }
+    },
+    "SearchFilter": {
+        "placeholder": "Search titles, reviews, notes or tags...",
+        "suggestions": {
+            "title": "Suggestions"
+        },
+        "history": {
+            "title": "Recent Searches",
+            "clear": "Clear"
+        },
+        "buttons": {
+            "filter": "Filters",
+            "clearAll": "Clear All Filters"
+        },
+        "quickFilters": {
+            "all": "All",
+            "highRating": "High Rating",
+            "notStarted": "Not Started",
+            "completed": "Completed"
+        },
+        "progress": {
+            "notStarted": "Not Started",
+            "inProgress": "In Progress",
+            "completed": "Completed",
+            "highProgress": "High Progress",
+            "lowProgress": "Low Progress"
+        },
+        "active": {
+            "title": "Active Filters",
+            "search": "Search: {term}",
+            "type": "Type: {type}",
+            "status": "Status: {status}",
+            "year": "Year: {year}",
+            "tag": "Tag: {tag}",
+            "rating": "Rating: {min}-{max}",
+            "progress": "Progress: {progress}"
+        },
+        "details": {
+            "title": "Detailed Filters",
+            "basic": {
+                "title": "Basic Filters",
+                "typeLabel": "Work Type",
+                "typeAll": "All Types",
+                "statusLabel": "Watch Status",
+                "statusAll": "All Statuses",
+                "yearLabel": "Release Year",
+                "yearAll": "All Years",
+                "progressLabel": "Progress",
+                "progressAll": "All Progress",
+                "progressOptions": {
+                    "high": "High Progress (80%+)",
+                    "low": "Low Progress (20%+)"
+                }
+            },
+            "advanced": {
+                "title": "Advanced Filters",
+                "ratingLabel": "Rating Range",
+                "ratingMinValue": "{value} pts",
+                "ratingMaxValue": "{value} pts",
+                "minLabel": "Min",
+                "maxLabel": "Max"
+            },
+            "tags": {
+                "label": "Tag Filters",
+                "select": "Select Tags",
+                "selectedCount": "{count} tags selected",
+                "empty": "No tags available"
+            }
+        },
+        "quickProgress": {
+            "title": "Quick Progress Filters"
+        }
+    },
+    "NewWork": {
+        "title": "Add Work",
+        "form": {
+            "cardTitle": "Work Information",
+            "labels": {
+                "title": "Title",
+                "type": "Type",
+                "status": "Status",
+                "year": "Year",
+                "rating": "Rating",
+                "review": "Review",
+                "note": "Notes",
+                "source": "Source"
+            },
+            "placeholders": {
+                "title": "Work title",
+                "year": "2023",
+                "review": "Share your thoughts...",
+                "note": "Additional notes...",
+                "source": "AniList, Manual entry..."
+            },
+            "ratingValue": "{value}/10"
+        },
+        "buttons": {
+            "save": "Create Work",
+            "saving": "Creating..."
+        },
+        "messages": {
+            "createSuccess": "Work created successfully!",
+            "createError": "Failed to create work"
+        },
+        "preview": {
+            "title": "Preview",
+            "year": "Year",
+            "tags": "Tags",
+            "rating": "Rating",
+            "review": "Review",
+            "note": "Notes",
+            "source": "Source",
+            "empty": "Fill in details to see a preview here."
+        },
+        "tips": {
+            "title": "Tips",
+            "item1": "• Title and type are required",
+            "item2": "• You can add multiple tags",
+            "item3": "• Add episodes right after creation",
+            "item4": "• Edit details later on the work page",
+            "item5": "• Supports import/export"
+        }
+    },
+    "Settings": {
+        "pageTitle": "Settings",
+        "nav": {
+            "helpGuide": "Help Guide",
+            "save": "Save Settings"
+        },
+        "appearance": {
+            "title": "Appearance",
+            "themeLabel": "Theme",
+            "theme": {
+                "light": "Light",
+                "dark": "Dark",
+                "auto": "Auto"
+            },
+            "auto": {
+                "title": "Auto Mode",
+                "systemTheme": "System theme",
+                "activeTheme": "Current theme",
+                "description": "Switches automatically when your system theme changes"
+            },
+            "language": {
+                "label": "Language",
+                "zh": "Traditional Chinese",
+                "en": "English"
+            }
+        },
+        "pwa": {
+            "title": "PWA Settings",
+            "status": {
+                "title": "PWA Status",
+                "installed": "Installed",
+                "uninstalled": "Not Installed",
+                "platform": "Platform",
+                "platformIOS": "iOS",
+                "platformAndroid": "Android",
+                "platformDesktop": "Desktop",
+                "notifications": "Notification Permission",
+                "notificationGranted": "Granted",
+                "notificationDenied": "Denied",
+                "notificationDefault": "Not Set"
+            },
+            "settings": {
+                "notifications": "PWA Notifications",
+                "autoUpdate": "Auto Update",
+                "offlineMode": "Offline Mode"
+            },
+            "install": {
+                "title": "Install PWA",
+                "ios": "Tap Safari's Share button and choose “Add to Home Screen”.",
+                "android": "Open the browser menu and choose “Install App”.",
+                "desktop": "Click the install icon next to the address bar.",
+                "fallback": "Click the install icon next to the address bar."
+            },
+            "actions": {
+                "requestNotification": "Request Notification Permission",
+                "checkUpdate": "Check for Updates",
+                "resetPrompt": "Reset Install Prompt",
+                "resetPromptSuccess": "PWA install prompt status has been reset"
+            },
+            "mode": {
+                "installed": "Running in PWA mode",
+                "browser": "Browser mode"
+            }
+        },
+        "data": {
+            "title": "Data Management",
+            "notice": {
+                "title": "Important Reminder",
+                "localOnly": "• All data is stored locally in your browser",
+                "clearingWarning": "• Clearing browser data will remove everything",
+                "backupAdvice": "• Back up important data regularly",
+                "noSync": "• Data does not sync between devices automatically"
+            },
+            "storage": {
+                "modeLabel": "Storage Mode",
+                "options": {
+                    "local": "Local Storage",
+                    "cloud": "Cloud Sync"
+                }
+            },
+            "cloud": {
+                "endpointLabel": "Cloud Endpoint",
+                "apiKeyLabel": "API Key (optional)",
+                "apiKeyPlaceholder": "Enter API key",
+                "testConnection": "Test Connection",
+                "syncToCloud": "Sync to Cloud",
+                "downloadFromCloud": "Download from Cloud",
+                "lastSync": "Last Sync",
+                "shouldSync": "Sync recommended",
+                "neverSynced": "Never synced"
+            },
+            "autoSync": {
+                "label": "Auto Sync",
+                "intervalLabel": "Sync Interval (minutes)"
+            },
+            "clearConfirm": "Are you sure you want to delete all data? This action cannot be undone!"
+        },
+        "backup": {
+            "title": "Backup Settings",
+            "stats": {
+                "title": "Data Stats",
+                "totalWorks": "Total works",
+                "totalTags": "Total tags",
+                "inProgress": "In progress",
+                "completed": "Completed"
+            },
+            "auto": {
+                "label": "Auto Backup",
+                "intervalLabel": "Backup Interval (days)"
+            },
+            "actions": {
+                "export": "Export Data",
+                "import": "Import Data",
+                "clearAll": "Clear All Data"
+            }
+        },
+        "advanced": {
+            "tags": {
+                "title": "Tag Management",
+                "description": "Manage your work tags, including creating, editing and deleting.",
+                "button": "Manage Tags"
+            },
+            "backup": {
+                "title": "Backup & Restore",
+                "description": "Manage manual backups, auto backups and data restore options.",
+                "button": "Manage Backups"
+            },
+            "workTypes": {
+                "title": "Work Type Management"
+            },
+            "episodeTypes": {
+                "title": "Custom Episode Types"
+            },
+            "notifications": {
+                "title": "Notification Settings",
+                "enable": "Enable Notifications",
+                "description": "Shows browser notifications to remind you of your progress."
+            }
+        },
+        "about": {
+            "title": "About WatchedIt",
+            "description": "WatchedIt is a self-hosted media tracking web app that helps you log anime, movies, TV shows, novels and more.",
+            "demoLink": "Online Demo",
+            "meta": "Version: 1.0.0 | License: MIT | Stack: Next.js + TypeScript + Tailwind CSS"
+        },
+        "messages": {
+            "saveSuccess": "Settings saved successfully",
+            "saveError": "Failed to save settings",
+            "exportSuccess": "Data exported successfully",
+            "exportError": "Failed to export data",
+            "importSuccess": "Data imported successfully",
+            "importError": "Failed to import data",
+            "clearSuccess": "Data cleared",
+            "clearError": "Failed to clear data",
+            "enterEndpoint": "Please enter the cloud endpoint",
+            "connectionSuccess": "Connection successful, endpoint saved automatically",
+            "connectionError": "Connection test failed",
+            "configureEndpoint": "Please configure a cloud endpoint first",
+            "syncSuccess": "Data uploaded to cloud successfully",
+            "syncError": "Sync failed",
+            "downloadError": "Download failed",
+            "notificationUnsupported": "Notifications are not supported in this browser",
+            "notificationEnabled": "Notification permission enabled",
+            "notificationDenied": "Notification permission denied",
+            "notificationRequestError": "Failed to request notification permission",
+            "checkUpdateSuccess": "Update check completed",
+            "checkUpdateUnavailable": "Unable to check for updates",
+            "checkUpdateError": "Failed to check for updates"
+        }
+    },
+    "PlatformInfo": {
+        "title": "Platform Information",
+        "yes": "Yes",
+        "no": "No",
+        "fields": {
+            "pwaMode": "PWA Mode",
+            "mobile": "Mobile",
+            "desktop": "Desktop",
+            "userAgent": "User Agent"
+        }
+    },
+    "HelpGuide": {
+        "title": "Help Guide",
+        "tabs": {
+            "guide": "Usage",
+            "data": "Data",
+            "backup": "Backup"
+        },
+        "guide": {
+            "welcome": {
+                "title": "Welcome to WatchedIt",
+                "description": "This is a lightweight personal tracker for anime, movies, TV shows and more."
+            },
+            "features": {
+                "title": "Key features:",
+                "manageWorks": "Add and manage works",
+                "trackProgress": "Track viewing progress",
+                "anilistSearch": "Search the AniList catalog",
+                "tagManagement": "Organize with tags",
+                "analytics": "View statistics"
+            },
+            "quickStart": {
+                "title": "Quick start:",
+                "step1": "Click “Add Work” or “Search Anime”",
+                "step2": "Enter work details or import from AniList",
+                "step3": "Log episodes and progress",
+                "step4": "Use tags to categorize",
+                "step5": "Back up your data regularly"
+            }
+        },
+        "data": {
+            "notice": {
+                "title": "Important Reminder",
+                "description": "Your data only lives on this device and is never uploaded."
+            },
+            "storage": {
+                "title": "Storage Notes",
+                "item1": "• Data is saved in your browser",
+                "item2": "• Clearing browser data removes everything",
+                "item3": "• Make backups at least weekly",
+                "item4": "• No automatic sync between devices"
+            },
+            "cleanup": {
+                "title": "Data removal:",
+                "description": "Data will be wiped in these cases:",
+                "item1": "Clearing browser cache/data",
+                "item2": "Using private/incognito mode",
+                "item3": "Reinstalling the browser",
+                "item4": "Switching devices"
+            },
+            "stats": {
+                "title": "Data Stats",
+                "totalWorks": "Total works",
+                "totalEpisodes": "Total episodes",
+                "watchedEpisodes": "Watched",
+                "completionRate": "Completion rate"
+            }
+        },
+        "backup": {
+            "title": "Backup Info",
+            "description": "Review your stats and backup choices.",
+            "cards": {
+                "totalWorks": "Total works",
+                "totalEpisodes": "Total episodes"
+            },
+            "options": {
+                "title": "Backup options:",
+                "export": "Export Data",
+                "exportFormat": "JSON format",
+                "import": "Import Data",
+                "importSupport": "Supports saved backups"
+            },
+            "tips": {
+                "title": "Backup tips:",
+                "item1": "• Back up important data weekly",
+                "item2": "• Store backup files in a safe place",
+                "item3": "• Always back up before switching devices",
+                "item4": "• Verify backup integrity regularly"
+            }
+        },
+        "actions": {
+            "close": "Close"
+        }
+    },
+    "SettingsTags": {
+        "title": "Tag Management",
+        "guide": {
+            "title": "Usage",
+            "addTitle": "Create Tag",
+            "addDescription": "Click “Add Tag”, enter a name and choose a color.",
+            "editTitle": "Edit Tag",
+            "editDescription": "Use the edit icon to change the name or color.",
+            "deleteTitle": "Delete Tag",
+            "deleteDescription": "Use the delete icon and confirm to remove a tag.",
+            "usageTitle": "Using Tags",
+            "usageDescription": "Add multiple tags when creating or editing a work."
+        },
+        "stats": {
+            "title": "Tag Stats",
+            "total": "Total tags",
+            "active": "Active tags"
+        },
+        "notes": {
+            "title": "Notes",
+            "item1": "• Tag names must be unique",
+            "item2": "• Deleting a tag removes it from all works",
+            "item3": "• Tag colors are customizable",
+            "item4": "• Use meaningful names for easier filtering"
+        }
+    },
+    "BackupPage": {
+        "documentTitle": "Backup & Restore - WatchedIt",
+        "title": "Backup & Restore",
+        "settingsButton": "Settings",
+        "info": {
+            "title": "Backup & Restore Features",
+            "manualBackup": "• <strong>Manual Backup</strong>: Export JSON or CSV backups",
+            "autoBackup": "• <strong>Auto Backup</strong>: Create local backups in your browser",
+            "import": "• <strong>Import & Restore</strong>: Restore data from backups",
+            "security": "• <strong>Data Safety</strong>: Protect your watch history and settings"
+        }
+    },
+    "BackupRestore": {
+        "database": {
+            "title": "Database Info",
+            "works": "Works",
+            "tags": "Tags",
+            "episodes": "Episodes",
+            "completion": "Completion Rate",
+            "lastBackup": "Last backup",
+            "neverSynced": "Never synced"
+        },
+        "tabs": {
+            "manual": "Manual Backup",
+            "auto": "Auto Backup",
+            "import": "Import & Restore"
+        },
+        "manual": {
+            "title": "Manual Backup",
+            "exportJson": "Export JSON Backup",
+            "exportCsv": "Export CSV Backup",
+            "description": "JSON contains the full dataset, while CSV is convenient for spreadsheets."
+        },
+        "auto": {
+            "title": "Auto Backup",
+            "backupNow": {
+                "title": "Backup Now",
+                "description": "Create an auto backup stored in your browser",
+                "button": "Create Backup"
+            },
+            "list": {
+                "title": "Auto Backup List",
+                "clearAll": "Clear All",
+                "clearTitle": "Clear all auto backups",
+                "clearDescription": "This will permanently delete all auto backups. Continue?",
+                "clearConfirm": "Delete",
+                "empty": "No auto backups yet",
+                "restoreButton": "Restore",
+                "restoreConfirm": "Restore from the auto backup created on {date}? This action overwrites current data."
+            }
+        },
+        "import": {
+            "title": "Import & Restore",
+            "chooseFile": {
+                "title": "Select Backup File",
+                "description": "Supports JSON or CSV backups",
+                "button": "Choose File"
+            },
+            "tips": {
+                "item1": "• JSON backups contain the full dataset",
+                "item2": "• CSV exports can be viewed in spreadsheets",
+                "item3": "• Restoring overwrites existing data"
+            },
+            "confirmRestore": "Restore this backup?\n\nDetails:\n- Works: {works}\n- Tags: {tags}\n- Episodes: {episodes}\n- Completion: {completion}%\n\nThis action overwrites current data!"
+        },
+        "notes": {
+            "title": "Notes",
+            "item1": "Manual backups are downloaded to your device—back up important data regularly.",
+            "item2": "Auto backups live in your browser; clearing browser data removes them.",
+            "item3": "Restores overwrite existing data; make sure you've backed up first.",
+            "item4": "Backups from different versions may be incompatible; use matching versions."
+        },
+        "messages": {
+            "exportSuccess": "Backup exported as {format}",
+            "exportError": "Failed to export backup",
+            "importError": "Failed to import backup",
+            "restoreSuccess": "Backup restored successfully",
+            "autoBackupSuccess": "Auto backup completed",
+            "autoBackupError": "Auto backup failed",
+            "autoRestoreSuccess": "Restored from auto backup successfully",
+            "autoRestoreError": "Failed to restore from auto backup",
+            "autoClearSuccess": "All auto backups have been cleared"
         }
     }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,14 +10,39 @@ import { Badge } from "@/components/ui/badge";
 import { Work, WorkCreate, Tag } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
 import TagSelector from "@/components/TagSelector";
-import { getFullPath } from "@/lib/utils";
 import { ArrowLeft, Save, Star, Plus } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import { useTranslations } from "next-intl";
+
+const WORK_TYPES: Work["type"][] = ["動畫", "電影", "電視劇", "小說", "漫畫", "遊戲"];
+const WORK_STATUSES: Work["status"][] = ["進行中", "已完結", "暫停", "放棄", "未播出", "已取消"];
+
+const WORK_TYPE_KEY_MAP: Record<string, string> = {
+  動畫: "anime",
+  電影: "movie",
+  電視劇: "tv",
+  小說: "novel",
+  漫畫: "manga",
+  遊戲: "game",
+};
+
+const WORK_STATUS_KEY_MAP: Record<Work["status"], string> = {
+  進行中: "ongoing",
+  已完結: "completed",
+  暫停: "paused",
+  放棄: "dropped",
+  未播出: "notStarted",
+  已取消: "cancelled",
+};
 
 export default function NewWorkPage() {
   const router = useRouter();
   const { createWork, tags } = useWorkStore();
   const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations("NewWork");
+  const commonT = useTranslations("Common");
+  const workStatusT = useTranslations("Work.status");
+  const workTypeT = useTranslations("Work.type");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -34,6 +59,12 @@ export default function NewWorkPage() {
 
   // Toast 通知
   const { showToast, ToastContainer } = useToast();
+  const getLocalizedTypeLabel = (type: Work["type"]) =>
+    WORK_TYPE_KEY_MAP[type] ? workTypeT(WORK_TYPE_KEY_MAP[type]) : type;
+  const getLocalizedStatusLabel = (status: Work["status"]) =>
+    WORK_STATUS_KEY_MAP[status]
+      ? workStatusT(WORK_STATUS_KEY_MAP[status])
+      : status;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,14 +86,13 @@ export default function NewWorkPage() {
 
       const createdWork = await createWork(newWork);
 
-      // 顯示成功提示
-      showToast("作品新增成功！", "success");
+      showToast(t("messages.createSuccess", { defaultMessage: "作品新增成功！" }), "success");
 
       // 導航回主頁面
-      router.push(getFullPath("/"));
+      router.push("/");
     } catch (error) {
       console.error("創建作品失敗:", error);
-      showToast("創建作品失敗", "error");
+      showToast(t("messages.createError", { defaultMessage: "創建作品失敗" }), "error");
     } finally {
       setIsLoading(false);
     }
@@ -109,21 +139,6 @@ export default function NewWorkPage() {
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "進行中":
-        return "進行中";
-      case "已完結":
-        return "已完結";
-      case "暫停":
-        return "暫停";
-      case "放棄":
-        return "放棄";
-      default:
-        return status;
-    }
-  };
-
   return (
     <div className="container mx-auto p-6">
       {/* 導航欄 */}
@@ -131,9 +146,11 @@ export default function NewWorkPage() {
         <div className="flex items-center space-x-4">
           <Button variant="outline" size="sm" onClick={() => router.back()}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            返回
+            {commonT("back", { defaultMessage: "返回" })}
           </Button>
-          <h1 className="text-2xl font-bold">新增作品</h1>
+          <h1 className="text-2xl font-bold">
+            {t("title", { defaultMessage: "新增作品" })}
+          </h1>
         </div>
       </div>
 
@@ -142,31 +159,39 @@ export default function NewWorkPage() {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>作品資訊</CardTitle>
+              <CardTitle>{t("form.cardTitle", { defaultMessage: "作品資訊" })}</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* 基本資訊 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium form-label-secondary">
-                      標題 *
+                    <label
+                      htmlFor="work-title"
+                      className="text-sm font-medium form-label-secondary"
+                    >
+                      {t("form.labels.title", { defaultMessage: "標題" })} *
                     </label>
                     <Input
+                      id="work-title"
                       value={formData.title}
                       onChange={(e) =>
                         setFormData({ ...formData, title: e.target.value })
                       }
-                      placeholder="作品標題"
+                      placeholder={t("form.placeholders.title", { defaultMessage: "作品標題" })}
                       required
                       className="mt-1"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium form-label-secondary">
-                      類型 *
+                    <label
+                      htmlFor="work-type"
+                      className="text-sm font-medium form-label-secondary"
+                    >
+                      {t("form.labels.type", { defaultMessage: "類型" })} *
                     </label>
                     <select
+                      id="work-type"
                       value={formData.type}
                       onChange={(e) =>
                         setFormData({
@@ -177,22 +202,25 @@ export default function NewWorkPage() {
                       className="w-full mt-1 p-2 border rounded-md dark:text-foreground/95 dark:bg-background/95"
                       required
                     >
-                      <option value="動畫">動畫</option>
-                      <option value="電影">電影</option>
-                      <option value="電視劇">電視劇</option>
-                      <option value="小說">小說</option>
-                      <option value="漫畫">漫畫</option>
-                      <option value="遊戲">遊戲</option>
+                      {WORK_TYPES.map((typeOption) => (
+                        <option key={typeOption} value={typeOption}>
+                          {getLocalizedTypeLabel(typeOption)}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium form-label-secondary">
-                      狀態 *
+                    <label
+                      htmlFor="work-status"
+                      className="text-sm font-medium form-label-secondary"
+                    >
+                      {t("form.labels.status", { defaultMessage: "狀態" })} *
                     </label>
                     <select
+                      id="work-status"
                       value={formData.status}
                       onChange={(e) =>
                         setFormData({
@@ -203,23 +231,28 @@ export default function NewWorkPage() {
                       className="w-full mt-1 p-2 border rounded-md dark:text-foreground/95 dark:bg-background/95"
                       required
                     >
-                      <option value="進行中">進行中</option>
-                      <option value="已完結">已完結</option>
-                      <option value="暫停">暫停</option>
-                      <option value="放棄">放棄</option>
+                      {WORK_STATUSES.map((statusOption) => (
+                        <option key={statusOption} value={statusOption}>
+                          {getLocalizedStatusLabel(statusOption)}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium form-label-secondary">
-                      年份
+                    <label
+                      htmlFor="work-year"
+                      className="text-sm font-medium form-label-secondary"
+                    >
+                      {t("form.labels.year", { defaultMessage: "年份" })}
                     </label>
                     <Input
+                      id="work-year"
                       type="number"
                       value={formData.year}
                       onChange={(e) =>
                         setFormData({ ...formData, year: e.target.value })
                       }
-                      placeholder="2023"
+                      placeholder={t("form.placeholders.year", { defaultMessage: "2023" })}
                       min="1900"
                       max="2030"
                       className="mt-1"
@@ -237,7 +270,7 @@ export default function NewWorkPage() {
                 {/* 評分 */}
                 <div>
                   <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    評分
+                    {t("form.labels.rating", { defaultMessage: "評分" })}
                   </label>
                   <div className="flex items-center space-x-2 mt-2">
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
@@ -245,11 +278,10 @@ export default function NewWorkPage() {
                         key={rating}
                         type="button"
                         onClick={() => handleRatingClick(rating)}
-                        className={`p-2 rounded-md transition-colors ${
-                          parseInt(formData.rating || "0") >= rating
-                            ? "text-yellow-500 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
-                            : "star-icon-unselected"
-                        }`}
+                        className={`p-2 rounded-md transition-colors ${parseInt(formData.rating || "0") >= rating
+                          ? "text-yellow-500 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
+                          : "star-icon-unselected"
+                          }`}
                       >
                         <Star
                           className="w-5 h-5"
@@ -263,7 +295,10 @@ export default function NewWorkPage() {
                     ))}
                     {formData.rating && (
                       <span className="text-sm status-text ml-2">
-                        {formData.rating}/10
+                        {t("form.ratingValue", {
+                          value: formData.rating,
+                          defaultMessage: "{value}/10"
+                        })}
                       </span>
                     )}
                   </div>
@@ -272,14 +307,17 @@ export default function NewWorkPage() {
                 {/* 評論 */}
                 <div>
                   <label className="text-sm font-medium form-label-secondary">
-                    評論
+                    {t("form.labels.review", { defaultMessage: "評論" })}
                   </label>
                   <Textarea
                     value={formData.review}
                     onChange={(e) =>
                       setFormData({ ...formData, review: e.target.value })
                     }
-                    placeholder="分享您的觀後感..."
+                    placeholder={t(
+                      "form.placeholders.review",
+                      { defaultMessage: "分享您的觀後感..." }
+                    )}
                     rows={3}
                     className="mt-1"
                   />
@@ -288,14 +326,17 @@ export default function NewWorkPage() {
                 {/* 備註 */}
                 <div>
                   <label className="text-sm font-medium form-label-secondary">
-                    備註
+                    {t("form.labels.note", { defaultMessage: "備註" })}
                   </label>
                   <Textarea
                     value={formData.note}
                     onChange={(e) =>
                       setFormData({ ...formData, note: e.target.value })
                     }
-                    placeholder="其他備註..."
+                    placeholder={t(
+                      "form.placeholders.note",
+                      { defaultMessage: "其他備註..." }
+                    )}
                     rows={2}
                     className="mt-1"
                   />
@@ -304,14 +345,17 @@ export default function NewWorkPage() {
                 {/* 來源 */}
                 <div>
                   <label className="text-sm font-medium form-label-secondary">
-                    來源
+                    {t("form.labels.source", { defaultMessage: "來源" })}
                   </label>
                   <Input
                     value={formData.source}
                     onChange={(e) =>
                       setFormData({ ...formData, source: e.target.value })
                     }
-                    placeholder="AniList, 手動新增..."
+                    placeholder={t(
+                      "form.placeholders.source",
+                      { defaultMessage: "AniList, 手動新增..." }
+                    )}
                     className="mt-1"
                   />
                 </div>
@@ -320,7 +364,9 @@ export default function NewWorkPage() {
                 <div className="flex space-x-2 pt-4">
                   <Button type="submit" disabled={isLoading} className="flex-1">
                     <Save className="w-4 h-4 mr-2" />
-                    {isLoading ? "創建中..." : "創建作品"}
+                    {isLoading
+                      ? t("buttons.saving", { defaultMessage: "創建中..." })
+                      : t("buttons.save", { defaultMessage: "創建作品" })}
                   </Button>
                   <Button
                     type="button"
@@ -328,7 +374,7 @@ export default function NewWorkPage() {
                     onClick={() => router.back()}
                     className="flex-1"
                   >
-                    取消
+                    {commonT("cancel", { defaultMessage: "取消" })}
                   </Button>
                 </div>
               </form>
@@ -341,7 +387,7 @@ export default function NewWorkPage() {
           {/* 預覽卡片 */}
           <Card>
             <CardHeader>
-              <CardTitle>預覽</CardTitle>
+              <CardTitle>{t("preview.title", { defaultMessage: "預覽" })}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {formData.title && (
@@ -349,23 +395,25 @@ export default function NewWorkPage() {
                   <h3 className="font-semibold text-lg">{formData.title}</h3>
                   <div className="flex items-center space-x-2 mt-2">
                     <Badge className={getTypeColor(formData.type)}>
-                      {formData.type}
+                      {getLocalizedTypeLabel(formData.type)}
                     </Badge>
                     <Badge className={getStatusColor(formData.status)}>
-                      {getStatusLabel(formData.status)}
+                      {getLocalizedStatusLabel(formData.status)}
                     </Badge>
                   </div>
                 </div>
               )}
 
               {formData.year && (
-                <div className="text-sm status-text">年份: {formData.year}</div>
+                <div className="text-sm status-text">
+                  {t("preview.year", { defaultMessage: "年份" })}: {formData.year}
+                </div>
               )}
 
               {selectedTags.length > 0 && (
                 <div>
                   <div className="text-sm font-medium form-label-secondary mb-1">
-                    標籤:
+                    {t("preview.tags", { defaultMessage: "標籤" })}:
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {selectedTags.map((tag) => (
@@ -378,14 +426,14 @@ export default function NewWorkPage() {
               {formData.rating && (
                 <div className="flex items-center text-sm">
                   <Star className="w-4 h-4 mr-1 text-yellow-500" />
-                  評分: {formData.rating}/10
+                  {t("preview.rating", { defaultMessage: "評分" })}: {formData.rating}/10
                 </div>
               )}
 
               {formData.review && (
                 <div>
                   <div className="text-sm font-medium form-label-secondary mb-1">
-                    評論:
+                    {t("preview.review", { defaultMessage: "評論" })}:
                   </div>
                   <div className="text-sm text-gray-800 bg-gray-50 p-2 rounded">
                     {formData.review}
@@ -396,7 +444,7 @@ export default function NewWorkPage() {
               {formData.note && (
                 <div>
                   <div className="text-sm font-medium form-label-secondary mb-1">
-                    備註:
+                    {t("preview.note", { defaultMessage: "備註" })}:
                   </div>
                   <div className="text-sm text-gray-800 bg-gray-50 p-2 rounded">
                     {formData.note}
@@ -406,13 +454,13 @@ export default function NewWorkPage() {
 
               {formData.source && (
                 <div className="text-sm status-text">
-                  來源: {formData.source}
+                  {t("preview.source", { defaultMessage: "來源" })}: {formData.source}
                 </div>
               )}
 
               {!formData.title && (
                 <div className="text-center empty-state py-8">
-                  填寫資訊後將在此顯示預覽
+                  {t("preview.empty", { defaultMessage: "填寫資訊後將在此顯示預覽" })}
                 </div>
               )}
             </CardContent>
@@ -421,14 +469,18 @@ export default function NewWorkPage() {
           {/* 提示資訊 */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">提示</CardTitle>
+              <CardTitle className="text-sm">
+                {t("tips.title", { defaultMessage: "提示" })}
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-xs note-text space-y-2">
-              <div>• 標題和類型為必填項目</div>
-              <div>• 可以為作品添加多個標籤</div>
-              <div>• 創建後可以立即添加集數</div>
-              <div>• 可以稍後在作品詳情頁面編輯</div>
-              <div>• 支援匯入/匯出資料</div>
+              <div>{t("tips.item1", { defaultMessage: "• 標題和類型為必填項目" })}</div>
+              <div>{t("tips.item2", { defaultMessage: "• 可以為作品添加多個標籤" })}</div>
+              <div>{t("tips.item3", { defaultMessage: "• 創建後可以立即添加集數" })}</div>
+              <div>
+                {t("tips.item4", { defaultMessage: "• 可以稍後在作品詳情頁面編輯" })}
+              </div>
+              <div>{t("tips.item5", { defaultMessage: "• 支援匯入/匯出資料" })}</div>
             </CardContent>
           </Card>
         </div>

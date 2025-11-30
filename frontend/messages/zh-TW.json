@@ -24,7 +24,38 @@
         "batchEdit": "批量編輯",
         "batchDelete": "批量刪除",
         "noWorks": "沒有找到作品",
-        "searchPlaceholder": "搜尋標題、心得、備註、標籤..."
+        "searchPlaceholder": "搜尋標題、心得、備註、標籤...",
+        "actions": {
+            "searchAnime": "搜尋動畫",
+            "settings": "設定",
+            "addWork": "新增作品",
+            "batchSelect": "批量選擇",
+            "batchMode": "批量模式",
+            "selectAll": "全選",
+            "clearSelection": "清除",
+            "batchEditCount": "批量編輯 ({count})",
+            "batchDeleteCount": "批量刪除 ({count})",
+            "migrationNow": "立即遷移",
+            "migrationInProgress": "遷移中...",
+            "viewGithub": "查看 GitHub Repository"
+        },
+        "labels": {
+            "recentWorks": "最近作品",
+            "searchResults": "搜尋結果",
+            "itemsCount": "共 {count} 個作品",
+            "filteredFrom": "（從 {total} 個中篩選）",
+            "searchTerm": "搜尋：「{term}」"
+        },
+        "dataReminder": {
+            "title": "重要提醒",
+            "description": "您的資料僅儲存在本地設備中。清除瀏覽器資料會導致資料遺失，建議定期備份。",
+            "dismiss": "不再提醒"
+        },
+        "migration": {
+            "notice": "發現舊版數據，建議進行數據遷移。",
+            "button": "立即遷移",
+            "inProgress": "遷移中..."
+        }
     },
     "Work": {
         "status": {
@@ -42,6 +73,87 @@
             "novel": "小說",
             "manga": "漫畫",
             "game": "遊戲"
+        }
+    },
+    "WorkCard": {
+        "buttons": {
+            "quickAddFull": "新增集數",
+            "quickAddShort": "新增"
+        },
+        "labels": {
+            "unknownYear": "未知年份"
+        }
+    },
+    "SearchFilter": {
+        "placeholder": "搜尋作品標題、評論、備註或標籤...",
+        "suggestions": {
+            "title": "搜尋建議"
+        },
+        "history": {
+            "title": "搜尋歷史",
+            "clear": "清除"
+        },
+        "buttons": {
+            "filter": "篩選",
+            "clearAll": "清除所有篩選"
+        },
+        "quickFilters": {
+            "all": "全部",
+            "highRating": "高評分",
+            "notStarted": "未開始",
+            "completed": "已完成"
+        },
+        "progress": {
+            "notStarted": "未開始",
+            "inProgress": "進行中",
+            "completed": "已完成",
+            "highProgress": "高進度",
+            "lowProgress": "低進度"
+        },
+        "active": {
+            "title": "活動篩選",
+            "search": "搜尋: {term}",
+            "type": "類型: {type}",
+            "status": "狀態: {status}",
+            "year": "年份: {year}",
+            "tag": "標籤: {tag}",
+            "rating": "評分: {min}-{max}",
+            "progress": "進度: {progress}"
+        },
+        "details": {
+            "title": "詳細篩選",
+            "basic": {
+                "title": "基本篩選",
+                "typeLabel": "作品類型",
+                "typeAll": "全部類型",
+                "statusLabel": "觀看狀態",
+                "statusAll": "全部狀態",
+                "yearLabel": "發行年份",
+                "yearAll": "全部年份",
+                "progressLabel": "觀看進度",
+                "progressAll": "全部進度",
+                "progressOptions": {
+                    "high": "高進度 (80%+)",
+                    "low": "低進度 (20%+)"
+                }
+            },
+            "advanced": {
+                "title": "進階篩選",
+                "ratingLabel": "評分範圍",
+                "ratingMinValue": "{value} 分",
+                "ratingMaxValue": "{value} 分",
+                "minLabel": "最小",
+                "maxLabel": "最大"
+            },
+            "tags": {
+                "label": "標籤篩選",
+                "select": "選擇標籤",
+                "selectedCount": "已選擇 {count} 個標籤",
+                "empty": "沒有可用的標籤"
+            }
+        },
+        "quickProgress": {
+            "title": "快速進度篩選"
         }
     }
 }

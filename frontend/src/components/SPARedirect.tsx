@@ -1,6 +1,7 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { useEffect } from "react";
 
 export default function SPARedirect() {

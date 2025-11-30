@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,11 +38,7 @@ export default function CustomEpisodeTypeManager({
     text: string;
   } | null>(null);
 
-  useEffect(() => {
-    loadEpisodeTypes();
-  }, []);
-
-  const loadEpisodeTypes = () => {
+  const loadEpisodeTypes = useCallback(() => {
     try {
       const types = customEpisodeTypeStorage.getAll();
       setEpisodeTypes(types);
@@ -51,7 +47,7 @@ export default function CustomEpisodeTypeManager({
       console.error("載入集數類型失敗:", error);
       setEpisodeTypes(DEFAULT_EPISODE_TYPES);
     }
-  };
+  }, [onTypesChange]);
 
   const showMessage = (type: "success" | "error", text: string) => {
     setMessage({ type, text });
@@ -202,11 +198,10 @@ export default function CustomEpisodeTypeManager({
       {/* 訊息顯示 */}
       {message && (
         <div
-          className={`p-3 rounded-md flex items-center gap-2 ${
-            message.type === "success"
-              ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800"
-              : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
-          }`}
+          className={`p-3 rounded-md flex items-center gap-2 ${message.type === "success"
+            ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800"
+            : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
+            }`}
         >
           {message.type === "success" ? (
             <CheckCircle className="w-4 h-4" />

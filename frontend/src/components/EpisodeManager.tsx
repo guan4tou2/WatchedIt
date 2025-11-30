@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,7 +54,7 @@ export default function EpisodeManager({
   );
 
   // 計算下一集數
-  const getNextEpisodeNumber = (season: number = 1) => {
+  const getNextEpisodeNumber = useCallback((season: number = 1) => {
     if (episodes.length === 0) return 1;
 
     // 篩選出指定季的所有集數
@@ -65,7 +65,7 @@ export default function EpisodeManager({
     // 找出該季的最大集數
     const maxNumber = Math.max(...seasonEpisodes.map((ep) => ep.number));
     return maxNumber + 1;
-  };
+  }, [episodes]);
 
   // 獲取預設季數
   const getDefaultSeason = () => {
@@ -85,7 +85,7 @@ export default function EpisodeManager({
   };
 
   const [newEpisode, setNewEpisode] = useState({
-    number: getNextEpisodeNumber(1),
+    number: 1, // Initial value, will be updated by useEffect
     title: "",
     description: "",
     type: "episode" as EpisodeType,
@@ -126,7 +126,7 @@ export default function EpisodeManager({
       ...prev,
       number: getNextEpisodeNumber(prev.season),
     }));
-  }, [episodes]);
+  }, [getNextEpisodeNumber]);
 
   // 當季數變化時，重新計算該季的下一集數
   useEffect(() => {
@@ -134,7 +134,7 @@ export default function EpisodeManager({
       ...prev,
       number: getNextEpisodeNumber(prev.season),
     }));
-  }, [newEpisode.season]);
+  }, [newEpisode.season, getNextEpisodeNumber]);
 
   const getEpisodeTypeLabel = (type: string) => {
     return episodeTypeLabels[type] || type;
@@ -239,10 +239,10 @@ export default function EpisodeManager({
     const updatedEpisodes = episodes.map((ep) =>
       ep.id === episodeId
         ? {
-            ...ep,
-            watched: !ep.watched,
-            date_watched: !ep.watched ? new Date().toISOString() : undefined,
-          }
+          ...ep,
+          watched: !ep.watched,
+          date_watched: !ep.watched ? new Date().toISOString() : undefined,
+        }
         : ep
     );
     onEpisodesChange(updatedEpisodes);
@@ -276,10 +276,10 @@ export default function EpisodeManager({
     const updatedEpisodes = episodes.map((ep) =>
       selectedEpisodeIds.has(ep.id)
         ? {
-            ...ep,
-            watched: true,
-            date_watched: new Date().toISOString(),
-          }
+          ...ep,
+          watched: true,
+          date_watched: new Date().toISOString(),
+        }
         : ep
     );
     onEpisodesChange(updatedEpisodes);
@@ -292,10 +292,10 @@ export default function EpisodeManager({
     const updatedEpisodes = episodes.map((ep) =>
       selectedEpisodeIds.has(ep.id)
         ? {
-            ...ep,
-            watched: false,
-            date_watched: undefined,
-          }
+          ...ep,
+          watched: false,
+          date_watched: undefined,
+        }
         : ep
     );
     onEpisodesChange(updatedEpisodes);
@@ -515,11 +515,10 @@ export default function EpisodeManager({
               return (
                 <div key={episode.id}>
                   <Card
-                    className={`hover:shadow-sm transition-shadow ${
-                      isSelected
-                        ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                        : ""
-                    }`}
+                    className={`hover:shadow-sm transition-shadow ${isSelected
+                      ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                      : ""
+                      }`}
                   >
                     <CardContent className="p-3">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">

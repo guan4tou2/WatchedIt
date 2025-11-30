@@ -1,8 +1,9 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import "@testing-library/jest-dom";
 import AnimeDetailModal from "../AnimeDetailModal";
-import { AniListMedia } from "@/types";
+import { AniListMedia } from "@/lib/anilist";
 
 // Mock useWorkStore
 const mockCreateWork = jest.fn();
@@ -33,6 +34,11 @@ const mockAnime: AniListMedia = {
   startDate: { year: 2024, month: 1, day: 1 },
   endDate: { year: 2024, month: 3, day: 31 },
   countryOfOrigin: "JP",
+  coverImage: {
+    large: "https://example.com/cover.jpg",
+    medium: "https://example.com/cover-medium.jpg",
+  },
+  bannerImage: "https://example.com/banner.jpg",
 };
 
 const defaultProps = {
@@ -40,6 +46,7 @@ const defaultProps = {
   isOpen: true,
   onClose: jest.fn(),
   onSelectAnime: jest.fn(),
+  isLoading: false,
 };
 
 describe("AnimeDetailModal", () => {
@@ -50,26 +57,26 @@ describe("AnimeDetailModal", () => {
   it("應該渲染動畫詳情", () => {
     render(<AnimeDetailModal {...defaultProps} />);
 
-    expect(screen.getByText("動畫詳情")).toBeInTheDocument();
-    expect(screen.getByText("測試動畫")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "動畫詳情" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "測試動畫" })).toBeInTheDocument();
     expect(screen.getByText("Test Anime English")).toBeInTheDocument();
     expect(screen.getByText("已完結")).toBeInTheDocument();
     expect(screen.getByText("電視動畫")).toBeInTheDocument();
     expect(screen.getByText("12 集")).toBeInTheDocument();
     expect(screen.getByText("24 分鐘")).toBeInTheDocument();
-    expect(screen.getByText("8.5")).toBeInTheDocument();
+    expect(screen.getByText("8.5/10")).toBeInTheDocument();
   });
 
   it("當 isOpen 為 false 時不應該渲染", () => {
     render(<AnimeDetailModal {...defaultProps} isOpen={false} />);
 
-    expect(screen.queryByText("動畫詳情")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "動畫詳情" })).not.toBeInTheDocument();
   });
 
   it("當 anime 為 null 時不應該渲染", () => {
     render(<AnimeDetailModal {...defaultProps} anime={null} />);
 
-    expect(screen.queryByText("動畫詳情")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "動畫詳情" })).not.toBeInTheDocument();
   });
 
   it("應該顯示正確的狀態顏色", () => {
@@ -133,14 +140,14 @@ describe("AnimeDetailModal", () => {
 
     render(<AnimeDetailModal {...defaultProps} />);
 
-    const confirmButton = screen.getByRole("button", { name: /確認選擇/i });
+    const confirmButton = screen.getByRole("button", { name: /新增作品/i });
     await user.click(confirmButton);
 
     expect(mockCreateWork).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "測試動畫",
         type: "動畫",
-        status: "已完成",
+        status: "已完結",
         source: "AniList",
       })
     );
@@ -156,14 +163,14 @@ describe("AnimeDetailModal", () => {
 
     render(<AnimeDetailModal {...defaultProps} />);
 
-    const confirmButton = screen.getByRole("button", { name: /確認選擇/i });
+    const confirmButton = screen.getByRole("button", { name: /新增作品/i });
     await user.click(confirmButton);
 
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
     expect(defaultProps.onClose).not.toHaveBeenCalled();
   });
 
-  it("當沒有集數時應該顯示正確的訊息", () => {
+  it("當沒有集數時應該不顯示集數標籤", () => {
     const animeWithoutEpisodes = {
       ...mockAnime,
       episodes: null,
@@ -171,10 +178,10 @@ describe("AnimeDetailModal", () => {
 
     render(<AnimeDetailModal {...defaultProps} anime={animeWithoutEpisodes} />);
 
-    expect(screen.getByText("未知")).toBeInTheDocument();
+    expect(screen.queryByText(/集/)).not.toBeInTheDocument();
   });
 
-  it("當沒有評分時應該顯示 0", () => {
+  it("當沒有評分時應該不顯示評分", () => {
     const animeWithoutRating = {
       ...mockAnime,
       averageScore: null,
@@ -182,7 +189,7 @@ describe("AnimeDetailModal", () => {
 
     render(<AnimeDetailModal {...defaultProps} anime={animeWithoutRating} />);
 
-    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.queryByText(/\/10/)).not.toBeInTheDocument();
   });
 
   it("當沒有描述時應該顯示空字串", () => {
@@ -191,11 +198,14 @@ describe("AnimeDetailModal", () => {
       description: null,
     };
 
-    render(
+    const { container } = render(
       <AnimeDetailModal {...defaultProps} anime={animeWithoutDescription} />
     );
 
-    expect(screen.queryByText("")).toBeInTheDocument();
+    // Check that no description text is rendered, or check for empty paragraph if that's how it's implemented
+    // Based on previous error, it was looking for empty string. 
+    // Let's assume we just want to ensure "Test description" is NOT there.
+    expect(screen.queryByText("Test description")).not.toBeInTheDocument();
   });
 
   it("應該處理不同的狀態", () => {

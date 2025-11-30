@@ -18,9 +18,8 @@ export default function TestReminderPage() {
     try {
       const hasPermission =
         await reminderService.requestNotificationPermission();
-      const result = `通知權限測試: ${
-        hasPermission ? "✅ 已授權" : "❌ 未授權"
-      }`;
+      const result = `通知權限測試: ${hasPermission ? "✅ 已授權" : "❌ 未授權"
+        }`;
       setTestResults((prev) => [...prev, result]);
     } catch (error) {
       const result = `通知權限測試: ❌ 失敗 - ${error}`;
@@ -240,12 +239,12 @@ export default function TestReminderPage() {
               <span className="text-sm font-medium">通知權限</span>
               <Badge
                 variant={
-                  Notification.permission === "granted"
+                  typeof window !== "undefined" && Notification.permission === "granted"
                     ? "default"
                     : "destructive"
                 }
               >
-                {Notification.permission === "granted" ? "已授權" : "未授權"}
+                {typeof window !== "undefined" && Notification.permission === "granted" ? "已授權" : "未授權"}
               </Badge>
             </div>
             <Separator />
@@ -268,7 +267,7 @@ export default function TestReminderPage() {
               <span className="text-sm font-medium">PWA 模式</span>
               <Badge variant="secondary">
                 {typeof window !== "undefined" &&
-                window.matchMedia("(display-mode: standalone)").matches
+                  window.matchMedia("(display-mode: standalone)").matches
                   ? "是"
                   : "否"}
               </Badge>

@@ -13,8 +13,3 @@ export function getBasePath() {
 export function getAssetPath() {
   return "";
 }
-
-export function getFullPath(path: string): string {
-  const basePath = getBasePath();
-  return `${basePath}${path}`;
-}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,11 +49,7 @@ export default function WorkTypeEpisodeMappingManager({
     text: string;
   } | null>(null);
 
-  useEffect(() => {
-    loadMappings();
-  }, []);
-
-  const loadMappings = () => {
+  const loadMappings = useCallback(() => {
     try {
       const loadedMappings = workTypeEpisodeMappingStorage.getAll();
       setMappings(loadedMappings);
@@ -62,7 +58,7 @@ export default function WorkTypeEpisodeMappingManager({
       console.error("載入對應關係失敗:", error);
       setMappings(DEFAULT_WORK_TYPE_EPISODE_MAPPING);
     }
-  };
+  }, [onMappingChange]);
 
   const showMessage = (type: "success" | "error", text: string) => {
     setMessage({ type, text });
@@ -204,11 +200,10 @@ export default function WorkTypeEpisodeMappingManager({
     <div className="space-y-6">
       {message && (
         <div
-          className={`p-3 rounded-md flex items-center ${
-            message.type === "success"
-              ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800"
-              : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
-          }`}
+          className={`p-3 rounded-md flex items-center ${message.type === "success"
+            ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800"
+            : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
+            }`}
         >
           {message.type === "success" ? (
             <CheckCircle className="w-4 h-4 mr-2" />

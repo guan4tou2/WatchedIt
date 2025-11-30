@@ -1,6 +1,7 @@
 import { AlertTriangle, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface DataReminderProps {
     show: boolean;
@@ -8,6 +9,8 @@ interface DataReminderProps {
 }
 
 export default function DataReminder({ show, onDismiss }: DataReminderProps) {
+    const reminderT = useTranslations("Home.dataReminder");
+
     if (!show) return null;
 
     return (
@@ -18,10 +21,10 @@ export default function DataReminder({ show, onDismiss }: DataReminderProps) {
                         <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
                         <div className="flex-1">
                             <h3 className="font-medium text-yellow-800 dark:text-yellow-200">
-                                重要提醒
+                                {reminderT("title")}
                             </h3>
                             <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                                您的資料僅儲存在本地設備中。清除瀏覽器資料會導致資料遺失，建議定期備份。
+                                {reminderT("description")}
                             </p>
                             <div className="flex items-center space-x-2 mt-2">
                                 <Button
@@ -30,7 +33,7 @@ export default function DataReminder({ show, onDismiss }: DataReminderProps) {
                                     onClick={onDismiss}
                                     className="text-yellow-600 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/40"
                                 >
-                                    不再提醒
+                                    {reminderT("dismiss")}
                                 </Button>
                             </div>
                         </div>

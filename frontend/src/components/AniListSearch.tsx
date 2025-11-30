@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -323,19 +324,23 @@ ${selectedAnime.season && selectedAnime.seasonYear
               <Card
                 key={anime.id}
                 className={`cursor-pointer transition-all hover:shadow-md ${selectedAnime?.id === anime.id
-                    ? "ring-2 ring-blue-500 selected-bg"
-                    : ""
+                  ? "ring-2 ring-blue-500 selected-bg"
+                  : ""
                   }`}
                 onClick={() => handleViewDetail(anime)}
               >
                 <CardContent className="p-4">
                   <div className="flex space-x-4">
                     {anime.coverImage?.medium && (
-                      <img
-                        src={anime.coverImage.medium}
-                        alt={anime.title.romaji}
-                        className="w-16 h-24 object-cover rounded flex-shrink-0"
-                      />
+                      <div className="relative w-16 h-24 flex-shrink-0">
+                        <Image
+                          src={anime.coverImage.medium}
+                          alt={anime.title.romaji || "Anime Cover"}
+                          fill
+                          className="object-cover rounded"
+                          sizes="64px"
+                        />
+                      </div>
                     )}
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <h3 className="font-semibold text-lg truncate mb-1">
