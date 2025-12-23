@@ -2,7 +2,7 @@
     "name": "watchedit-root",
     "private": true,
     "scripts": {
-        "build": "cd frontend && npm install && npm run build"
+        "build": "npm run build -w watchedit-frontend"
     },
     "workspaces": [
         "frontend"
