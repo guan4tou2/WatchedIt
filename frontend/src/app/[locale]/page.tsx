@@ -37,6 +37,7 @@ import { useToast } from "@/components/ui/toast";
 import StatsOverview from "@/components/StatsOverview";
 import DataReminder from "@/components/DataReminder";
 import WorkList from "@/components/WorkList";
+import SyncIndicator from "@/components/SyncIndicator";
 import { useWorkFilters } from "@/hooks/useWorkFilters";
 import { useBatchOperations } from "@/hooks/useBatchOperations";
 
@@ -295,6 +296,7 @@ export default function HomePage() {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center space-x-2">
+          <SyncIndicator />
           <ThemeToggle />
           <Button
             variant="outline"

@@ -11,6 +11,8 @@ interface WorkStore {
   stats: Stats | null;
   loading: boolean;
   error: string | null;
+  isSyncing: boolean;
+  setIsSyncing: (isSyncing: boolean) => void;
 
   // 作品相關操作
   fetchWorks: (params?: {
@@ -63,6 +65,10 @@ export const useWorkStore = create<WorkStore>((set, get) => ({
   stats: null,
   loading: false,
   error: null,
+  isSyncing: false,
+  setIsSyncing: (isSyncing) => set({ isSyncing }),
+
+
 
   // 初始化
   initialize: async () => {

@@ -25,9 +25,15 @@ const mockStats: Stats = {
         "漫畫": 0,
         "遊戲": 0,
     },
-    completion_rate: 0.8,
-    total_episodes: 100,
-    watched_episodes: 80,
+    year_stats: {
+        "2023": 5,
+        "2024": 5,
+    },
+    episode_stats: {
+        total_episodes: 100,
+        watched_episodes: 80,
+        completion_rate: 0.8,
+    },
 };
 
 describe("StatsOverview", () => {
@@ -38,19 +44,19 @@ describe("StatsOverview", () => {
 
     it("renders total works count correctly", () => {
         render(<StatsOverview stats={mockStats} />);
-        expect(screen.getByText("總作品數")).toBeInTheDocument();
+        expect(screen.getByText("totalWorks")).toBeInTheDocument();
         expect(screen.getByText("10")).toBeInTheDocument();
     });
 
     it("renders ongoing works count correctly", () => {
         render(<StatsOverview stats={mockStats} />);
-        expect(screen.getByText("進行中")).toBeInTheDocument();
+        expect(screen.getByText("inProgress")).toBeInTheDocument();
         expect(screen.getByText("3")).toBeInTheDocument();
     });
 
     it("renders completed works count correctly", () => {
         render(<StatsOverview stats={mockStats} />);
-        expect(screen.getByText("已完結")).toBeInTheDocument();
+        expect(screen.getByText("completed")).toBeInTheDocument();
         expect(screen.getByText("5")).toBeInTheDocument();
     });
 });
