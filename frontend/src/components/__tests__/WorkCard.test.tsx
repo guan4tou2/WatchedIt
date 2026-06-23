@@ -180,11 +180,34 @@ describe("WorkCard", () => {
         expect(pushMock).toHaveBeenCalledWith("/works/detail?id=1");
     });
 
-    it("should not expose the whole card as an interactive control in normal mode", () => {
+    it("should navigate to detail page when the card surface is clicked", async () => {
+        const user = userEvent.setup();
         renderComponent();
 
+        await user.click(
+            screen.getByRole("link", { name: "openDetails: Test Anime Title" })
+        );
+
+        expect(pushMock).toHaveBeenCalledWith("/works/detail?id=1");
+    });
+
+    it("should navigate to detail page with keyboard from the card surface", () => {
+        renderComponent();
+
+        const cardLink = screen.getByRole("link", {
+            name: "openDetails: Test Anime Title",
+        });
+        cardLink.focus();
+        fireEvent.keyDown(cardLink, { key: "Enter" });
+
+        expect(pushMock).toHaveBeenCalledWith("/works/detail?id=1");
+    });
+
+    it("should not expose the card surface as a link in batch mode", () => {
+        renderComponent({ ...defaultProps, isBatchMode: true });
+
         expect(
-            screen.queryByRole("button", { name: "Test Anime Title" })
+            screen.queryByRole("link", { name: "openDetails: Test Anime Title" })
         ).not.toBeInTheDocument();
     });
 

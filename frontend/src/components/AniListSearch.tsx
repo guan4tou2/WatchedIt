@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type MouseEvent } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,8 @@ const SEASON_TRANSLATION_KEYS: Record<string, string> = {
   FALL: "fall",
 };
 
+const ANILIST_PAGE_SIZE = 24;
+
 interface AniListSearchProps {
   onSelectAnime: (workData: WorkCreate) => void;
   onClose: () => void;
@@ -70,6 +72,10 @@ export default function AniListSearch({
   const [error, setError] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreResults, setHasMoreResults] = useState(false);
+  const [detailLoadingId, setDetailLoadingId] = useState<number | null>(null);
   const [selectedAnime, setSelectedAnime] = useState<AniListMedia | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedAnimeForDetail, setSelectedAnimeForDetail] =
@@ -84,18 +90,40 @@ export default function AniListSearch({
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  const searchAnime = useCallback(async (term: string) => {
+  const searchAnime = useCallback(async (
+    term: string,
+    page: number = 1,
+    mode: "replace" | "append" = "replace"
+  ) => {
     if (!term.trim()) {
       setSearchResults([]);
+      setHasMoreResults(false);
+      setCurrentPage(1);
       return;
     }
 
-    setIsLoading(true);
+    if (mode === "append") {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoading(true);
+    }
     setError(null);
 
     try {
-      const results = await anilistService.searchAnime(term, 1, 10);
-      setSearchResults(results);
+      const results = await anilistService.searchAnime(
+        term,
+        page,
+        ANILIST_PAGE_SIZE
+      );
+      setSearchResults((currentResults) => {
+        if (mode === "replace") return results;
+
+        const existingIds = new Set(currentResults.map((anime) => anime.id));
+        const newResults = results.filter((anime) => !existingIds.has(anime.id));
+        return [...currentResults, ...newResults];
+      });
+      setCurrentPage(page);
+      setHasMoreResults(results.length === ANILIST_PAGE_SIZE);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : searchFallbackMessage;
@@ -111,16 +139,25 @@ export default function AniListSearch({
       }
 
       setSearchResults([]);
+      setHasMoreResults(false);
     } finally {
-      setIsLoading(false);
+      if (mode === "append") {
+        setIsLoadingMore(false);
+      } else {
+        setIsLoading(false);
+      }
     }
   }, [backendUnavailableMessage, searchFallbackMessage]);
 
   useEffect(() => {
     if (debouncedSearchTerm) {
-      searchAnime(debouncedSearchTerm);
+      setSelectedAnime(null);
+      setAddError(null);
+      searchAnime(debouncedSearchTerm, 1, "replace");
     } else {
       setSearchResults([]);
+      setHasMoreResults(false);
+      setCurrentPage(1);
     }
   }, [debouncedSearchTerm, searchAnime]);
 
@@ -129,9 +166,29 @@ export default function AniListSearch({
     setAddError(null);
   };
 
-  const handleViewDetail = (anime: AniListMedia) => {
-    setSelectedAnimeForDetail(anime);
-    setDetailModalOpen(true);
+  const handleViewDetail = async (anime: AniListMedia) => {
+    setDetailLoadingId(anime.id);
+
+    try {
+      const fullAnime = await anilistService.getAnimeById(anime.id);
+      setSelectedAnimeForDetail(fullAnime);
+    } catch {
+      setSelectedAnimeForDetail(anime);
+    } finally {
+      setDetailModalOpen(true);
+      setDetailLoadingId(null);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (!debouncedSearchTerm || isLoadingMore) return;
+    searchAnime(debouncedSearchTerm, currentPage + 1, "append");
+  };
+
+  const handleBackdropMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget && !isAdding) {
+      onClose();
+    }
   };
 
   const handleConfirmSelection = async () => {
@@ -231,7 +288,13 @@ ${broadcastInfo}
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      data-testid="anilist-search-backdrop"
+      role="dialog"
+      aria-modal="true"
+      onMouseDown={handleBackdropMouseDown}
+    >
       <Card className="w-full max-w-5xl max-h-[90vh] overflow-hidden">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -442,6 +505,13 @@ ${broadcastInfo}
                         </div>
                       )}
 
+                      {detailLoadingId === anime.id && (
+                        <div className="mt-2 flex items-center text-xs text-muted-foreground">
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                          {t("buttons.loadingDetails")}
+                        </div>
+                      )}
+
                       {anime.genres && anime.genres.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {anime.genres.slice(0, 3).map((genre) => (
@@ -477,6 +547,26 @@ ${broadcastInfo}
               </Card>
             ))}
           </div>
+
+          {hasMoreResults && !isLoading && (
+            <div className="mt-4 flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleLoadMore}
+                disabled={isLoadingMore || isAdding}
+              >
+                {isLoadingMore ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t("buttons.loadingMore")}
+                  </>
+                ) : (
+                  t("buttons.loadMore")
+                )}
+              </Button>
+            </div>
+          )}
         </CardContent>
 
         {selectedAnime && (

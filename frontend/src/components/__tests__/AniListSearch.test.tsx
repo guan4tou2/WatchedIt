@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import AniListSearch from "../AniListSearch";
@@ -28,6 +28,9 @@ const mockTranslations: Record<string, string> = {
   "AniListSearch.buttons.select": "Select",
   "AniListSearch.buttons.addWork": "Add work",
   "AniListSearch.buttons.adding": "Adding...",
+  "AniListSearch.buttons.loadMore": "Load more",
+  "AniListSearch.buttons.loadingMore": "Loading more...",
+  "AniListSearch.buttons.loadingDetails": "Loading details...",
   "AniListSearch.messages.addSuccess": "Work added successfully.",
   "AniListSearch.messages.addError": "Failed to add work",
   "AniListSearch.status.finished": "Finished",
@@ -55,9 +58,11 @@ jest.mock("@/hooks/useDebounce", () => ({
 }));
 
 const mockSearchAnime = jest.fn();
+const mockGetAnimeById = jest.fn();
 jest.mock("@/lib/anilist", () => ({
   anilistService: {
     searchAnime: (...args: unknown[]) => mockSearchAnime(...args),
+    getAnimeById: (...args: unknown[]) => mockGetAnimeById(...args),
     getBestChineseTitle: (title: { romaji?: string }, synonyms?: string[]) =>
       synonyms?.[0] ?? title.romaji ?? "",
     convertTypeToWorkType: () => "動畫",
@@ -88,8 +93,15 @@ jest.mock("@/components/ui/toast", () => ({
   }),
 }));
 
-jest.mock("../AnimeDetailModal", () => function MockAnimeDetailModal() {
-  return null;
+jest.mock("../AnimeDetailModal", () => function MockAnimeDetailModal({
+  anime,
+  isOpen,
+}: {
+  anime: { description?: string | null } | null;
+  isOpen: boolean;
+}) {
+  if (!isOpen || !anime) return null;
+  return <div data-testid="anime-detail-modal">{anime.description}</div>;
 });
 
 const animeResult = {
@@ -119,6 +131,16 @@ const animeResult = {
   },
   bannerImage: null,
 };
+
+const makeAnimeResult = (id: number) => ({
+  ...animeResult,
+  id,
+  title: {
+    ...animeResult.title,
+    romaji: `Test Anime ${id}`,
+  },
+  synonyms: [`測試動畫 ${id}`],
+});
 
 const defaultProps = {
   onSelectAnime: jest.fn(),
@@ -155,7 +177,9 @@ describe("AniListSearch", () => {
 
     render(<AniListSearch {...defaultProps} />);
 
-    await user.type(screen.getByPlaceholderText("Search anime title..."), "test");
+    fireEvent.change(screen.getByPlaceholderText("Search anime title..."), {
+      target: { value: "test" },
+    });
 
     await waitFor(() => expect(screen.getByText("測試動畫")).toBeInTheDocument());
     await user.click(screen.getByRole("button", { name: "Select" }));
@@ -165,5 +189,67 @@ describe("AniListSearch", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("作品已存在");
     expect(mockShowToast).toHaveBeenCalledWith("Failed to add work", "error");
     expect(defaultProps.onClose).not.toHaveBeenCalled();
+  });
+
+  it("requests a larger AniList page and appends more results", async () => {
+    const user = userEvent.setup();
+    const firstPage = Array.from({ length: 24 }, (_, index) =>
+      makeAnimeResult(index + 1)
+    );
+    const secondPage = [makeAnimeResult(25)];
+    mockSearchAnime
+      .mockResolvedValueOnce(firstPage)
+      .mockResolvedValueOnce(secondPage);
+
+    render(<AniListSearch {...defaultProps} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Search anime title..."), {
+      target: { value: "test" },
+    });
+
+    await waitFor(() =>
+      expect(mockSearchAnime).toHaveBeenCalledWith("test", 1, 24)
+    );
+    expect(await screen.findByText("測試動畫 24")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Load more" }));
+
+    await waitFor(() =>
+      expect(mockSearchAnime).toHaveBeenLastCalledWith("test", 2, 24)
+    );
+    expect(await screen.findByText("測試動畫 25")).toBeInTheDocument();
+  });
+
+  it("loads full AniList details before opening the detail modal", async () => {
+    const user = userEvent.setup();
+    mockSearchAnime.mockResolvedValue([
+      {
+        ...animeResult,
+        description: "Short search description",
+      },
+    ]);
+    mockGetAnimeById.mockResolvedValue({
+      ...animeResult,
+      description: "Full AniList description",
+    });
+
+    render(<AniListSearch {...defaultProps} />);
+
+    await user.type(screen.getByPlaceholderText("Search anime title..."), "test");
+    await user.click(await screen.findByText("測試動畫"));
+
+    await waitFor(() => expect(mockGetAnimeById).toHaveBeenCalledWith(1));
+    expect(await screen.findByTestId("anime-detail-modal")).toHaveTextContent(
+      "Full AniList description"
+    );
+  });
+
+  it("closes when the backdrop outside the AniList search panel is clicked", async () => {
+    const user = userEvent.setup();
+    render(<AniListSearch {...defaultProps} />);
+
+    await user.click(screen.getByTestId("anilist-search-backdrop"));
+
+    expect(defaultProps.onClose).toHaveBeenCalled();
   });
 });

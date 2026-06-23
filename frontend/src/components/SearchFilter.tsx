@@ -216,6 +216,7 @@ export default function SearchFilter({
     ratingRange.min !== 0 ||
     ratingRange.max !== 10 ||
     progressFilter;
+  const filterButtonLabel = t("buttons.filter", { defaultMessage: "篩選" });
 
   // 快速篩選選項
   const quickFilters = [
@@ -381,12 +382,13 @@ export default function SearchFilter({
             variant="outline"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
+            aria-label={filterButtonLabel}
+            aria-expanded={showFilters}
+            aria-controls="search-filter-panel"
             className="flex-1 lg:flex-none h-11 px-4"
           >
             <Filter className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">
-              {t("buttons.filter", { defaultMessage: "篩選" })}
-            </span>
+            <span>{filterButtonLabel}</span>
             {showFilters ? (
               <ChevronUp className="w-4 h-4 ml-2" />
             ) : (
@@ -507,7 +509,10 @@ export default function SearchFilter({
 
       {/* 詳細篩選選項 */}
       {showFilters && (
-        <Card className="border-2 border-gray-200 dark:border-gray-700">
+        <Card
+          id="search-filter-panel"
+          className="border-2 border-gray-200 dark:border-gray-700"
+        >
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center space-x-2 text-lg">
               <Filter className="w-5 h-5" />

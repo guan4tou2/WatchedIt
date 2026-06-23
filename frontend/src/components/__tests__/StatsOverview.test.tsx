@@ -4,7 +4,10 @@ import { Stats } from "@/types";
 
 // Mock next-intl
 jest.mock("next-intl", () => ({
-    useTranslations: () => (key: string) => key,
+    useTranslations: () => (
+        key: string,
+        values?: { defaultMessage?: string }
+    ) => values?.defaultMessage ?? key,
 }));
 
 const mockStats: Stats = {
@@ -48,6 +51,17 @@ describe("StatsOverview", () => {
         render(<StatsOverview stats={mockStats} />);
         expect(screen.getByText("totalWorks")).toBeInTheDocument();
         expect(screen.getByText("10")).toBeInTheDocument();
+    });
+
+    it("provides a compact mobile summary before the full desktop cards", () => {
+        render(<StatsOverview stats={mockStats} />);
+
+        const summary = screen.getByLabelText("作品統計摘要");
+
+        expect(summary).toHaveClass("sm:hidden");
+        expect(summary).toHaveTextContent("10作品");
+        expect(summary).toHaveTextContent("3進行中");
+        expect(summary).toHaveTextContent("5已完結");
     });
 
     it("renders ongoing works count correctly", () => {

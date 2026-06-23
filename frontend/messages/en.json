@@ -23,6 +23,12 @@
         "inProgressDesc": "Currently watching or releasing",
         "completed": "Completed",
         "completedDesc": "Finished watching",
+        "mobileSummary": {
+            "title": "Work stats summary",
+            "totalWorks": "works",
+            "inProgress": "active",
+            "completed": "done"
+        },
         "addWork": "Add Work",
         "batchSelect": "Batch Select",
         "batchEdit": "Batch Edit",
@@ -293,7 +299,10 @@
             "close": "Close",
             "select": "Select",
             "addWork": "Add work",
-            "adding": "Adding..."
+            "adding": "Adding...",
+            "loadMore": "Load more",
+            "loadingMore": "Loading more...",
+            "loadingDetails": "Loading details..."
         },
         "messages": {
             "addError": "Failed to add work"
@@ -466,7 +475,9 @@
         },
         "buttons": {
             "save": "Create Work",
-            "saving": "Creating..."
+            "saving": "Creating...",
+            "showOptional": "More fields",
+            "hideOptional": "Hide fields"
         },
         "messages": {
             "createSuccess": "Work created successfully!",
@@ -496,6 +507,13 @@
         "nav": {
             "helpGuide": "Help Guide",
             "save": "Save Settings"
+        },
+        "sections": {
+            "label": "Settings sections",
+            "general": "General",
+            "data": "Data & Sync",
+            "manage": "Manage",
+            "about": "About"
         },
         "appearance": {
             "title": "Appearance",

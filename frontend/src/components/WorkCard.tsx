@@ -1,5 +1,6 @@
- "use client";
+"use client";
 
+import type { KeyboardEvent } from "react";
 import {
     ArrowRight,
     Calendar,
@@ -70,7 +71,7 @@ export default function WorkCard({
     };
 
     const handleKeyboardActivate = (
-        event: React.KeyboardEvent,
+        event: KeyboardEvent,
         action: () => void
     ) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -81,7 +82,21 @@ export default function WorkCard({
 
     return (
         <Card
-            className={`hover:shadow-lg transition-all card-hover ${isSelected ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20" : ""
+            role={isBatchMode ? undefined : "link"}
+            tabIndex={isBatchMode ? undefined : 0}
+            aria-label={
+                isBatchMode
+                    ? undefined
+                    : `${workCardButtonsT("openDetails")}: ${work.title}`
+            }
+            onClick={isBatchMode ? undefined : openDetails}
+            onKeyDown={
+                isBatchMode
+                    ? undefined
+                    : (event) => handleKeyboardActivate(event, openDetails)
+            }
+            className={`hover:shadow-lg transition-all card-hover ${!isBatchMode ? "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" : ""
+                } ${isSelected ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20" : ""
                 }`}
         >
             <CardHeader className="pb-3">
@@ -143,10 +158,14 @@ export default function WorkCard({
                                 size="icon"
                                 variant="ghost"
                                 aria-label={workCardButtonsT("openDetails")}
-                                onClick={openDetails}
-                                onKeyDown={(event) =>
-                                    handleKeyboardActivate(event, openDetails)
-                                }
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    openDetails();
+                                }}
+                                onKeyDown={(event) => {
+                                    event.stopPropagation();
+                                    handleKeyboardActivate(event, openDetails);
+                                }}
                                 className="h-9 w-9"
                             >
                                 <ArrowRight className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" />

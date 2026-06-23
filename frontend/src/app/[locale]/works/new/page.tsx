@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Work, WorkCreate, Tag } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
 import TagSelector from "@/components/TagSelector";
-import { ArrowLeft, Save, Star, Plus } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Save, Star } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { useTranslations } from "next-intl";
 
@@ -56,6 +56,7 @@ export default function NewWorkPage() {
   });
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [showOptionalFields, setShowOptionalFields] = useState(false);
 
   // Toast 通知
   const { showToast, ToastContainer } = useToast();
@@ -140,7 +141,7 @@ export default function NewWorkPage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-4 sm:p-6">
       {/* 導航欄 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
@@ -238,156 +239,179 @@ export default function NewWorkPage() {
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <label
-                      htmlFor="work-year"
-                      className="text-sm font-medium form-label-secondary"
-                    >
-                      {t("form.labels.year", { defaultMessage: "年份" })}
-                    </label>
-                    <Input
-                      id="work-year"
-                      type="number"
-                      value={formData.year}
-                      onChange={(e) =>
-                        setFormData({ ...formData, year: e.target.value })
-                      }
-                      placeholder={t("form.placeholders.year", { defaultMessage: "2023" })}
-                      min="1900"
-                      max="2030"
-                      className="mt-1"
-                    />
-                  </div>
                 </div>
 
-                {/* 標籤選擇 */}
-                <TagSelector
-                  availableTags={tags}
-                  selectedTags={selectedTags}
-                  onTagsChange={setSelectedTags}
-                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowOptionalFields(!showOptionalFields)}
+                  aria-expanded={showOptionalFields}
+                  aria-controls="optional-work-fields"
+                  className="w-full"
+                >
+                  {showOptionalFields ? (
+                    <ChevronUp className="w-4 h-4 mr-2" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 mr-2" />
+                  )}
+                  {showOptionalFields
+                    ? t("buttons.hideOptional", { defaultMessage: "收起欄位" })
+                    : t("buttons.showOptional", { defaultMessage: "更多欄位" })}
+                </Button>
 
-                {/* 評分 */}
-                <div>
-                  <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    {t("form.labels.rating", { defaultMessage: "評分" })}
-                  </label>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
-                      <button
-                        key={rating}
-                        type="button"
-                        aria-label={t("form.ratingOption", {
-                          value: rating,
-                          defaultMessage: `設定評分為 ${rating}/10`,
-                        })}
-                        onClick={() => handleRatingClick(rating)}
-                        className={`p-2 rounded-md transition-colors ${parseFloat(formData.rating || "0") >= rating
-                          ? "text-yellow-500 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
-                          : "star-icon-unselected"
-                          }`}
+                {showOptionalFields && (
+                  <div id="optional-work-fields" className="space-y-6">
+                    <div>
+                      <label
+                        htmlFor="work-year"
+                        className="text-sm font-medium form-label-secondary"
                       >
-                        <Star
-                          className="w-5 h-5"
-                          fill={
-                            parseFloat(formData.rating || "0") >= rating
-                              ? "currentColor"
-                              : "none"
-                          }
-                        />
-                      </button>
-                    ))}
-                    {formData.rating && (
-                      <span className="text-sm status-text ml-2">
-                        {t("form.ratingValue", {
-                          value: formData.rating,
-                          defaultMessage: "{value}/10"
-                        })}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-3 max-w-40">
-                    <label htmlFor="work-rating" className="sr-only">
-                      {t("form.ratingInputLabel", {
-                        defaultMessage: "評分數值",
-                      })}
-                    </label>
-                    <Input
-                      id="work-rating"
-                      type="number"
-                      inputMode="decimal"
-                      min="0"
-                      max="10"
-                      step="0.5"
-                      value={formData.rating}
-                      onChange={(e) =>
-                        setFormData({ ...formData, rating: e.target.value })
-                      }
-                      placeholder="0-10"
+                        {t("form.labels.year", { defaultMessage: "年份" })}
+                      </label>
+                      <Input
+                        id="work-year"
+                        type="number"
+                        value={formData.year}
+                        onChange={(e) =>
+                          setFormData({ ...formData, year: e.target.value })
+                        }
+                        placeholder={t("form.placeholders.year", { defaultMessage: "2023" })}
+                        min="1900"
+                        max="2030"
+                        className="mt-1"
+                      />
+                    </div>
+
+                    {/* 標籤選擇 */}
+                    <TagSelector
+                      availableTags={tags}
+                      selectedTags={selectedTags}
+                      onTagsChange={setSelectedTags}
                     />
-                    <p className="mt-1 text-xs note-text">
-                      {t("form.ratingInputHelp", {
-                        defaultMessage: "可輸入 0 到 10，支援 0.5 分",
-                      })}
-                    </p>
+
+                    {/* 評分 */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        {t("form.labels.rating", { defaultMessage: "評分" })}
+                      </label>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
+                          <button
+                            key={rating}
+                            type="button"
+                            aria-label={t("form.ratingOption", {
+                              value: rating,
+                              defaultMessage: `設定評分為 ${rating}/10`,
+                            })}
+                            onClick={() => handleRatingClick(rating)}
+                            className={`p-2 rounded-md transition-colors ${parseFloat(formData.rating || "0") >= rating
+                              ? "text-yellow-500 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
+                              : "star-icon-unselected"
+                              }`}
+                          >
+                            <Star
+                              className="w-5 h-5"
+                              fill={
+                                parseFloat(formData.rating || "0") >= rating
+                                  ? "currentColor"
+                                  : "none"
+                              }
+                            />
+                          </button>
+                        ))}
+                        {formData.rating && (
+                          <span className="text-sm status-text ml-2">
+                            {t("form.ratingValue", {
+                              value: formData.rating,
+                              defaultMessage: "{value}/10"
+                            })}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-3 max-w-40">
+                        <label htmlFor="work-rating" className="sr-only">
+                          {t("form.ratingInputLabel", {
+                            defaultMessage: "評分數值",
+                          })}
+                        </label>
+                        <Input
+                          id="work-rating"
+                          type="number"
+                          inputMode="decimal"
+                          min="0"
+                          max="10"
+                          step="0.5"
+                          value={formData.rating}
+                          onChange={(e) =>
+                            setFormData({ ...formData, rating: e.target.value })
+                          }
+                          placeholder="0-10"
+                        />
+                        <p className="mt-1 text-xs note-text">
+                          {t("form.ratingInputHelp", {
+                            defaultMessage: "可輸入 0 到 10，支援 0.5 分",
+                          })}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 評論 */}
+                    <div>
+                      <label className="text-sm font-medium form-label-secondary">
+                        {t("form.labels.review", { defaultMessage: "評論" })}
+                      </label>
+                      <Textarea
+                        value={formData.review}
+                        onChange={(e) =>
+                          setFormData({ ...formData, review: e.target.value })
+                        }
+                        placeholder={t(
+                          "form.placeholders.review",
+                          { defaultMessage: "分享您的觀後感..." }
+                        )}
+                        rows={3}
+                        className="mt-1"
+                      />
+                    </div>
+
+                    {/* 備註 */}
+                    <div>
+                      <label className="text-sm font-medium form-label-secondary">
+                        {t("form.labels.note", { defaultMessage: "備註" })}
+                      </label>
+                      <Textarea
+                        value={formData.note}
+                        onChange={(e) =>
+                          setFormData({ ...formData, note: e.target.value })
+                        }
+                        placeholder={t(
+                          "form.placeholders.note",
+                          { defaultMessage: "其他備註..." }
+                        )}
+                        rows={2}
+                        className="mt-1"
+                      />
+                    </div>
+
+                    {/* 來源 */}
+                    <div>
+                      <label className="text-sm font-medium form-label-secondary">
+                        {t("form.labels.source", { defaultMessage: "來源" })}
+                      </label>
+                      <Input
+                        value={formData.source}
+                        onChange={(e) =>
+                          setFormData({ ...formData, source: e.target.value })
+                        }
+                        placeholder={t(
+                          "form.placeholders.source",
+                          { defaultMessage: "AniList, 手動新增..." }
+                        )}
+                        className="mt-1"
+                      />
+                    </div>
                   </div>
-                </div>
-
-                {/* 評論 */}
-                <div>
-                  <label className="text-sm font-medium form-label-secondary">
-                    {t("form.labels.review", { defaultMessage: "評論" })}
-                  </label>
-                  <Textarea
-                    value={formData.review}
-                    onChange={(e) =>
-                      setFormData({ ...formData, review: e.target.value })
-                    }
-                    placeholder={t(
-                      "form.placeholders.review",
-                      { defaultMessage: "分享您的觀後感..." }
-                    )}
-                    rows={3}
-                    className="mt-1"
-                  />
-                </div>
-
-                {/* 備註 */}
-                <div>
-                  <label className="text-sm font-medium form-label-secondary">
-                    {t("form.labels.note", { defaultMessage: "備註" })}
-                  </label>
-                  <Textarea
-                    value={formData.note}
-                    onChange={(e) =>
-                      setFormData({ ...formData, note: e.target.value })
-                    }
-                    placeholder={t(
-                      "form.placeholders.note",
-                      { defaultMessage: "其他備註..." }
-                    )}
-                    rows={2}
-                    className="mt-1"
-                  />
-                </div>
-
-                {/* 來源 */}
-                <div>
-                  <label className="text-sm font-medium form-label-secondary">
-                    {t("form.labels.source", { defaultMessage: "來源" })}
-                  </label>
-                  <Input
-                    value={formData.source}
-                    onChange={(e) =>
-                      setFormData({ ...formData, source: e.target.value })
-                    }
-                    placeholder={t(
-                      "form.placeholders.source",
-                      { defaultMessage: "AniList, 手動新增..." }
-                    )}
-                    className="mt-1"
-                  />
-                </div>
+                )}
 
                 {/* 按鈕 */}
                 <div className="flex space-x-2 pt-4">

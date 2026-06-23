@@ -55,9 +55,13 @@ describe("SearchFilter", () => {
 
     it("toggles detailed filters when filter button is clicked", () => {
         render(<SearchFilter {...defaultProps} />);
-        const filterButton = screen.getByText("buttons.filter");
+        const filterButton = screen.getByRole("button", { name: "buttons.filter" });
+
+        expect(filterButton).toHaveAttribute("aria-expanded", "false");
+
         fireEvent.click(filterButton);
         expect(screen.getByText("details.title")).toBeInTheDocument();
+        expect(filterButton).toHaveAttribute("aria-expanded", "true");
     });
 
     it("calls onTypeChange when type is selected", () => {

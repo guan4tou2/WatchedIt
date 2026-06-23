@@ -107,6 +107,12 @@ jest.mock("@/lib/pwa", () => ({
 
 const mockedCloudStorage = cloudStorage as jest.Mocked<typeof cloudStorage>;
 
+const openDataSection = async (
+  user: ReturnType<typeof userEvent.setup>
+) => {
+  await user.click(screen.getByRole("tab", { name: "資料與同步" }));
+};
+
 describe("SettingsPage", () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -121,12 +127,48 @@ describe("SettingsPage", () => {
     jest.useRealTimers();
   });
 
+  it("groups settings into focused sections", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+    render(<SettingsPage />);
+
+    expect(
+      screen.getByRole("tablist", { name: "設定分類" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "一般" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    expect(screen.getByText("外觀設定")).toBeInTheDocument();
+    expect(screen.queryByText("資料管理")).not.toBeInTheDocument();
+
+    await openDataSection(user);
+
+    expect(screen.getByRole("tab", { name: "資料與同步" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    expect(screen.getByText("資料管理")).toBeInTheDocument();
+    expect(screen.queryByText("外觀設定")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("tab", { name: "管理" }));
+
+    expect(screen.getByText("作品類型管理")).toBeInTheDocument();
+    expect(screen.queryByText("資料管理")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("tab", { name: "關於" }));
+
+    expect(screen.getByText("關於 WatchedIt")).toBeInTheDocument();
+    expect(screen.getByTestId("platform-info")).toBeInTheDocument();
+  });
+
   it("confirms clearing all data with an inline dialog", async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(false);
 
     render(<SettingsPage />);
 
+    await openDataSection(user);
     await user.click(screen.getByRole("button", { name: "清除所有資料" }));
 
     expect(
@@ -154,6 +196,7 @@ describe("SettingsPage", () => {
 
     render(<SettingsPage />);
 
+    await openDataSection(user);
     await user.selectOptions(screen.getByLabelText("儲存模式"), "cloud");
     const endpointInput = screen.getByLabelText("雲端端點");
     await user.type(endpointInput, " https://sync.example.test/cloud/// ");
@@ -187,6 +230,7 @@ describe("SettingsPage", () => {
 
     render(<SettingsPage />);
 
+    await openDataSection(user);
     await user.selectOptions(screen.getByLabelText("儲存模式"), "cloud");
     await user.type(
       screen.getByLabelText("雲端端點"),

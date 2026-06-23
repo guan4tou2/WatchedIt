@@ -74,6 +74,8 @@ interface Settings {
   pwaOfflineMode: boolean;
 }
 
+type SettingsSection = "general" | "data" | "manage" | "about";
+
 const normalizeCloudEndpoint = (endpoint: string): string =>
   endpoint.trim().replace(/\/+$/, "");
 
@@ -112,6 +114,8 @@ export default function SettingsPage() {
   } | null>(null);
   const [helpGuideOpen, setHelpGuideOpen] = useState(false);
   const [clearDataDialogOpen, setClearDataDialogOpen] = useState(false);
+  const [activeSection, setActiveSection] =
+    useState<SettingsSection>("general");
 
   // PWA 相關狀態
   const [pwaInfo, setPwaInfo] = useState({
@@ -589,6 +593,16 @@ export default function SettingsPage() {
     }
   };
 
+  const settingsSections: Array<{
+    id: SettingsSection;
+    label: string;
+  }> = [
+    { id: "general", label: t("sections.general", "一般") },
+    { id: "data", label: t("sections.data", "資料與同步") },
+    { id: "manage", label: t("sections.manage", "管理") },
+    { id: "about", label: t("sections.about", "關於") },
+  ];
+
   return (
     <div className="container mx-auto p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
@@ -636,8 +650,32 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div
+        role="tablist"
+        aria-label={t("sections.label", "設定分類")}
+        className="mb-6 grid grid-cols-2 gap-2 rounded-lg border border-border/60 bg-muted/30 p-1 sm:flex sm:w-fit"
+      >
+        {settingsSections.map((section) => (
+          <button
+            key={section.id}
+            type="button"
+            role="tab"
+            aria-selected={activeSection === section.id}
+            onClick={() => setActiveSection(section.id)}
+            className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              activeSection === section.id
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
+            }`}
+          >
+            {section.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-6">
         {/* 基本設定 */}
+        {activeSection === "general" && (
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -915,7 +953,11 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+        </div>
+        )}
 
+        {activeSection === "data" && (
+        <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -1227,8 +1269,10 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </div>
+        )}
 
         {/* 進階設定 */}
+        {activeSection === "manage" && (
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -1329,10 +1373,13 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </div>
+        )}
       </div>
 
       {/* 關於 */}
-      <div className="mt-6">
+      {activeSection === "about" && (
+      <>
+      <div>
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -1395,6 +1442,8 @@ export default function SettingsPage() {
       <div className="mt-6">
         <PlatformInfo />
       </div>
+      </>
+      )}
 
       <AlertDialog
         open={clearDataDialogOpen}

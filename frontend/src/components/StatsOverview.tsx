@@ -12,6 +12,26 @@ interface StatsOverviewProps {
 export default function StatsOverview({ stats, isLoading }: StatsOverviewProps) {
     const t = useTranslations("Home");
 
+    const compactStats = stats
+        ? [
+            {
+                label: t("mobileSummary.totalWorks", { defaultMessage: "作品" }),
+                value: stats.total_works,
+                className: "text-foreground",
+            },
+            {
+                label: t("mobileSummary.inProgress", { defaultMessage: "進行中" }),
+                value: stats.status_stats["進行中"] || 0,
+                className: "text-blue-600 dark:text-blue-300",
+            },
+            {
+                label: t("mobileSummary.completed", { defaultMessage: "已完結" }),
+                value: stats.status_stats["已完結"] || 0,
+                className: "text-green-600 dark:text-green-300",
+            },
+        ]
+        : [];
+
     if (isLoading || !stats) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
@@ -32,7 +52,26 @@ export default function StatsOverview({ stats, isLoading }: StatsOverviewProps) 
     }
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+        <>
+        <div
+            aria-label={t("mobileSummary.title", {
+                defaultMessage: "作品統計摘要",
+            })}
+            className="sm:hidden grid grid-cols-3 gap-2 mb-4"
+        >
+            {compactStats.map((item) => (
+                <div
+                    key={item.label}
+                    className="rounded-md border border-border/60 bg-card/95 px-3 py-2 text-center shadow-sm"
+                >
+                    <div className={`text-base font-semibold ${item.className}`}>
+                        {item.value}{item.label}
+                    </div>
+                </div>
+            ))}
+        </div>
+
+        <div className="hidden sm:grid sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
             <Card className="animate-fade-in-up hover:shadow-md transition-shadow" style={{ animationDelay: "0ms" }}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -84,5 +123,6 @@ export default function StatsOverview({ stats, isLoading }: StatsOverviewProps) 
                 </CardContent>
             </Card>
         </div>
+        </>
     );
 }

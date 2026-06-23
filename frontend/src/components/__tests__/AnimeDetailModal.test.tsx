@@ -194,6 +194,15 @@ describe("AnimeDetailModal", () => {
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
 
+  it("點擊彈窗外部背景應該關閉詳情彈窗", async () => {
+    const user = userEvent.setup();
+    render(<AnimeDetailModal {...defaultProps} />);
+
+    await user.click(screen.getByTestId("anime-detail-modal-backdrop"));
+
+    expect(defaultProps.onClose).toHaveBeenCalled();
+  });
+
   it("點擊確認按鈕應該創建作品並關閉彈窗", async () => {
     const user = userEvent.setup();
     mockCreateWork.mockResolvedValue({ id: "1", title: "測試動畫" });

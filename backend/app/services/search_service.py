@@ -9,12 +9,14 @@ class SearchService:
         self.db = db
         self.anilist_url = "https://graphql.anilist.co"
 
-    async def search_anime(self, query: str) -> List[Dict[str, Any]]:
+    async def search_anime(
+        self, query: str, page: int = 1, per_page: int = 24
+    ) -> List[Dict[str, Any]]:
         """搜尋動畫（使用 AniList API）"""
         # GraphQL 查詢
         graphql_query = """
-        query ($search: String) {
-          Page (page: 1, perPage: 10) {
+        query ($search: String, $page: Int, $perPage: Int) {
+          Page (page: $page, perPage: $perPage) {
             media (search: $search, type: ANIME) {
               id
               title {
@@ -41,7 +43,7 @@ class SearchService:
         }
         """
 
-        variables = {"search": query}
+        variables = {"search": query, "page": page, "perPage": per_page}
 
         try:
             async with httpx.AsyncClient() as client:

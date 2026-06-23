@@ -9,18 +9,21 @@ router = APIRouter(prefix="/search", tags=["search"])
 
 @router.get("/anime")
 async def search_anime(
-    query: str = Query(..., description="搜尋關鍵字"), db: Session = Depends(get_db)
+    query: str = Query(..., description="搜尋關鍵字"),
+    page: int = Query(1, ge=1, description="頁碼"),
+    per_page: int = Query(24, ge=1, le=50, description="每頁筆數"),
+    db: Session = Depends(get_db),
 ):
     """搜尋動畫（整合 AniList API）"""
     search_service = SearchService(db)
-    return search_service.search_anime(query)
+    return await search_service.search_anime(query, page=page, per_page=per_page)
 
 
 @router.get("/anime/{anime_id}")
 async def get_anime_by_id(anime_id: int, db: Session = Depends(get_db)):
     """根據 ID 獲取動畫詳情"""
     search_service = SearchService(db)
-    return search_service.get_anime_by_id(anime_id)
+    return await search_service.get_anime_by_id(anime_id)
 
 
 @router.get("/suggestions")

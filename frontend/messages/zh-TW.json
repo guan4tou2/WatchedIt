@@ -23,6 +23,12 @@
         "inProgressDesc": "正在觀看或連載中",
         "completed": "已完結",
         "completedDesc": "已完成觀看",
+        "mobileSummary": {
+            "title": "作品統計摘要",
+            "totalWorks": "作品",
+            "inProgress": "進行中",
+            "completed": "已完結"
+        },
         "addWork": "新增作品",
         "batchSelect": "批量選擇",
         "batchEdit": "批量編輯",
@@ -293,7 +299,10 @@
             "close": "關閉",
             "select": "選擇",
             "addWork": "新增作品",
-            "adding": "新增中..."
+            "adding": "新增中...",
+            "loadMore": "載入更多",
+            "loadingMore": "載入更多中...",
+            "loadingDetails": "載入詳情中..."
         },
         "messages": {
             "addError": "新增作品失敗"
@@ -466,7 +475,9 @@
         },
         "buttons": {
             "save": "建立作品",
-            "saving": "建立中..."
+            "saving": "建立中...",
+            "showOptional": "更多欄位",
+            "hideOptional": "收起欄位"
         },
         "messages": {
             "createSuccess": "作品建立成功！",
@@ -496,6 +507,13 @@
         "nav": {
             "helpGuide": "使用指南",
             "save": "儲存設定"
+        },
+        "sections": {
+            "label": "設定分類",
+            "general": "一般",
+            "data": "資料與同步",
+            "manage": "管理",
+            "about": "關於"
         },
         "appearance": {
             "title": "外觀控制",
