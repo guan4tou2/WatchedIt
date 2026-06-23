@@ -12,11 +12,14 @@ export const config = {
   isTest: process.env.NODE_ENV === "test",
 };
 
+export const normalizeApiBaseUrl = (baseUrl: string): string =>
+  baseUrl.trim().replace(/\/+$/, "");
+
 // 動態獲取 API 基礎 URL
 export const getApiBaseUrl = (): string => {
   // 1. 檢查環境變數
   if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
+    return normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
   }
 
   // 2. 在瀏覽器環境中，使用當前網址的 API 路徑
@@ -51,7 +54,7 @@ export const hasBackendService = (): boolean => {
 
 // 導出完整的 API URL
 export const getApiUrl = (endpoint: string): string => {
-  const baseUrl = getApiBaseUrl();
+  const baseUrl = normalizeApiBaseUrl(getApiBaseUrl());
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   return `${baseUrl}${cleanEndpoint}`;
 };

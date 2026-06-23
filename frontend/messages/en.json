@@ -41,12 +41,16 @@
             "batchDeleteCount": "Batch Delete ({count})",
             "migrationNow": "Migrate Now",
             "migrationInProgress": "Migrating...",
+            "openMenu": "Open menu",
+            "closeMenu": "Close menu",
+            "mainMenu": "Main menu",
             "viewGithub": "View GitHub Repository"
         },
         "labels": {
             "recentWorks": "Recent Works",
             "searchResults": "Search Results",
             "itemsCount": "Total {count} works",
+            "selectedCount": "{count} selected",
             "filteredFrom": "(filtered from {total})",
             "searchTerm": "Search: \"{term}\""
         },
@@ -82,16 +86,251 @@
     "WorkCard": {
         "buttons": {
             "quickAddFull": "Add Episode",
-            "quickAddShort": "Add"
+            "quickAddShort": "Add",
+            "openDetails": "Open details"
         },
         "labels": {
             "unknownYear": "Unknown Year"
         }
     },
+    "WorkList": {
+        "empty": {
+            "title": "No works yet",
+            "description": "Add your first work to start tracking progress, ratings and tags.",
+            "action": "Add Work"
+        },
+        "noResults": {
+            "title": "No matching works",
+            "description": "Try a broader search or fewer filters."
+        }
+    },
+    "WorkEditForm": {
+        "cardTitle": "Edit Work",
+        "labels": {
+            "title": "Title",
+            "type": "Type",
+            "status": "Status",
+            "year": "Year",
+            "rating": "Rating",
+            "review": "Review",
+            "note": "Notes",
+            "source": "Source"
+        },
+        "placeholders": {
+            "title": "Work title",
+            "year": "2023",
+            "review": "Share your thoughts...",
+            "note": "Additional notes...",
+            "source": "AniList, Manual entry..."
+        },
+        "buttons": {
+            "save": "Save",
+            "saving": "Saving...",
+            "cancel": "Cancel"
+        },
+        "ratingInputLabel": "Rating value",
+        "ratingInputHelp": "Enter 0 to 10, including half points",
+        "ratingOption": "Set rating to {value}/10",
+        "ratingValue": "{value}/10"
+    },
+    "TagSelector": {
+        "label": "Tags",
+        "buttons": {
+            "select": "Select tags",
+            "manage": "Manage tags",
+            "remove": "Remove {name}"
+        },
+        "empty": "All tags are selected"
+    },
+    "TagManager": {
+        "title": "Tag management",
+        "stats": "{count} tags created",
+        "labels": {
+            "name": "Tag name",
+            "color": "Color"
+        },
+        "placeholders": {
+            "name": "Enter tag name"
+        },
+        "buttons": {
+            "add": "Add tag",
+            "confirmAdd": "Add",
+            "update": "Update",
+            "cancel": "Cancel",
+            "edit": "Edit {name}",
+            "delete": "Delete {name}"
+        },
+        "deleteDialog": {
+            "title": "Delete tag",
+            "description": "This will permanently delete \"{name}\" from the tag list.",
+            "confirm": "Confirm delete"
+        },
+        "empty": "No tags yet. Add your first tag to start organizing works.",
+        "colorSwatch": "{name} color",
+        "selectedColor": "Selected color",
+        "errors": {
+            "duplicate": "A tag with this name already exists."
+        }
+    },
+    "CloudSyncStatus": {
+        "title": "Cloud sync",
+        "badges": {
+            "needsSync": "Needs sync"
+        },
+        "labels": {
+            "lastSync": "Last sync:",
+            "neverSynced": "Never synced"
+        },
+        "buttons": {
+            "syncNow": "Sync now",
+            "syncing": "Syncing..."
+        },
+        "messages": {
+            "success": "Sync completed.",
+            "error": "Sync failed: {error}",
+            "errorFallback": "Sync failed.",
+            "needsSync": "Sync to keep your data up to date.",
+            "upToDate": "Data is up to date."
+        }
+    },
+    "SyncIndicator": {
+        "states": {
+            "syncing": "Syncing with cloud...",
+            "error": "Cloud sync failed: {error}",
+            "needsSync": "Cloud sync recommended",
+            "synced": "Cloud data is synced"
+        }
+    },
+    "AnimeDetailModal": {
+        "title": "Anime details",
+        "unknown": "Unknown",
+        "units": {
+            "episodes": "{count} episodes",
+            "minutes": "{count} min",
+            "score": "{score} pts"
+        },
+        "sections": {
+            "airDates": "Air dates",
+            "genres": "Genres",
+            "description": "Synopsis",
+            "aliases": "Other titles",
+            "country": "Country of origin"
+        },
+        "labels": {
+            "start": "Start:",
+            "end": "End:",
+            "addingWork": "Will add:",
+            "autoCreateEpisodes": "Automatically create {count} episodes"
+        },
+        "buttons": {
+            "close": "Close",
+            "cancel": "Cancel",
+            "addWork": "Add work",
+            "adding": "Adding..."
+        },
+        "messages": {
+            "addSuccess": "Work added successfully.",
+            "addError": "Failed to add work",
+            "genericError": "Something went wrong while adding this work. Please try again."
+        },
+        "status": {
+            "finished": "Finished",
+            "releasing": "Releasing",
+            "notYetReleased": "Not yet released",
+            "cancelled": "Cancelled",
+            "hiatus": "Hiatus"
+        },
+        "format": {
+            "tv": "TV",
+            "tvShort": "TV short",
+            "movie": "Movie",
+            "special": "Special",
+            "ova": "OVA",
+            "ona": "ONA",
+            "music": "Music"
+        },
+        "season": {
+            "winter": "Winter",
+            "spring": "Spring",
+            "summer": "Summer",
+            "fall": "Fall"
+        },
+        "seasonYear": "{year} {season}",
+        "moreAliases": "+{count} more"
+    },
+    "AniListSearch": {
+        "title": "Search AniList",
+        "searchPlaceholder": "Search anime title...",
+        "empty": {
+            "title": "Search AniList anime",
+            "description": "Enter an anime title to start searching.",
+            "tip": "Tip: Chinese, Japanese and English titles are supported."
+        },
+        "error": {
+            "title": "Search problem",
+            "backendUnavailable": "AniList search is unavailable. Please try AniList directly.",
+            "searchFallback": "Search failed",
+            "addTitle": "Could not add this work",
+            "addFallback": "Failed to add work",
+            "openAniList": "Search on AniList"
+        },
+        "noResults": {
+            "title": "No matching anime",
+            "description": "Try one of these:",
+            "useJapanese": "Use the Japanese title.",
+            "useEnglish": "Use the English title.",
+            "checkSpelling": "Check the spelling.",
+            "useShorter": "Try shorter keywords."
+        },
+        "units": {
+            "episodes": "{count} episodes"
+        },
+        "labels": {
+            "selected": "Selected:",
+            "autoCreateEpisodes": "Automatically create {count} episodes"
+        },
+        "buttons": {
+            "close": "Close",
+            "select": "Select",
+            "addWork": "Add work",
+            "adding": "Adding..."
+        },
+        "messages": {
+            "addError": "Failed to add work"
+        },
+        "status": {
+            "finished": "Finished",
+            "releasing": "Releasing",
+            "notYetReleased": "Not yet released",
+            "cancelled": "Cancelled",
+            "hiatus": "Hiatus"
+        },
+        "format": {
+            "tv": "TV",
+            "tvShort": "TV short",
+            "movie": "Movie",
+            "special": "Special",
+            "ova": "OVA",
+            "ona": "ONA",
+            "music": "Music"
+        },
+        "season": {
+            "winter": "Winter",
+            "spring": "Spring",
+            "summer": "Summer",
+            "fall": "Fall"
+        },
+        "seasonYear": "{year} {season}"
+    },
     "WorkDetail": {
         "loading": "Loading...",
         "notFound": "Work not found",
         "confirmDelete": "Are you sure you want to delete this work?",
+        "deleteDialog": {
+            "title": "Delete work",
+            "description": "This will permanently delete \"{name}\" and cannot be undone.",
+            "confirm": "Confirm delete"
+        },
         "actions": {
             "backHome": "Back to Home",
             "delete": "Delete",
@@ -177,7 +416,7 @@
                 "progressAll": "All Progress",
                 "progressOptions": {
                     "high": "High Progress (80%+)",
-                    "low": "Low Progress (20%+)"
+                    "low": "Low Progress (<20%)"
                 }
             },
             "advanced": {
@@ -220,7 +459,10 @@
                 "note": "Additional notes...",
                 "source": "AniList, Manual entry..."
             },
-            "ratingValue": "{value}/10"
+            "ratingValue": "{value}/10",
+            "ratingOption": "Set rating to {value}/10",
+            "ratingInputLabel": "Rating value",
+            "ratingInputHelp": "Enter 0 to 10, including half points"
         },
         "buttons": {
             "save": "Create Work",
@@ -344,7 +586,12 @@
                 "label": "Auto Sync",
                 "intervalLabel": "Sync Interval (minutes)"
             },
-            "clearConfirm": "Are you sure you want to delete all data? This action cannot be undone!"
+            "clearConfirm": "Are you sure you want to delete all data? This action cannot be undone!",
+            "clearDialog": {
+                "title": "Clear all data",
+                "description": "This permanently clears all works, tags and local data. This cannot be undone.",
+                "confirm": "Clear data"
+            }
         },
         "backup": {
             "title": "Backup Settings",
@@ -587,7 +834,9 @@
                 "clearConfirm": "Delete",
                 "empty": "No auto backups yet",
                 "restoreButton": "Restore",
-                "restoreConfirm": "Restore from the auto backup created on {date}? This action overwrites current data."
+                "restoreTitle": "Restore auto backup",
+                "restoreDescription": "Restore from the auto backup created on {date}? This action overwrites current data.",
+                "restoreConfirm": "Restore"
             }
         },
         "import": {
@@ -602,7 +851,10 @@
                 "item2": "• CSV exports can be viewed in spreadsheets",
                 "item3": "• Restoring overwrites existing data"
             },
-            "confirmRestore": "Restore this backup?\n\nDetails:\n- Works: {works}\n- Tags: {tags}\n- Episodes: {episodes}\n- Completion: {completion}%\n\nThis action overwrites current data!"
+            "confirmRestore": "Restore this backup?\n\nDetails:\n- Works: {works}\n- Tags: {tags}\n- Episodes: {episodes}\n- Completion: {completion}%\n\nThis action overwrites current data!",
+            "confirmTitle": "Confirm backup restore",
+            "confirmDescription": "This will restore {works} works, {tags} tags, {episodes} episodes, and {completion}% completion. This action overwrites current data.",
+            "confirmAction": "Restore"
         },
         "notes": {
             "title": "Notes",

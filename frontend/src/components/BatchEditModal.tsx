@@ -43,6 +43,8 @@ interface BatchEditForm {
   reminder_frequency?: "daily" | "weekly" | "monthly" | "custom";
 }
 
+export const BATCH_RATING_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
 export default function BatchEditModal({
   isOpen,
   onClose,
@@ -288,7 +290,7 @@ export default function BatchEditModal({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">保持原狀</SelectItem>
-                    {[1, 2, 3, 4, 5].map((rating) => (
+                    {BATCH_RATING_OPTIONS.map((rating) => (
                       <SelectItem key={rating} value={rating.toString()}>
                         {rating} 分
                       </SelectItem>

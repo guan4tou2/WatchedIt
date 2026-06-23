@@ -7,6 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Plus,
   Edit,
   Trash2,
@@ -44,6 +54,9 @@ export default function WorkTypeEpisodeMappingManager({
   const [editingMapping, setEditingMapping] =
     useState<WorkTypeEpisodeMapping | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [mappingToDelete, setMappingToDelete] =
+    useState<WorkTypeEpisodeMapping | null>(null);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -59,6 +72,10 @@ export default function WorkTypeEpisodeMappingManager({
       setMappings(DEFAULT_WORK_TYPE_EPISODE_MAPPING);
     }
   }, [onMappingChange]);
+
+  useEffect(() => {
+    loadMappings();
+  }, [loadMappings]);
 
   const showMessage = (type: "success" | "error", text: string) => {
     setMessage({ type, text });
@@ -135,29 +152,34 @@ export default function WorkTypeEpisodeMappingManager({
   };
 
   const handleDeleteMapping = (mapping: WorkTypeEpisodeMapping) => {
-    if (confirm(`確定要刪除對應關係「${mapping.workType}」嗎？`)) {
-      try {
-        workTypeEpisodeMappingStorage.delete(mapping.workType);
-        showMessage("success", `成功刪除對應關係「${mapping.workType}」`);
-        loadMappings();
-      } catch (error) {
-        showMessage(
-          "error",
-          error instanceof Error ? error.message : "刪除失敗"
-        );
-      }
+    setMappingToDelete(mapping);
+  };
+
+  const confirmDeleteMapping = () => {
+    if (!mappingToDelete) return;
+
+    try {
+      workTypeEpisodeMappingStorage.delete(mappingToDelete.workType);
+      showMessage("success", `成功刪除對應關係「${mappingToDelete.workType}」`);
+      setMappingToDelete(null);
+      loadMappings();
+    } catch (error) {
+      showMessage("error", error instanceof Error ? error.message : "刪除失敗");
     }
   };
 
   const handleResetToDefault = () => {
-    if (confirm("確定要重置為預設對應關係嗎？這將清除所有自訂對應關係。")) {
-      try {
-        workTypeEpisodeMappingStorage.resetToDefault();
-        showMessage("success", "已重置為預設對應關係");
-        loadMappings();
-      } catch (error) {
-        showMessage("error", "重置失敗");
-      }
+    setResetDialogOpen(true);
+  };
+
+  const confirmResetToDefault = () => {
+    try {
+      workTypeEpisodeMappingStorage.resetToDefault();
+      setResetDialogOpen(false);
+      showMessage("success", "已重置為預設對應關係");
+      loadMappings();
+    } catch (error) {
+      showMessage("error", "重置失敗");
     }
   };
 
@@ -220,7 +242,12 @@ export default function WorkTypeEpisodeMappingManager({
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               {isAdding ? "新增對應關係" : "編輯對應關係"}
-              <Button variant="ghost" size="sm" onClick={handleCancel}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCancel}
+                aria-label="關閉對應關係表單"
+              >
                 <X className="w-4 h-4" />
               </Button>
             </CardTitle>
@@ -351,6 +378,7 @@ export default function WorkTypeEpisodeMappingManager({
                     variant="ghost"
                     size="sm"
                     onClick={() => handleEditMapping(mapping)}
+                    aria-label={`編輯${mapping.workType}對應`}
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
@@ -358,6 +386,7 @@ export default function WorkTypeEpisodeMappingManager({
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDeleteMapping(mapping)}
+                    aria-label={`刪除${mapping.workType}對應`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -367,6 +396,50 @@ export default function WorkTypeEpisodeMappingManager({
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={Boolean(mappingToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setMappingToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>刪除對應關係</AlertDialogTitle>
+            <AlertDialogDescription>
+              {mappingToDelete
+                ? `將刪除「${mappingToDelete.workType}」的對應關係，且無法復原。`
+                : "此操作無法復原。"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteMapping}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              確認刪除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>重置對應關係</AlertDialogTitle>
+            <AlertDialogDescription>
+              將清除所有自訂對應關係，並恢復預設設定。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmResetToDefault}>
+              確認重置
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

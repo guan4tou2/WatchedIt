@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useWorkStore } from "@/store/useWorkStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,10 @@ export default function DebugInitPage() {
         createWork,
     } = useWorkStore();
 
-    const [debugInfo, setDebugInfo] = useState<any>({});
+    const [createResult, setCreateResult] = useState<{
+        type: "success" | "error";
+        text: string;
+    } | null>(null);
     const [testWork, setTestWork] = useState<WorkCreate>({
         title: "測試作品",
         type: "動畫",
@@ -42,27 +45,32 @@ export default function DebugInitPage() {
         fetchWorks();
     }, [initialize, fetchWorks]);
 
-    useEffect(() => {
-        // 更新調試資訊
-        setDebugInfo({
+    const debugInfo = useMemo(() => {
+        return {
             worksCount: works.length,
-            works: works,
+            works,
             loading,
             error,
             stats,
             tagsCount: tags.length,
-            tags: tags,
-        });
+            tags,
+        };
     }, [works, loading, error, stats, tags]);
 
     const handleCreateTestWork = async () => {
+        setCreateResult(null);
         try {
             const newWork = await createWork(testWork);
-            console.log("新增的作品:", newWork);
-            alert(`作品新增成功！ID: ${newWork.id}`);
+            setCreateResult({
+                type: "success",
+                text: `作品新增成功！ID: ${newWork.id}`,
+            });
         } catch (error) {
             console.error("新增作品失敗:", error);
-            alert(`新增作品失敗: ${error}`);
+            setCreateResult({
+                type: "error",
+                text: `新增作品失敗: ${error}`,
+            });
         }
     };
 
@@ -83,6 +91,20 @@ export default function DebugInitPage() {
                 </Button>
                 <h1 className="text-2xl font-bold">調試初始化</h1>
             </div>
+
+            {createResult && (
+                <div
+                    role={createResult.type === "success" ? "status" : "alert"}
+                    aria-label="新增測試作品結果"
+                    className={`mb-6 rounded border px-4 py-3 text-sm ${
+                        createResult.type === "success"
+                            ? "border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-200"
+                            : "border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200"
+                    }`}
+                >
+                    {createResult.text}
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* 調試資訊 */}

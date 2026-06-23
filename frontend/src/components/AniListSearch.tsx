@@ -10,9 +10,46 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AniListMedia, anilistService } from "@/lib/anilist";
 import { WorkCreate } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
-import { Search, X, Star, Calendar, Play, Plus, Loader2, ExternalLink, Info } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
+import { useTranslations } from "next-intl";
+import {
+  Search,
+  X,
+  Star,
+  Calendar,
+  Play,
+  Plus,
+  Loader2,
+  ExternalLink,
+  Info,
+} from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import AnimeDetailModal from "./AnimeDetailModal";
+
+const STATUS_TRANSLATION_KEYS: Record<string, string> = {
+  FINISHED: "finished",
+  RELEASING: "releasing",
+  NOT_YET_RELEASED: "notYetReleased",
+  CANCELLED: "cancelled",
+  HIATUS: "hiatus",
+};
+
+const FORMAT_TRANSLATION_KEYS: Record<string, string> = {
+  TV: "tv",
+  TV_SHORT: "tvShort",
+  MOVIE: "movie",
+  SPECIAL: "special",
+  OVA: "ova",
+  ONA: "ona",
+  MUSIC: "music",
+};
+
+const SEASON_TRANSLATION_KEYS: Record<string, string> = {
+  WINTER: "winter",
+  SPRING: "spring",
+  SUMMER: "summer",
+  FALL: "fall",
+};
 
 interface AniListSearchProps {
   onSelectAnime: (workData: WorkCreate) => void;
@@ -31,11 +68,19 @@ export default function AniListSearch({
   const [searchResults, setSearchResults] = useState<AniListMedia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
   const [selectedAnime, setSelectedAnime] = useState<AniListMedia | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedAnimeForDetail, setSelectedAnimeForDetail] =
     useState<AniListMedia | null>(null);
   const { createWork } = useWorkStore();
+  const { showToast } = useToast();
+  const t = useTranslations("AniListSearch");
+  const searchFallbackMessage = t("error.searchFallback");
+  const backendUnavailableMessage = t("error.backendUnavailable");
+  const addFallbackMessage = t("error.addFallback");
+  const addErrorToastMessage = t("messages.addError");
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -52,16 +97,15 @@ export default function AniListSearch({
       const results = await anilistService.searchAnime(term, 1, 10);
       setSearchResults(results);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "搜尋失敗";
+      const errorMessage =
+        err instanceof Error ? err.message : searchFallbackMessage;
 
       // 檢查是否是後端服務不可用的錯誤
       if (
         errorMessage.includes("API 端點未配置") ||
         errorMessage.includes("Failed to fetch")
       ) {
-        setError(
-          "後端服務不可用。請設定 NEXT_PUBLIC_API_URL 環境變數或部署後端服務。目前僅支援本地儲存模式。"
-        );
+        setError(backendUnavailableMessage);
       } else {
         setError(errorMessage);
       }
@@ -70,7 +114,7 @@ export default function AniListSearch({
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [backendUnavailableMessage, searchFallbackMessage]);
 
   useEffect(() => {
     if (debouncedSearchTerm) {
@@ -82,6 +126,7 @@ export default function AniListSearch({
 
   const handleAnimeSelect = (anime: AniListMedia) => {
     setSelectedAnime(anime);
+    setAddError(null);
   };
 
   const handleViewDetail = (anime: AniListMedia) => {
@@ -91,6 +136,17 @@ export default function AniListSearch({
 
   const handleConfirmSelection = async () => {
     if (!selectedAnime) return;
+    setIsAdding(true);
+    setAddError(null);
+
+    const broadcastInfo =
+      selectedAnime.season && selectedAnime.seasonYear
+        ? `播出時間: ${anilistService.convertSeason(selectedAnime.season)} ${selectedAnime.seasonYear}年`
+        : "";
+    const alternateTitles = anilistService
+      .getAllTitles(selectedAnime.title, selectedAnime.synonyms)
+      .slice(1)
+      .join(", ");
 
     const workData: WorkCreate = {
       title: anilistService.getBestChineseTitle(
@@ -104,31 +160,23 @@ export default function AniListSearch({
       review: anilistService.cleanDescription(selectedAnime.description),
       note: `來自 AniList (ID: ${selectedAnime.id})
 格式: ${anilistService.convertFormat(selectedAnime.format)}
-${selectedAnime.season && selectedAnime.seasonYear
-          ? `播出時間: ${anilistService.convertSeason(selectedAnime.season)} ${selectedAnime.seasonYear
-          }年`
-          : ""
-        }
-其他標題: ${anilistService
-          .getAllTitles(selectedAnime.title, selectedAnime.synonyms)
-          .slice(1)
-          .join(", ")}`,
+${broadcastInfo}
+其他標題: ${alternateTitles}`,
       source: "AniList",
       episodes: selectedAnime.episodes
         ? Array.from({ length: selectedAnime.episodes }, (_, i) => ({
-          id: `ep-${selectedAnime.id}-${i + 1}`,
-          number: i + 1,
-          type: "episode" as const,
-          season: 1,
-          watched: false,
-        }))
+            id: `ep-${selectedAnime.id}-${i + 1}`,
+            number: i + 1,
+            type: "episode" as const,
+            season: 1,
+            watched: false,
+          }))
         : [],
     };
 
     try {
       // 新增作品（store 會自動檢查重複）
-      const newWork = await createWork(workData);
-      console.log("新增作品成功:", newWork);
+      await createWork(workData);
 
       // 通知主頁面作品新增成功
       if (onWorkAdded) {
@@ -138,10 +186,12 @@ ${selectedAnime.season && selectedAnime.seasonYear
       onClose();
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "新增作品失敗";
-      console.error("新增作品失敗:", error);
-      alert(errorMessage);
+        error instanceof Error ? error.message : addFallbackMessage;
+      setAddError(errorMessage);
+      showToast(addErrorToastMessage, "error");
       // 不關閉視窗，讓用戶看到錯誤訊息
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -162,30 +212,20 @@ ${selectedAnime.season && selectedAnime.seasonYear
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
-      case "FINISHED":
-        return "已完結";
-      case "RELEASING":
-        return "連載中";
-      case "NOT_YET_RELEASED":
-        return "未播出";
-      case "CANCELLED":
-        return "已取消";
-      case "HIATUS":
-        return "暫停";
-      default:
-        return status;
-    }
+    const translationKey = STATUS_TRANSLATION_KEYS[status];
+    return translationKey ? t(`status.${translationKey}`) : status;
   };
 
   const getFormatText = (format: string) => {
-    return anilistService.convertFormat(format);
+    const translationKey = FORMAT_TRANSLATION_KEYS[format];
+    return translationKey ? t(`format.${translationKey}`) : format;
   };
 
   const getSeasonText = (season: string | null, year: number | null) => {
     if (!season || !year) return "";
-    const seasonText = anilistService.convertSeason(season);
-    return `${year}年${seasonText}`;
+    const translationKey = SEASON_TRANSLATION_KEYS[season];
+    const seasonText = translationKey ? t(`season.${translationKey}`) : season;
+    return t("seasonYear", { year, season: seasonText });
   };
 
   if (!isOpen) return null;
@@ -196,9 +236,16 @@ ${selectedAnime.season && selectedAnime.seasonYear
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center">
-              <Search className="w-5 h-5 mr-2" />從 AniList 搜尋動畫
+              <Search className="w-5 h-5 mr-2" />
+              {t("title")}
             </CardTitle>
-            <Button variant="ghost" size="sm" onClick={onClose}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              aria-label={t("buttons.close")}
+              disabled={isAdding}
+            >
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -206,8 +253,9 @@ ${selectedAnime.season && selectedAnime.seasonYear
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="搜尋動畫名稱..."
+              placeholder={t("searchPlaceholder")}
               className="pr-10"
+              disabled={isAdding}
             />
             {isLoading && (
               <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 animate-spin" />
@@ -216,15 +264,18 @@ ${selectedAnime.season && selectedAnime.seasonYear
         </CardHeader>
         <CardContent className="overflow-y-auto max-h-[60vh]">
           {error && (
-            <div className="error-container px-4 py-3 rounded mb-4 space-y-3">
+            <div
+              className="error-container px-4 py-3 rounded mb-4 space-y-3"
+              role="alert"
+            >
               <div className="flex items-start gap-2">
                 <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="font-medium mb-1">搜尋遇到問題</p>
+                  <p className="font-medium mb-1">{t("error.title")}</p>
                   <p className="text-sm">{error}</p>
                 </div>
               </div>
-              {error.includes("後端服務不可用") && (
+              {error === backendUnavailableMessage && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -232,7 +283,7 @@ ${selectedAnime.season && selectedAnime.seasonYear
                   className="w-full"
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  在 AniList 網站搜尋
+                  {t("error.openAniList")}
                 </Button>
               )}
             </div>
@@ -241,25 +292,27 @@ ${selectedAnime.season && selectedAnime.seasonYear
           {searchResults.length === 0 && !isLoading && searchTerm && !error && (
             <div className="text-center py-8 space-y-4 animate-fade-in-up">
               <div className="text-muted-foreground">
-                <p className="text-lg font-medium mb-2">沒有找到相關動畫</p>
-                <p className="text-sm">試試以下方法：</p>
+                <p className="text-lg font-medium mb-2">
+                  {t("noResults.title")}
+                </p>
+                <p className="text-sm">{t("noResults.description")}</p>
               </div>
               <div className="bg-muted/50 rounded-lg p-4 text-left max-w-md mx-auto space-y-2">
                 <p className="text-sm flex items-start gap-2">
                   <span className="text-primary">•</span>
-                  <span>使用日文原名（例如：ワンピース、鬼滅の刃）</span>
+                  <span>{t("noResults.useJapanese")}</span>
                 </p>
                 <p className="text-sm flex items-start gap-2">
                   <span className="text-primary">•</span>
-                  <span>使用英文名稱（例如：One Piece、Demon Slayer）</span>
+                  <span>{t("noResults.useEnglish")}</span>
                 </p>
                 <p className="text-sm flex items-start gap-2">
                   <span className="text-primary">•</span>
-                  <span>檢查拼寫是否正確</span>
+                  <span>{t("noResults.checkSpelling")}</span>
                 </p>
                 <p className="text-sm flex items-start gap-2">
                   <span className="text-primary">•</span>
-                  <span>嘗試使用較短的關鍵字</span>
+                  <span>{t("noResults.useShorter")}</span>
                 </p>
               </div>
               <Button
@@ -267,7 +320,7 @@ ${selectedAnime.season && selectedAnime.seasonYear
                 onClick={() => window.open('https://anilist.co', '_blank')}
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
-                在 AniList 網站搜尋
+                {t("error.openAniList")}
               </Button>
             </div>
           )}
@@ -278,12 +331,14 @@ ${selectedAnime.season && selectedAnime.seasonYear
                 <Search className="w-8 h-8 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-lg font-medium mb-1">搜尋 AniList 動畫</p>
-                <p className="text-sm text-muted-foreground">輸入動畫名稱開始搜尋</p>
+                <p className="text-lg font-medium mb-1">{t("empty.title")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("empty.description")}
+                </p>
               </div>
               <div className="bg-muted/30 rounded-lg p-3 max-w-sm mx-auto">
                 <p className="text-xs text-muted-foreground">
-                  💡 提示：支援中文、日文、英文搜尋
+                  {t("empty.tip")}
                 </p>
               </div>
             </div>
@@ -367,7 +422,7 @@ ${selectedAnime.season && selectedAnime.seasonYear
                         {anime.episodes && (
                           <Badge variant="outline" className="text-xs">
                             <Play className="w-3 h-3 mr-1" />
-                            {anime.episodes} 集
+                            {t("units.episodes", { count: anime.episodes })}
                           </Badge>
                         )}
                         {anime.season && anime.seasonYear && (
@@ -413,8 +468,9 @@ ${selectedAnime.season && selectedAnime.seasonYear
                         handleAnimeSelect(anime);
                       }}
                       className="flex-1"
+                      disabled={isAdding}
                     >
-                      選擇
+                      {t("buttons.select")}
                     </Button>
                   </div>
                 </CardContent>
@@ -425,10 +481,16 @@ ${selectedAnime.season && selectedAnime.seasonYear
 
         {selectedAnime && (
           <div className="border-t p-4 bg-gray-50 dark:bg-gray-800">
+            {addError && (
+              <div className="error-container mb-4 p-3 rounded" role="alert">
+                <p className="font-medium mb-1">{t("error.addTitle")}</p>
+                <p className="text-sm">{addError}</p>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <div>
                 <p className="description-container">
-                  已選擇:{" "}
+                  {t("labels.selected")}{" "}
                   <span className="font-medium">
                     {anilistService.getBestChineseTitle(
                       selectedAnime.title,
@@ -438,13 +500,24 @@ ${selectedAnime.season && selectedAnime.seasonYear
                 </p>
                 {selectedAnime.episodes && (
                   <p className="text-xs-secondary">
-                    將自動創建 {selectedAnime.episodes} 集
+                    {t("labels.autoCreateEpisodes", {
+                      count: selectedAnime.episodes,
+                    })}
                   </p>
                 )}
               </div>
-              <Button onClick={handleConfirmSelection}>
-                <Plus className="w-4 h-4 mr-2" />
-                新增作品
+              <Button onClick={handleConfirmSelection} disabled={isAdding}>
+                {isAdding ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t("buttons.adding")}
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    {t("buttons.addWork")}
+                  </>
+                )}
               </Button>
             </div>
           </div>

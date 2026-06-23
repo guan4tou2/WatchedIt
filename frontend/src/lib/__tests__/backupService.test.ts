@@ -1,5 +1,19 @@
 import { BackupService, BackupData } from "@/lib/backup";
+import { tagStorage, workStorage } from "@/lib/indexedDB";
 import { Work, Tag } from "@/types";
+
+jest.mock("@/lib/indexedDB", () => ({
+  workStorage: {
+    getAll: jest.fn(),
+    clearAll: jest.fn(),
+    setAll: jest.fn(),
+  },
+  tagStorage: {
+    getAll: jest.fn(),
+    clearAll: jest.fn(),
+    setAll: jest.fn(),
+  },
+}));
 
 const createSampleBackup = (): BackupData => {
   const sampleTag: Tag = { id: 1, name: "Action", color: "#ff0000" };
@@ -53,6 +67,10 @@ describe("BackupService helpers", () => {
   const service = BackupService.getInstance() as any;
   const backupData = createSampleBackup();
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("converts backup data to CSV and parses it back", () => {
     const csv = service.convertToCSV(backupData);
     expect(csv).toContain("WatchedIt Backup Data");
@@ -68,6 +86,34 @@ describe("BackupService helpers", () => {
     expect(parsed.metadata.totalEpisodes).toBe(1);
   });
 
+  it("preserves commas and quotes in CSV backup fields", () => {
+    const specialBackup = createSampleBackup();
+    specialBackup.tags[0] = {
+      id: 1,
+      name: 'Action, "Drama"',
+      color: "#ff0000",
+    };
+    specialBackup.works[0] = {
+      ...specialBackup.works[0],
+      title: 'Sample, "Quoted" Work',
+      tags: [specialBackup.tags[0]],
+      review: 'Great, then "better"',
+      rating: 8.5,
+    };
+
+    const parsed = service.parseFromCSV(service.convertToCSV(specialBackup));
+
+    expect(parsed.tags[0]).toMatchObject({
+      name: 'Action, "Drama"',
+      color: "#ff0000",
+    });
+    expect(parsed.works[0]).toMatchObject({
+      title: 'Sample, "Quoted" Work',
+      review: 'Great, then "better"',
+      rating: 8.5,
+    });
+  });
+
   it("throws when backup payload misses required fields", () => {
     expect(() =>
       service.validateBackupData({
@@ -75,5 +121,40 @@ describe("BackupService helpers", () => {
       })
     ).toThrow("備份資料缺少版本或時間戳");
   });
-});
 
+  it("rejects invalid work data before clearing existing storage", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const invalidBackup = createSampleBackup();
+    invalidBackup.works[0] = {
+      ...invalidBackup.works[0],
+      title: "",
+    };
+
+    try {
+      await expect(service.restoreBackup(invalidBackup)).rejects.toThrow(
+        "還原備份失敗"
+      );
+      expect(workStorage.clearAll).not.toHaveBeenCalled();
+      expect(tagStorage.clearAll).not.toHaveBeenCalled();
+      expect(workStorage.setAll).not.toHaveBeenCalled();
+      expect(tagStorage.setAll).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  it("propagates auto backup failures so the UI can show an error", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    jest.mocked(workStorage.getAll).mockRejectedValue(new Error("read failed"));
+
+    try {
+      await expect(service.autoBackup()).rejects.toThrow("自動備份失敗");
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+});

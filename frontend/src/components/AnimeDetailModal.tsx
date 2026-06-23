@@ -9,6 +9,7 @@ import { AniListMedia, anilistService } from "@/lib/anilist";
 import { WorkCreate } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
 import { useToast } from "@/components/ui/toast";
+import { useTranslations } from "next-intl";
 import {
   X,
   Star,
@@ -22,6 +23,31 @@ import {
   FileText,
   ExternalLink,
 } from "lucide-react";
+
+const STATUS_TRANSLATION_KEYS: Record<string, string> = {
+  FINISHED: "finished",
+  RELEASING: "releasing",
+  NOT_YET_RELEASED: "notYetReleased",
+  CANCELLED: "cancelled",
+  HIATUS: "hiatus",
+};
+
+const FORMAT_TRANSLATION_KEYS: Record<string, string> = {
+  TV: "tv",
+  TV_SHORT: "tvShort",
+  MOVIE: "movie",
+  SPECIAL: "special",
+  OVA: "ova",
+  ONA: "ona",
+  MUSIC: "music",
+};
+
+const SEASON_TRANSLATION_KEYS: Record<string, string> = {
+  WINTER: "winter",
+  SPRING: "spring",
+  SUMMER: "summer",
+  FALL: "fall",
+};
 
 interface AnimeDetailModalProps {
   anime: AniListMedia | null;
@@ -40,8 +66,15 @@ export default function AnimeDetailModal({
   const [duplicateMessage, setDuplicateMessage] = useState<string | null>(null);
   const { createWork } = useWorkStore();
   const { showToast } = useToast();
+  const t = useTranslations("AnimeDetailModal");
 
   if (!isOpen || !anime) return null;
+
+  const handleClose = () => {
+    if (!isAdding) {
+      onClose();
+    }
+  };
 
   const handleConfirmSelection = async () => {
     setIsAdding(true);
@@ -79,24 +112,20 @@ ${anime.season && anime.seasonYear
       };
 
       // 新增作品（store 會自動檢查重複）
-      const newWork = await createWork(workData);
+      await createWork(workData);
 
       // 顯示成功提示
-      showToast("作品新增成功！", "success");
+      showToast(t("messages.addSuccess"), "success");
 
       // 只有在成功新增後才關閉彈窗
       onClose();
-
-      // 顯示成功訊息（可選）
-      console.log("成功新增作品:", newWork.title);
     } catch (error) {
-      console.error("新增作品失敗:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "新增作品時發生錯誤，請稍後再試。";
+          : t("messages.genericError");
       setDuplicateMessage(errorMessage);
-      showToast("新增作品失敗", "error");
+      showToast(t("messages.addError"), "error");
       // 不關閉彈窗，讓用戶看到錯誤訊息
     } finally {
       setIsAdding(false);
@@ -120,30 +149,20 @@ ${anime.season && anime.seasonYear
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
-      case "FINISHED":
-        return "已完結";
-      case "RELEASING":
-        return "連載中";
-      case "NOT_YET_RELEASED":
-        return "未播出";
-      case "CANCELLED":
-        return "已取消";
-      case "HIATUS":
-        return "暫停";
-      default:
-        return status;
-    }
+    const translationKey = STATUS_TRANSLATION_KEYS[status];
+    return translationKey ? t(`status.${translationKey}`) : status;
   };
 
   const getFormatText = (format: string) => {
-    return anilistService.convertFormat(format);
+    const translationKey = FORMAT_TRANSLATION_KEYS[format];
+    return translationKey ? t(`format.${translationKey}`) : format;
   };
 
   const getSeasonText = (season: string | null, year: number | null) => {
     if (!season || !year) return "";
-    const seasonText = anilistService.convertSeason(season);
-    return `${year}年${seasonText}`;
+    const translationKey = SEASON_TRANSLATION_KEYS[season];
+    const seasonText = translationKey ? t(`season.${translationKey}`) : season;
+    return t("seasonYear", { year, season: seasonText });
   };
 
   const formatDate = (date: {
@@ -151,7 +170,7 @@ ${anime.season && anime.seasonYear
     month: number | null;
     day: number | null;
   }) => {
-    if (!date.year) return "未知";
+    if (!date.year) return t("unknown");
     const parts: (string | number)[] = [date.year];
     if (date.month !== null) parts.push(date.month.toString().padStart(2, "0"));
     if (date.day !== null) parts.push(date.day.toString().padStart(2, "0"));
@@ -165,9 +184,15 @@ ${anime.season && anime.seasonYear
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center">
               <Globe className="w-5 h-5 mr-2" />
-              動畫詳情
+              {t("title")}
             </CardTitle>
-            <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClose}
+              aria-label={t("buttons.close")}
+              disabled={isAdding}
+            >
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -243,13 +268,13 @@ ${anime.season && anime.seasonYear
                 {anime.episodes && (
                   <Badge variant="outline">
                     <Play className="w-3 h-3 mr-1" />
-                    {anime.episodes} 集
+                    {t("units.episodes", { count: anime.episodes })}
                   </Badge>
                 )}
                 {anime.duration && (
                   <Badge variant="outline">
                     <Clock className="w-3 h-3 mr-1" />
-                    {anime.duration} 分鐘
+                    {t("units.minutes", { count: anime.duration })}
                   </Badge>
                 )}
                 {anime.season && anime.seasonYear && (
@@ -268,7 +293,7 @@ ${anime.season && anime.seasonYear
                     {(anime.averageScore / 10).toFixed(1)}/10
                   </span>
                   <span className="text-sm note-text ml-2">
-                    ({anime.averageScore} 分)
+                    ({t("units.score", { score: anime.averageScore })})
                   </span>
                 </div>
               )}
@@ -278,16 +303,20 @@ ${anime.season && anime.seasonYear
                 <div>
                   <h3 className="font-semibold mb-2 flex items-center">
                     <Calendar className="w-4 h-4 mr-1" />
-                    播出時間
+                    {t("sections.airDates")}
                   </h3>
                   <div className="space-y-1 text-sm">
                     <div>
-                      <span className="description-text">開始：</span>
+                      <span className="description-text">
+                        {t("labels.start")}
+                      </span>
                       {formatDate(anime.startDate)}
                     </div>
                     {anime.endDate && (
                       <div>
-                        <span className="description-text">結束：</span>
+                        <span className="description-text">
+                          {t("labels.end")}
+                        </span>
                         {formatDate(anime.endDate)}
                       </div>
                     )}
@@ -299,7 +328,7 @@ ${anime.season && anime.seasonYear
                   <div>
                     <h3 className="font-semibold mb-2 flex items-center">
                       <Award className="w-4 h-4 mr-1" />
-                      類型
+                      {t("sections.genres")}
                     </h3>
                     <div className="flex flex-wrap gap-1">
                       {anime.genres.map((genre) => (
@@ -321,7 +350,7 @@ ${anime.season && anime.seasonYear
                 <div>
                   <h3 className="font-semibold mb-2 flex items-center">
                     <FileText className="w-4 h-4 mr-1" />
-                    簡介
+                    {t("sections.description")}
                   </h3>
                   <div
                     className="paragraph-text"
@@ -335,7 +364,9 @@ ${anime.season && anime.seasonYear
               {/* 其他標題 */}
               {anime.synonyms && anime.synonyms.length > 0 && (
                 <div>
-                  <h3 className="font-semibold mb-2">其他標題</h3>
+                  <h3 className="font-semibold mb-2">
+                    {t("sections.aliases")}
+                  </h3>
                   <div className="flex flex-wrap gap-1">
                     {anime.synonyms.slice(0, 10).map((synonym, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
@@ -344,7 +375,9 @@ ${anime.season && anime.seasonYear
                     ))}
                     {anime.synonyms.length > 10 && (
                       <Badge variant="outline" className="text-xs">
-                        +{anime.synonyms.length - 10} 更多
+                        {t("moreAliases", {
+                          count: anime.synonyms.length - 10,
+                        })}
                       </Badge>
                     )}
                   </div>
@@ -354,7 +387,9 @@ ${anime.season && anime.seasonYear
               {/* 來源國家 */}
               {anime.countryOfOrigin && (
                 <div>
-                  <h3 className="font-semibold mb-2">來源國家</h3>
+                  <h3 className="font-semibold mb-2">
+                    {t("sections.country")}
+                  </h3>
                   <Badge variant="outline">{anime.countryOfOrigin}</Badge>
                 </div>
               )}
@@ -365,7 +400,7 @@ ${anime.season && anime.seasonYear
         {/* 底部操作按鈕 */}
         <div className="border-t p-4 bg-gray-50 dark:bg-gray-800">
           {duplicateMessage && (
-            <div className="error-container mb-4 p-3 rounded">
+            <div className="error-container mb-4 p-3 rounded" role="alert">
               {duplicateMessage}
             </div>
           )}
@@ -373,7 +408,7 @@ ${anime.season && anime.seasonYear
           <div className="flex items-center justify-between">
             <div className="description-container">
               <p>
-                將新增作品：{" "}
+                {t("labels.addingWork")}{" "}
                 <span className="font-medium">
                   {anilistService.getBestChineseTitle(
                     anime.title,
@@ -383,24 +418,31 @@ ${anime.season && anime.seasonYear
               </p>
               {anime.episodes && (
                 <p className="text-xs-secondary">
-                  自動創建 {anime.episodes} 集
+                  {t("labels.autoCreateEpisodes", { count: anime.episodes })}
                 </p>
               )}
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={onClose}>
-                取消
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                disabled={isAdding}
+              >
+                {t("buttons.cancel")}
               </Button>
               <Button onClick={handleConfirmSelection} disabled={isAdding}>
                 {isAdding ? (
                   <>
-                    <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    新增中...
+                    <div
+                      className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"
+                      aria-hidden="true"
+                    />
+                    {t("buttons.adding")}
                   </>
                 ) : (
                   <>
                     <Plus className="w-4 h-4 mr-2" />
-                    新增作品
+                    {t("buttons.addWork")}
                   </>
                 )}
               </Button>

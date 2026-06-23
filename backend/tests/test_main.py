@@ -1,5 +1,13 @@
 from httpx import AsyncClient
 
+from app.main import parse_allowed_origins
+
+
+def test_parse_allowed_origins_trims_whitespace_and_empty_entries():
+    assert parse_allowed_origins(
+        " http://localhost:3000, , https://watchedit.example.com "
+    ) == ["http://localhost:3000", "https://watchedit.example.com"]
+
 
 class TestMainApp:
     """測試主應用程式功能"""
@@ -21,6 +29,12 @@ class TestMainApp:
 
     async def test_cors_headers(self, client: AsyncClient):
         """測試 CORS 標頭"""
-        response = await client.options("/")
+        response = await client.options(
+            "/",
+            headers={
+                "Origin": "http://localhost:3000",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
         assert response.status_code == 200
         assert "access-control-allow-origin" in response.headers

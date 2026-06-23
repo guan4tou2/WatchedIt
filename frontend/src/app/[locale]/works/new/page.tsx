@@ -76,7 +76,7 @@ export default function NewWorkPage() {
         type: formData.type,
         status: formData.status,
         year: formData.year ? parseInt(formData.year) : undefined,
-        rating: formData.rating ? parseInt(formData.rating) : undefined,
+        rating: formData.rating ? parseFloat(formData.rating) : undefined,
         review: formData.review || undefined,
         note: formData.note || undefined,
         source: formData.source || undefined,
@@ -272,13 +272,17 @@ export default function NewWorkPage() {
                   <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     {t("form.labels.rating", { defaultMessage: "評分" })}
                   </label>
-                  <div className="flex items-center space-x-2 mt-2">
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
                       <button
                         key={rating}
                         type="button"
+                        aria-label={t("form.ratingOption", {
+                          value: rating,
+                          defaultMessage: `設定評分為 ${rating}/10`,
+                        })}
                         onClick={() => handleRatingClick(rating)}
-                        className={`p-2 rounded-md transition-colors ${parseInt(formData.rating || "0") >= rating
+                        className={`p-2 rounded-md transition-colors ${parseFloat(formData.rating || "0") >= rating
                           ? "text-yellow-500 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
                           : "star-icon-unselected"
                           }`}
@@ -286,7 +290,7 @@ export default function NewWorkPage() {
                         <Star
                           className="w-5 h-5"
                           fill={
-                            parseInt(formData.rating || "0") >= rating
+                            parseFloat(formData.rating || "0") >= rating
                               ? "currentColor"
                               : "none"
                           }
@@ -301,6 +305,31 @@ export default function NewWorkPage() {
                         })}
                       </span>
                     )}
+                  </div>
+                  <div className="mt-3 max-w-40">
+                    <label htmlFor="work-rating" className="sr-only">
+                      {t("form.ratingInputLabel", {
+                        defaultMessage: "評分數值",
+                      })}
+                    </label>
+                    <Input
+                      id="work-rating"
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      max="10"
+                      step="0.5"
+                      value={formData.rating}
+                      onChange={(e) =>
+                        setFormData({ ...formData, rating: e.target.value })
+                      }
+                      placeholder="0-10"
+                    />
+                    <p className="mt-1 text-xs note-text">
+                      {t("form.ratingInputHelp", {
+                        defaultMessage: "可輸入 0 到 10，支援 0.5 分",
+                      })}
+                    </p>
                   </div>
                 </div>
 

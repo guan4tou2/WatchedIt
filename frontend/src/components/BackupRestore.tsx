@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { backupService, BackupFormat } from "@/lib/backup";
+import { useState, useRef, useEffect } from "react";
+import { backupService, BackupFormat, BackupData } from "@/lib/backup";
 import { useWorkStore } from "@/store/useWorkStore";
 import {
   Download,
@@ -53,6 +53,11 @@ export default function BackupRestore({ onDataChange }: BackupRestoreProps) {
   const [autoBackupList, setAutoBackupList] = useState<
     Array<{ date: string; size: number }>
   >([]);
+  const [pendingImportBackup, setPendingImportBackup] =
+    useState<BackupData | null>(null);
+  const [pendingAutoRestoreDate, setPendingAutoRestoreDate] = useState<
+    string | null
+  >(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 載入資料庫資訊
@@ -70,6 +75,11 @@ export default function BackupRestore({ onDataChange }: BackupRestoreProps) {
     const list = backupService.getAutoBackupList();
     setAutoBackupList(list);
   };
+
+  useEffect(() => {
+    loadDatabaseInfo();
+    loadAutoBackupList();
+  }, []);
 
   // 顯示訊息
   const showMessage = (type: "success" | "error" | "warning", text: string) => {
@@ -107,22 +117,7 @@ export default function BackupRestore({ onDataChange }: BackupRestoreProps) {
     try {
       const backupData = await backupService.importBackup(file);
 
-      // 確認還原
-      const confirmMessage = t("import.confirmRestore", {
-        defaultMessage: `確定要還原備份嗎？\n\n備份資訊：\n- 作品：{works} 個\n- 標籤：{tags} 個\n- 集數：{episodes} 集\n- 完成率：{completion}%\n\n此操作將覆蓋現有資料！`,
-        works: backupData.metadata.totalWorks,
-        tags: backupData.metadata.totalTags,
-        episodes: backupData.metadata.totalEpisodes,
-        completion: backupData.metadata.completionRate,
-      });
-
-      if (confirm(confirmMessage)) {
-        await backupService.restoreBackup(backupData);
-        await fetchWorks();
-        await fetchTags();
-        showMessage("success", t("messages.restoreSuccess", { defaultMessage: "備份還原成功" }));
-        onDataChange?.();
-      }
+      setPendingImportBackup(backupData);
     } catch (error) {
       showMessage("error", t("messages.importError", { defaultMessage: "匯入備份失敗" }));
     } finally {
@@ -134,12 +129,33 @@ export default function BackupRestore({ onDataChange }: BackupRestoreProps) {
     }
   };
 
+  const confirmImportRestore = async () => {
+    if (!pendingImportBackup) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await backupService.restoreBackup(pendingImportBackup);
+      await fetchWorks();
+      await fetchTags();
+      showMessage("success", t("messages.restoreSuccess", { defaultMessage: "備份還原成功" }));
+      onDataChange?.();
+    } catch (error) {
+      showMessage("error", t("messages.importError", { defaultMessage: "匯入備份失敗" }));
+    } finally {
+      setPendingImportBackup(null);
+      setIsLoading(false);
+    }
+  };
+
   // 自動備份
   const handleAutoBackup = async () => {
     setIsLoading(true);
     try {
       await backupService.autoBackup();
       loadAutoBackupList();
+      await loadDatabaseInfo();
       showMessage("success", t("messages.autoBackupSuccess", { defaultMessage: "自動備份完成" }));
     } catch (error) {
       showMessage("error", t("messages.autoBackupError", { defaultMessage: "自動備份失敗" }));
@@ -150,20 +166,18 @@ export default function BackupRestore({ onDataChange }: BackupRestoreProps) {
 
   // 從自動備份還原
   const handleRestoreFromAutoBackup = async (date: string) => {
-    if (
-      !confirm(
-        t("auto.list.restoreConfirm", {
-          defaultMessage: "確定要從 {date} 的自動備份還原嗎？此操作將覆蓋現有資料！",
-          date
-        })
-      )
-    ) {
+    setPendingAutoRestoreDate(date);
+  };
+
+  const confirmAutoBackupRestore = async () => {
+    if (!pendingAutoRestoreDate) {
       return;
     }
 
+    const restoreDate = pendingAutoRestoreDate;
     setIsLoading(true);
     try {
-      await backupService.restoreFromAutoBackup(date);
+      await backupService.restoreFromAutoBackup(restoreDate);
       await fetchWorks();
       await fetchTags();
       showMessage(
@@ -177,6 +191,7 @@ export default function BackupRestore({ onDataChange }: BackupRestoreProps) {
         t("messages.autoRestoreError", { defaultMessage: "從自動備份還原失敗" })
       );
     } finally {
+      setPendingAutoRestoreDate(null);
       setIsLoading(false);
     }
   };
@@ -218,6 +233,25 @@ export default function BackupRestore({ onDataChange }: BackupRestoreProps) {
       minute: "2-digit",
     });
   };
+
+  const importRestoreDescription = pendingImportBackup
+    ? t("import.confirmDescription", {
+        defaultMessage:
+          "即將還原：作品 {works} 個，標籤 {tags} 個，集數 {episodes} 集，完成率 {completion}%。此操作將覆蓋現有資料。",
+        works: pendingImportBackup.metadata.totalWorks,
+        tags: pendingImportBackup.metadata.totalTags,
+        episodes: pendingImportBackup.metadata.totalEpisodes,
+        completion: pendingImportBackup.metadata.completionRate,
+      })
+    : "";
+
+  const autoRestoreDescription = pendingAutoRestoreDate
+    ? t("auto.list.restoreDescription", {
+        defaultMessage:
+          "確定要從 {date} 的自動備份還原嗎？此操作將覆蓋現有資料。",
+        date: pendingAutoRestoreDate,
+      })
+    : "";
 
   return (
     <div className="space-y-6">
@@ -493,6 +527,64 @@ export default function BackupRestore({ onDataChange }: BackupRestoreProps) {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <AlertDialog
+        open={pendingImportBackup !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingImportBackup(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("import.confirmTitle", { defaultMessage: "確認還原備份" })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {importRestoreDescription}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>
+              {commonT("cancel", { defaultMessage: "取消" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isLoading}
+              onClick={confirmImportRestore}
+            >
+              {t("import.confirmAction", { defaultMessage: "確認還原" })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={pendingAutoRestoreDate !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingAutoRestoreDate(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("auto.list.restoreTitle", { defaultMessage: "還原自動備份" })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {autoRestoreDescription}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>
+              {commonT("cancel", { defaultMessage: "取消" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isLoading}
+              onClick={confirmAutoBackupRestore}
+            >
+              {t("auto.list.restoreConfirm", { defaultMessage: "確認還原" })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* 注意事項 */}
       <Card>

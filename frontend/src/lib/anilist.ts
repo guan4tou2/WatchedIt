@@ -298,7 +298,7 @@ class AniListService {
   // 將 AniList 評分轉換為我們的評分
   convertRating(aniListScore: number | null): number | undefined {
     if (!aniListScore) return 0;
-    // AniList 評分是 0-100，我們需要轉換為 1-5
+    // AniList 評分是 0-100，我們需要轉換為 0-10
     return aniListScore / 10;
   }
 

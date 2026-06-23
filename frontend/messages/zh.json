@@ -41,12 +41,16 @@
             "batchDeleteCount": "批量刪除 ({count})",
             "migrationNow": "立即遷移",
             "migrationInProgress": "遷移中...",
+            "openMenu": "開啟選單",
+            "closeMenu": "關閉選單",
+            "mainMenu": "主選單",
             "viewGithub": "查看 GitHub Repository"
         },
         "labels": {
             "recentWorks": "最近作品",
             "searchResults": "搜尋結果",
             "itemsCount": "共 {count} 個作品",
+            "selectedCount": "已选取 {count} 个",
             "filteredFrom": "（從 {total} 個中篩選）",
             "searchTerm": "搜尋：「{term}」"
         },
@@ -82,16 +86,251 @@
     "WorkCard": {
         "buttons": {
             "quickAddFull": "新增集數",
-            "quickAddShort": "新增"
+            "quickAddShort": "新增",
+            "openDetails": "开启详情"
         },
         "labels": {
             "unknownYear": "未知年份"
         }
     },
+    "WorkList": {
+        "empty": {
+            "title": "还没有作品",
+            "description": "新增第一个作品，开始整理观看进度、评分和标签。",
+            "action": "新增作品"
+        },
+        "noResults": {
+            "title": "没有找到符合条件的作品",
+            "description": "试着放宽搜索词或清除部分筛选条件。"
+        }
+    },
+    "WorkEditForm": {
+        "cardTitle": "编辑作品",
+        "labels": {
+            "title": "标题",
+            "type": "类型",
+            "status": "状态",
+            "year": "年份",
+            "rating": "评分",
+            "review": "心得",
+            "note": "备注",
+            "source": "来源"
+        },
+        "placeholders": {
+            "title": "作品标题",
+            "year": "2023",
+            "review": "分享你的心得...",
+            "note": "额外备注...",
+            "source": "AniList, 手动输入..."
+        },
+        "buttons": {
+            "save": "储存",
+            "saving": "储存中...",
+            "cancel": "取消"
+        },
+        "ratingInputLabel": "评分数值",
+        "ratingInputHelp": "可输入 0 到 10，支持 0.5 分",
+        "ratingOption": "设置评分为 {value}/10",
+        "ratingValue": "{value}/10"
+    },
+    "TagSelector": {
+        "label": "标签",
+        "buttons": {
+            "select": "选择标签",
+            "manage": "管理标签",
+            "remove": "移除 {name}"
+        },
+        "empty": "所有标签都已选择"
+    },
+    "TagManager": {
+        "title": "标签管理",
+        "stats": "已建立 {count} 个标签",
+        "labels": {
+            "name": "标签名称",
+            "color": "颜色"
+        },
+        "placeholders": {
+            "name": "输入标签名称"
+        },
+        "buttons": {
+            "add": "新增标签",
+            "confirmAdd": "新增",
+            "update": "更新",
+            "cancel": "取消",
+            "edit": "编辑 {name}",
+            "delete": "删除 {name}"
+        },
+        "deleteDialog": {
+            "title": "删除标签",
+            "description": "此操作会从标签列表永久删除「{name}」，且无法复原。",
+            "confirm": "确认删除"
+        },
+        "empty": "还没有标签，新增第一个标签开始整理作品。",
+        "colorSwatch": "{name} 的颜色",
+        "selectedColor": "当前选择的颜色",
+        "errors": {
+            "duplicate": "此标签名称已存在。"
+        }
+    },
+    "CloudSyncStatus": {
+        "title": "云端同步",
+        "badges": {
+            "needsSync": "需要同步"
+        },
+        "labels": {
+            "lastSync": "最后同步：",
+            "neverSynced": "从未同步"
+        },
+        "buttons": {
+            "syncNow": "立即同步",
+            "syncing": "同步中..."
+        },
+        "messages": {
+            "success": "同步完成。",
+            "error": "同步失败：{error}",
+            "errorFallback": "同步失败。",
+            "needsSync": "建议进行同步以确保资料最新。",
+            "upToDate": "资料已是最新状态。"
+        }
+    },
+    "SyncIndicator": {
+        "states": {
+            "syncing": "云端同步中...",
+            "error": "云端同步失败：{error}",
+            "needsSync": "建议进行云端同步",
+            "synced": "云端资料已同步"
+        }
+    },
+    "AnimeDetailModal": {
+        "title": "动画详情",
+        "unknown": "未知",
+        "units": {
+            "episodes": "{count} 集",
+            "minutes": "{count} 分钟",
+            "score": "{score} 分"
+        },
+        "sections": {
+            "airDates": "播出时间",
+            "genres": "类型",
+            "description": "简介",
+            "aliases": "其他标题",
+            "country": "来源国家"
+        },
+        "labels": {
+            "start": "开始：",
+            "end": "结束：",
+            "addingWork": "将新增作品：",
+            "autoCreateEpisodes": "自动建立 {count} 集"
+        },
+        "buttons": {
+            "close": "关闭",
+            "cancel": "取消",
+            "addWork": "新增作品",
+            "adding": "新增中..."
+        },
+        "messages": {
+            "addSuccess": "作品新增成功！",
+            "addError": "新增作品失败",
+            "genericError": "新增作品时发生错误，请稍后再试。"
+        },
+        "status": {
+            "finished": "已完结",
+            "releasing": "连载中",
+            "notYetReleased": "未播出",
+            "cancelled": "已取消",
+            "hiatus": "暂停"
+        },
+        "format": {
+            "tv": "电视动画",
+            "tvShort": "短篇动画",
+            "movie": "电影",
+            "special": "特别篇",
+            "ova": "OVA",
+            "ona": "网络动画",
+            "music": "音乐动画"
+        },
+        "season": {
+            "winter": "冬季",
+            "spring": "春季",
+            "summer": "夏季",
+            "fall": "秋季"
+        },
+        "seasonYear": "{year}年{season}",
+        "moreAliases": "+{count} 更多"
+    },
+    "AniListSearch": {
+        "title": "搜索 AniList",
+        "searchPlaceholder": "搜索动画名称...",
+        "empty": {
+            "title": "搜索 AniList 动画",
+            "description": "输入动画名称开始搜索。",
+            "tip": "提示：支持中文、日文、英文搜索。"
+        },
+        "error": {
+            "title": "搜索遇到问题",
+            "backendUnavailable": "AniList 搜索暂时不可用。请直接到 AniList 网站搜索。",
+            "searchFallback": "搜索失败",
+            "addTitle": "无法新增此作品",
+            "addFallback": "新增作品失败",
+            "openAniList": "在 AniList 网站搜索"
+        },
+        "noResults": {
+            "title": "没有找到相关动画",
+            "description": "试试以下方法：",
+            "useJapanese": "使用日文原名。",
+            "useEnglish": "使用英文名称。",
+            "checkSpelling": "检查拼写是否正确。",
+            "useShorter": "尝试使用较短的关键词。"
+        },
+        "units": {
+            "episodes": "{count} 集"
+        },
+        "labels": {
+            "selected": "已选择：",
+            "autoCreateEpisodes": "将自动建立 {count} 集"
+        },
+        "buttons": {
+            "close": "关闭",
+            "select": "选择",
+            "addWork": "新增作品",
+            "adding": "新增中..."
+        },
+        "messages": {
+            "addError": "新增作品失败"
+        },
+        "status": {
+            "finished": "已完结",
+            "releasing": "连载中",
+            "notYetReleased": "未播出",
+            "cancelled": "已取消",
+            "hiatus": "暂停"
+        },
+        "format": {
+            "tv": "电视动画",
+            "tvShort": "短篇动画",
+            "movie": "电影",
+            "special": "特别篇",
+            "ova": "OVA",
+            "ona": "网络动画",
+            "music": "音乐动画"
+        },
+        "season": {
+            "winter": "冬季",
+            "spring": "春季",
+            "summer": "夏季",
+            "fall": "秋季"
+        },
+        "seasonYear": "{year}年{season}"
+    },
     "WorkDetail": {
         "loading": "載入中...",
         "notFound": "找不到作品",
         "confirmDelete": "確定要刪除此作品嗎？",
+        "deleteDialog": {
+            "title": "刪除作品",
+            "description": "此操作會永久刪除「{name}」，且無法復原。",
+            "confirm": "確認刪除"
+        },
         "actions": {
             "backHome": "返回首頁",
             "delete": "刪除",
@@ -177,7 +416,7 @@
                 "progressAll": "全部進度",
                 "progressOptions": {
                     "high": "高進度 (80%+)",
-                    "low": "低進度 (20%+)"
+                    "low": "低進度 (<20%)"
                 }
             },
             "advanced": {
@@ -220,7 +459,10 @@
                 "note": "額外備註...",
                 "source": "AniList, 手動輸入..."
             },
-            "ratingValue": "{value}/10"
+            "ratingValue": "{value}/10",
+            "ratingOption": "设置评分为 {value}/10",
+            "ratingInputLabel": "评分数值",
+            "ratingInputHelp": "可输入 0 到 10，支持 0.5 分"
         },
         "buttons": {
             "save": "建立作品",
@@ -344,7 +586,12 @@
                 "label": "自動同步",
                 "intervalLabel": "同步間隔 (分鐘)"
             },
-            "clearConfirm": "您確定要刪除所有資料嗎？此動作無法復原！"
+            "clearConfirm": "您確定要刪除所有資料嗎？此動作無法復原！",
+            "clearDialog": {
+                "title": "清除所有资料",
+                "description": "此操作将永久清除所有作品、标签与本机资料，且无法复原。",
+                "confirm": "确认清除"
+            }
         },
         "backup": {
             "title": "備份設定",
@@ -587,7 +834,9 @@
                 "clearConfirm": "刪除",
                 "empty": "尚無自動備份",
                 "restoreButton": "還原",
-                "restoreConfirm": "要還原 {date} 建立的自動備份嗎？此動作將覆蓋目前資料。"
+                "restoreTitle": "还原自动备份",
+                "restoreDescription": "要还原 {date} 建立的自动备份吗？此操作将覆盖当前资料。",
+                "restoreConfirm": "还原"
             }
         },
         "import": {
@@ -602,7 +851,10 @@
                 "item2": "• CSV 匯出可在試算表中查看",
                 "item3": "• 還原將會覆寫現有數據"
             },
-            "confirmRestore": "要還原此備份嗎？\n\n詳情：\n- 作品：{works}\n- 標籤：{tags}\n- 集數：{episodes}\n- 完成率：{completion}%\n\n此動作將覆蓋目前資料！"
+            "confirmRestore": "要还原此备份吗？\n\n详情：\n- 作品：{works}\n- 标签：{tags}\n- 集数：{episodes}\n- 完成率：{completion}%\n\n此操作将覆盖当前资料！",
+            "confirmTitle": "确认还原备份",
+            "confirmDescription": "即将还原：作品 {works} 个，标签 {tags} 个，集数 {episodes} 集，完成率 {completion}%。此操作将覆盖当前资料。",
+            "confirmAction": "确认还原"
         },
         "notes": {
             "title": "說明",

@@ -2,6 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { cloudStorage } from "@/lib/cloudStorage";
 import { useWorkStore } from "@/store/useWorkStore";
 
+export interface CloudSyncActionResult {
+    success: boolean;
+    error?: string;
+}
+
 export function useCloudSync() {
     const { works, tags, updateWorks, updateTags, isSyncing, setIsSyncing } = useWorkStore();
     const [lastSync, setLastSync] = useState<string | null>(null);
@@ -18,11 +23,12 @@ export function useCloudSync() {
         checkSyncStatus();
     }, [checkSyncStatus]);
 
-    const sync = async () => {
+    const sync = async (): Promise<CloudSyncActionResult> => {
         const config = cloudStorage.getConfig();
         if (!config?.endpoint) {
-            setError("請先在設定中配置雲端端點");
-            return false;
+            const errorMessage = "請先在設定中配置雲端端點";
+            setError(errorMessage);
+            return { success: false, error: errorMessage };
         }
 
         setIsSyncing(true);
@@ -33,21 +39,24 @@ export function useCloudSync() {
 
             if (result.success && result.data) {
                 // 更新本地數據
-                updateWorks(result.data.works);
-                updateTags(result.data.tags);
+                await updateWorks(result.data.works);
+                await updateTags(result.data.tags);
                 cloudStorage.setLastSyncTime();
 
                 // 更新狀態
                 setLastSync(new Date().toISOString());
                 setShouldSync(false);
-                return true;
+                return { success: true };
             } else {
-                setError(result.message || "同步失敗");
-                return false;
+                const errorMessage = result.error || result.message || "同步失敗";
+                setError(errorMessage);
+                return { success: false, error: errorMessage };
             }
         } catch (err) {
-            setError("同步發生未知錯誤");
-            return false;
+            const errorMessage =
+                err instanceof Error ? err.message : "同步發生未知錯誤";
+            setError(errorMessage);
+            return { success: false, error: errorMessage };
         } finally {
             setIsSyncing(false);
         }

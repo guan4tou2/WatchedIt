@@ -50,11 +50,25 @@ class CloudStorageService {
     return deviceId;
   }
 
+  private getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : "未知錯誤";
+  }
+
+  private normalizeEndpoint(endpoint: string): string {
+    return endpoint.trim().replace(/\/+$/, "");
+  }
+
   // 設定雲端配置
   setConfig(config: CloudConfig): void {
-    this.config = config;
+    this.config = {
+      ...config,
+      endpoint: this.normalizeEndpoint(config.endpoint),
+    };
     if (typeof window !== "undefined") {
-      localStorage.setItem("watchedit_cloud_config", JSON.stringify(config));
+      localStorage.setItem(
+        "watchedit_cloud_config",
+        JSON.stringify(this.config)
+      );
     }
   }
 
@@ -64,7 +78,25 @@ class CloudStorageService {
       if (typeof window !== "undefined") {
         const saved = localStorage.getItem("watchedit_cloud_config");
         if (saved) {
-          this.config = JSON.parse(saved);
+          try {
+            const savedConfig = JSON.parse(saved) as Partial<CloudConfig>;
+            if (typeof savedConfig.endpoint !== "string") {
+              localStorage.removeItem("watchedit_cloud_config");
+              this.config = null;
+            } else {
+              this.config = {
+                ...savedConfig,
+                endpoint: this.normalizeEndpoint(savedConfig.endpoint),
+              };
+              localStorage.setItem(
+                "watchedit_cloud_config",
+                JSON.stringify(this.config)
+              );
+            }
+          } catch {
+            localStorage.removeItem("watchedit_cloud_config");
+            this.config = null;
+          }
         }
       }
     }
@@ -74,7 +106,7 @@ class CloudStorageService {
   // 測試雲端連接
   async testConnection(endpoint: string): Promise<SyncResult> {
     try {
-      const response = await fetch(`${endpoint}/health`, {
+      const response = await fetch(`${this.normalizeEndpoint(endpoint)}/health`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -104,7 +136,8 @@ class CloudStorageService {
 
   // 上傳數據到雲端
   async uploadData(works: Work[], tags: Tag[]): Promise<SyncResult> {
-    if (!this.config?.endpoint) {
+    const config = this.getConfig();
+    if (!config?.endpoint) {
       return {
         success: false,
         message: "未設定雲端端點",
@@ -121,12 +154,12 @@ class CloudStorageService {
         deviceId: this.deviceId,
       };
 
-      const response = await fetch(`${this.config.endpoint}/backup`, {
+      const response = await fetch(`${config.endpoint}/backup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(this.config.apiKey && {
-            Authorization: `Bearer ${this.config.apiKey}`,
+          ...(config.apiKey && {
+            Authorization: `Bearer ${config.apiKey}`,
           }),
         },
         body: JSON.stringify(backupData),
@@ -154,14 +187,15 @@ class CloudStorageService {
       return {
         success: false,
         message: "數據上傳失敗",
-        error: error instanceof Error ? error.message : "未知錯誤",
+        error: this.getErrorMessage(error),
       };
     }
   }
 
   // 從雲端下載數據
   async downloadData(): Promise<SyncResult> {
-    if (!this.config?.endpoint) {
+    const config = this.getConfig();
+    if (!config?.endpoint) {
       return {
         success: false,
         message: "未設定雲端端點",
@@ -171,13 +205,13 @@ class CloudStorageService {
 
     try {
       const response = await fetch(
-        `${this.config.endpoint}/backup?device_id=${this.deviceId}`,
+        `${config.endpoint}/backup?device_id=${this.deviceId}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            ...(this.config.apiKey && {
-              Authorization: `Bearer ${this.config.apiKey}`,
+            ...(config.apiKey && {
+              Authorization: `Bearer ${config.apiKey}`,
             }),
           },
         }
@@ -205,14 +239,15 @@ class CloudStorageService {
       return {
         success: false,
         message: "數據下載失敗",
-        error: error instanceof Error ? error.message : "未知錯誤",
+        error: this.getErrorMessage(error),
       };
     }
   }
 
   // 同步數據（上傳和下載合併）
   async syncData(works: Work[], tags: Tag[]): Promise<SyncResult> {
-    if (!this.config?.endpoint) {
+    const config = this.getConfig();
+    if (!config?.endpoint) {
       return {
         success: false,
         message: "未設定雲端端點",
@@ -224,36 +259,39 @@ class CloudStorageService {
       // 先嘗試下載雲端數據
       const downloadResult = await this.downloadData();
 
-      if (downloadResult.success && downloadResult.data) {
-        // 合併本地和雲端數據
-        const mergedWorks = this.mergeWorks(works, downloadResult.data.works);
-        const mergedTags = this.mergeTags(tags, downloadResult.data.tags);
-
-        // 上傳合併後的數據
-        const uploadResult = await this.uploadData(mergedWorks, mergedTags);
-
-        if (uploadResult.success) {
-          return {
-            success: true,
-            message: "數據同步成功",
-            data: {
-              works: mergedWorks,
-              tags: mergedTags,
-              lastSync: new Date().toISOString(),
-            },
-          };
-        } else {
-          return uploadResult;
-        }
-      } else {
-        // 如果下載失敗，只上傳本地數據
-        return await this.uploadData(works, tags);
+      if (!downloadResult.success || !downloadResult.data) {
+        return {
+          success: false,
+          message: downloadResult.message || "數據下載失敗",
+          error: downloadResult.error || "下載雲端資料失敗，已取消同步",
+        };
       }
+
+      // 合併本地和雲端數據
+      const mergedWorks = this.mergeWorks(works, downloadResult.data.works);
+      const mergedTags = this.mergeTags(tags, downloadResult.data.tags);
+
+      // 上傳合併後的數據
+      const uploadResult = await this.uploadData(mergedWorks, mergedTags);
+
+      if (uploadResult.success) {
+        return {
+          success: true,
+          message: "數據同步成功",
+          data: {
+            works: mergedWorks,
+            tags: mergedTags,
+            lastSync: new Date().toISOString(),
+          },
+        };
+      }
+
+      return uploadResult;
     } catch (error) {
       return {
         success: false,
         message: "數據同步失敗",
-        error: error instanceof Error ? error.message : "未知錯誤",
+        error: this.getErrorMessage(error),
       };
     }
   }

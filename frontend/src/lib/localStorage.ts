@@ -81,10 +81,6 @@ export const workStorage = {
 
     works.push(newWork);
     localStorage.setItem(STORAGE_KEYS.WORKS, JSON.stringify(works));
-    console.log("workStorage.create: 新增作品", {
-      newWork,
-      totalWorks: works.length,
-    });
     return newWork;
   },
 

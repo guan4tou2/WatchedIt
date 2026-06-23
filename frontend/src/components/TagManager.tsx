@@ -1,12 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tag } from "@/types";
-import { Plus, Edit, Trash2, X, Check } from "lucide-react";
+import { Plus, Edit, Trash2, Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface TagManagerProps {
   tags: Tag[];
@@ -19,8 +30,11 @@ export default function TagManager({
   onTagsChange,
   disabled = false,
 }: TagManagerProps) {
+  const t = useTranslations("TagManager");
   const [isAdding, setIsAdding] = useState(false);
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
+  const [tagToDelete, setTagToDelete] = useState<Tag | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [newTag, setNewTag] = useState({
     name: "",
     color: "#3B82F6", // 預設藍色
@@ -47,7 +61,7 @@ export default function TagManager({
     );
 
     if (existingTag) {
-      alert("標籤名稱已存在！");
+      setFormError(t("errors.duplicate"));
       return;
     }
 
@@ -62,6 +76,7 @@ export default function TagManager({
 
     // 重置表單
     setNewTag({ name: "", color: "#3B82F6" });
+    setFormError(null);
     setIsAdding(false);
   };
 
@@ -74,33 +89,50 @@ export default function TagManager({
     );
 
     if (existingTag) {
-      alert("標籤名稱已存在！");
+      setFormError(t("errors.duplicate"));
       return;
     }
 
     const updatedTags = tags.map((t) => (t.id === tag.id ? tag : t));
     onTagsChange(updatedTags);
+    setFormError(null);
     setEditingTag(null);
   };
 
   const handleDeleteTag = (tagId: number) => {
-    if (confirm("確定要刪除這個標籤嗎？")) {
-      const updatedTags = tags.filter((tag) => tag.id !== tagId);
-      onTagsChange(updatedTags);
-    }
+    const tag = tags.find((item) => item.id === tagId);
+    if (!tag) return;
+
+    setTagToDelete(tag);
+  };
+
+  const confirmDeleteTag = () => {
+    if (!tagToDelete) return;
+
+    const updatedTags = tags.filter((tag) => tag.id !== tagToDelete.id);
+    onTagsChange(updatedTags);
+    setTagToDelete(null);
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">標籤管理</CardTitle>
+          <CardTitle className="text-lg">{t("title")}</CardTitle>
           <div className="flex items-center space-x-2">
-            <span className="stats-text">已建立: {tags.length} 個標籤</span>
+            <span className="stats-text">
+              {t("stats", { count: tags.length })}
+            </span>
             {!disabled && (
-              <Button size="sm" onClick={() => setIsAdding(true)}>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setFormError(null);
+                  setIsAdding(true);
+                }}
+              >
                 <Plus className="w-4 h-4 mr-1" />
-                新增標籤
+                {t("buttons.add")}
               </Button>
             )}
           </div>
@@ -111,23 +143,39 @@ export default function TagManager({
         {isAdding && (
           <Card className="border-2 border-dashed border-blue-200 dark:border-blue-800">
             <CardContent className="pt-4">
+              {formError && (
+                <div className="error-container mb-4 p-3 rounded" role="alert">
+                  {formError}
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="form-label-secondary">標籤名稱</label>
+                  <label className="form-label-secondary" htmlFor="new-tag-name">
+                    {t("labels.name")}
+                  </label>
                   <Input
+                    id="new-tag-name"
                     value={newTag.name}
-                    onChange={(e) =>
-                      setNewTag({ ...newTag, name: e.target.value })
-                    }
-                    placeholder="輸入標籤名稱"
+                    onChange={(e) => {
+                      setNewTag({ ...newTag, name: e.target.value });
+                      setFormError(null);
+                    }}
+                    placeholder={t("placeholders.name")}
                     className="mt-1"
                   />
                 </div>
                 <div>
-                  <label className="form-label-secondary">顏色</label>
+                  <label className="form-label-secondary" htmlFor="new-tag-color">
+                    {t("labels.color")}
+                  </label>
                   <div className="flex items-center space-x-2 mt-1">
-                    <div className="w-8 h-8 rounded border" />
+                    <div
+                      className="w-8 h-8 rounded border"
+                      aria-label={t("selectedColor")}
+                      style={{ backgroundColor: newTag.color }}
+                    />
                     <select
+                      id="new-tag-color"
                       value={newTag.color}
                       onChange={(e) =>
                         setNewTag({ ...newTag, color: e.target.value })
@@ -146,7 +194,7 @@ export default function TagManager({
               <div className="flex space-x-2 mt-3">
                 <Button size="sm" onClick={handleAddTag}>
                   <Check className="w-4 h-4 mr-1" />
-                  新增
+                  {t("buttons.confirmAdd")}
                 </Button>
                 <Button
                   size="sm"
@@ -154,9 +202,10 @@ export default function TagManager({
                   onClick={() => {
                     setIsAdding(false);
                     setNewTag({ name: "", color: "#3B82F6" });
+                    setFormError(null);
                   }}
                 >
-                  取消
+                  {t("buttons.cancel")}
                 </Button>
               </div>
             </CardContent>
@@ -167,7 +216,7 @@ export default function TagManager({
         <div className="space-y-2">
           {tags.length === 0 ? (
             <div className="text-center py-8 empty-state">
-              還沒有標籤，點擊「新增標籤」開始添加
+              {t("empty")}
             </div>
           ) : (
             tags.map((tag) => (
@@ -177,7 +226,11 @@ export default function TagManager({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <Badge>{tag.name}</Badge>
-                        <div className="w-4 h-4 rounded border" />
+                        <div
+                          className="w-4 h-4 rounded border"
+                          aria-label={t("colorSwatch", { name: tag.name })}
+                          style={{ backgroundColor: tag.color }}
+                        />
                       </div>
                       <div className="flex items-center space-x-1">
                         {!disabled && (
@@ -185,7 +238,13 @@ export default function TagManager({
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => setEditingTag(tag)}
+                              onClick={() => {
+                                setFormError(null);
+                                setEditingTag(tag);
+                              }}
+                              aria-label={t("buttons.edit", {
+                                name: tag.name,
+                              })}
                             >
                               <Edit className="w-3 h-3" />
                             </Button>
@@ -194,6 +253,9 @@ export default function TagManager({
                               variant="ghost"
                               onClick={() => handleDeleteTag(tag.id)}
                               className="error-text-hover"
+                              aria-label={t("buttons.delete", {
+                                name: tag.name,
+                              })}
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>
@@ -208,28 +270,51 @@ export default function TagManager({
                 {editingTag && editingTag.id === tag.id && (
                   <Card className="mt-2 border-2 border-dashed border-blue-200 dark:border-blue-800">
                     <CardContent className="pt-4">
+                      {formError && (
+                        <div
+                          className="error-container mb-4 p-3 rounded"
+                          role="alert"
+                        >
+                          {formError}
+                        </div>
+                      )}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="form-label-secondary">
-                            標籤名稱
+                          <label
+                            className="form-label-secondary"
+                            htmlFor={`edit-tag-name-${tag.id}`}
+                          >
+                            {t("labels.name")}
                           </label>
                           <Input
+                            id={`edit-tag-name-${tag.id}`}
                             value={editingTag.name}
-                            onChange={(e) =>
+                            onChange={(e) => {
                               setEditingTag({
                                 ...editingTag,
                                 name: e.target.value,
-                              })
-                            }
-                            placeholder="輸入標籤名稱"
+                              });
+                              setFormError(null);
+                            }}
+                            placeholder={t("placeholders.name")}
                             className="mt-1"
                           />
                         </div>
                         <div>
-                          <label className="form-label-secondary">顏色</label>
+                          <label
+                            className="form-label-secondary"
+                            htmlFor={`edit-tag-color-${tag.id}`}
+                          >
+                            {t("labels.color")}
+                          </label>
                           <div className="flex items-center space-x-2 mt-1">
-                            <div className="w-8 h-8 rounded border" />
+                            <div
+                              className="w-8 h-8 rounded border"
+                              aria-label={t("selectedColor")}
+                              style={{ backgroundColor: editingTag.color }}
+                            />
                             <select
+                              id={`edit-tag-color-${tag.id}`}
                               value={editingTag.color}
                               onChange={(e) =>
                                 setEditingTag({
@@ -254,14 +339,17 @@ export default function TagManager({
                           onClick={() => handleUpdateTag(editingTag)}
                         >
                           <Check className="w-4 h-4 mr-1" />
-                          更新
+                          {t("buttons.update")}
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setEditingTag(null)}
+                          onClick={() => {
+                            setFormError(null);
+                            setEditingTag(null);
+                          }}
                         >
-                          取消
+                          {t("buttons.cancel")}
                         </Button>
                       </div>
                     </CardContent>
@@ -272,6 +360,33 @@ export default function TagManager({
           )}
         </div>
       </CardContent>
+
+      <AlertDialog
+        open={Boolean(tagToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setTagToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tagToDelete
+                ? t("deleteDialog.description", { name: tagToDelete.name })
+                : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("buttons.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteTag}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("deleteDialog.confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

@@ -8,6 +8,16 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Plus,
   Edit,
   Trash2,
@@ -33,6 +43,10 @@ export default function CustomEpisodeTypeManager({
     null
   );
   const [isAdding, setIsAdding] = useState(false);
+  const [typeToDelete, setTypeToDelete] = useState<CustomEpisodeType | null>(
+    null
+  );
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -48,6 +62,10 @@ export default function CustomEpisodeTypeManager({
       setEpisodeTypes(DEFAULT_EPISODE_TYPES);
     }
   }, [onTypesChange]);
+
+  useEffect(() => {
+    loadEpisodeTypes();
+  }, [loadEpisodeTypes]);
 
   const showMessage = (type: "success" | "error", text: string) => {
     setMessage({ type, text });
@@ -150,18 +168,20 @@ export default function CustomEpisodeTypeManager({
       return;
     }
 
-    if (confirm(`確定要刪除集數類型「${type.label}」嗎？`)) {
-      try {
-        customEpisodeTypeStorage.delete(type.id);
-        showMessage("success", `成功刪除集數類型「${type.label}」`);
-        loadEpisodeTypes();
-      } catch (error) {
-        console.error("刪除集數類型失敗:", error);
-        showMessage(
-          "error",
-          error instanceof Error ? error.message : "刪除失敗"
-        );
-      }
+    setTypeToDelete(type);
+  };
+
+  const confirmDeleteType = () => {
+    if (!typeToDelete) return;
+
+    try {
+      customEpisodeTypeStorage.delete(typeToDelete.id);
+      showMessage("success", `成功刪除集數類型「${typeToDelete.label}」`);
+      setTypeToDelete(null);
+      loadEpisodeTypes();
+    } catch (error) {
+      console.error("刪除集數類型失敗:", error);
+      showMessage("error", error instanceof Error ? error.message : "刪除失敗");
     }
   };
 
@@ -176,15 +196,18 @@ export default function CustomEpisodeTypeManager({
   };
 
   const handleResetToDefault = () => {
-    if (confirm("確定要重置為預設集數類型嗎？這將清除所有自訂類型。")) {
-      try {
-        customEpisodeTypeStorage.resetToDefault();
-        showMessage("success", "已重置為預設集數類型");
-        loadEpisodeTypes();
-      } catch (error) {
-        console.error("重置集數類型失敗:", error);
-        showMessage("error", "重置失敗");
-      }
+    setResetDialogOpen(true);
+  };
+
+  const confirmResetToDefault = () => {
+    try {
+      customEpisodeTypeStorage.resetToDefault();
+      setResetDialogOpen(false);
+      showMessage("success", "已重置為預設集數類型");
+      loadEpisodeTypes();
+    } catch (error) {
+      console.error("重置集數類型失敗:", error);
+      showMessage("error", "重置失敗");
     }
   };
 
@@ -367,6 +390,7 @@ export default function CustomEpisodeTypeManager({
                     onClick={() => handleEditType(type)}
                     variant="outline"
                     size="sm"
+                    aria-label={`編輯${type.label}`}
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
@@ -375,6 +399,7 @@ export default function CustomEpisodeTypeManager({
                       onClick={() => handleDeleteType(type)}
                       variant="outline"
                       size="sm"
+                      aria-label={`刪除${type.label}`}
                       className="text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -386,6 +411,50 @@ export default function CustomEpisodeTypeManager({
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={Boolean(typeToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setTypeToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>刪除集數類型</AlertDialogTitle>
+            <AlertDialogDescription>
+              {typeToDelete
+                ? `將刪除集數類型「${typeToDelete.label}」，且無法復原。`
+                : "此操作無法復原。"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteType}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              確認刪除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>重置集數類型</AlertDialogTitle>
+            <AlertDialogDescription>
+              將清除所有自訂集數類型，並恢復預設設定。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmResetToDefault}>
+              確認重置
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

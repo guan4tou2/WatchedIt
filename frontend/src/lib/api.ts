@@ -23,7 +23,6 @@ class ApiClient {
     options?: RequestInit
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`API 請求: ${url}`);
 
     try {
       const response = await fetch(url, {
@@ -33,8 +32,6 @@ class ApiClient {
         },
         ...options,
       });
-
-      console.log(`API 響應: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
         const errorText = await response.text();

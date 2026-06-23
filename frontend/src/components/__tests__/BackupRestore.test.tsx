@@ -1,5 +1,5 @@
 import React, { act } from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BackupRestore from "../BackupRestore";
 import { backupService } from "@/lib/backup";
@@ -33,11 +33,19 @@ const translationMap: Record<string, string> = {
   "BackupRestore.auto.list.clearConfirm": "確定清除",
   "BackupRestore.auto.list.empty": "尚無自動備份",
   "BackupRestore.auto.list.restoreButton": "還原",
+  "BackupRestore.auto.list.restoreTitle": "還原自動備份",
+  "BackupRestore.auto.list.restoreDescription":
+    "確定要從 2024/01/10 10:00 的自動備份還原嗎？此操作將覆蓋現有資料。",
+  "BackupRestore.auto.list.restoreConfirm": "確認還原",
   "BackupRestore.import.title": "匯入還原",
   "BackupRestore.import.chooseFile.title": "選擇備份檔案",
   "BackupRestore.import.chooseFile.description":
     "支援 JSON 和 CSV 格式的備份檔案",
   "BackupRestore.import.chooseFile.button": "選擇檔案",
+  "BackupRestore.import.confirmTitle": "確認還原備份",
+  "BackupRestore.import.confirmDescription":
+    "即將還原：作品 0 個，標籤 0 個，集數 0 集，完成率 0%。此操作將覆蓋現有資料。",
+  "BackupRestore.import.confirmAction": "確認還原",
   "BackupRestore.import.tips.item1": "• 支援 JSON 格式的完整備份檔案",
   "BackupRestore.import.tips.item2": "• 支援 CSV 格式的資料匯出檔案",
   "BackupRestore.import.tips.item3": "• 還原操作將覆蓋現有資料，請謹慎操作",
@@ -55,6 +63,8 @@ const translationMap: Record<string, string> = {
   "BackupRestore.messages.autoBackupSuccess": "自動備份完成",
   "BackupRestore.messages.autoBackupError": "自動備份失敗",
   "BackupRestore.messages.autoClearSuccess": "所有自動備份已清除",
+  "BackupRestore.messages.restoreSuccess": "備份還原成功",
+  "BackupRestore.messages.autoRestoreSuccess": "從自動備份還原成功",
 };
 
 jest.mock("@/store/useWorkStore", () => ({
@@ -65,26 +75,19 @@ jest.mock("@/store/useWorkStore", () => ({
 }));
 
 jest.mock("next-intl", () => {
-  const translate = (
-    namespace: string,
-    key: string,
-    defaultMessage?: string,
-    values?: Record<string, string | number>
-  ) => {
-    const lookup = translationMap[`${namespace}.${key}`] || defaultMessage || key;
-    if (!values) return lookup;
-    return lookup.replace(/\{(\w+)\}/g, (_, token) =>
-      values[token] !== undefined ? String(values[token]) : `{${token}}`
-    );
-  };
-
   return {
     useTranslations: (namespace: string) => {
-      return (
-        key: string,
-        defaultMessage?: string,
-        values?: Record<string, string | number>
-      ) => translate(namespace, key, defaultMessage, values);
+      return (key: string, values?: Record<string, string | number>) => {
+        const defaultMessage =
+          typeof values?.defaultMessage === "string"
+            ? values.defaultMessage
+            : key;
+        const lookup = translationMap[`${namespace}.${key}`] || defaultMessage;
+
+        return lookup.replace(/\{(\w+)\}/g, (_, token) =>
+          values?.[token] !== undefined ? String(values[token]) : `{${token}}`
+        );
+      };
     },
     useLocale: () => "zh-TW",
     NextIntlClientProvider: ({ children }: { children: React.ReactNode }) => (
@@ -174,9 +177,81 @@ describe("BackupRestore component", () => {
     await waitFor(() =>
       expect(screen.getByText("2024/01/10 10:00")).toBeInTheDocument()
     );
+    expect(backupService.getDatabaseInfo).toHaveBeenCalledTimes(2);
     expect(
       await screen.findByText("自動備份完成")
     ).toBeInTheDocument();
   });
-});
 
+  it("opens an inline restore confirmation after importing a backup", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(false);
+    const { container } = renderComponent();
+
+    await user.click(screen.getByRole("tab", { name: "匯入還原" }));
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const file = new File(["{}"], "watchedit.json", {
+      type: "application/json",
+    });
+
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    expect(await screen.findByRole("alertdialog", {
+      name: "確認還原備份",
+    })).toBeInTheDocument();
+    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(backupService.restoreBackup).not.toHaveBeenCalled();
+
+    confirmSpy.mockRestore();
+  });
+
+  it("restores an imported backup from the inline confirmation", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const { container } = renderComponent();
+
+    await user.click(screen.getByRole("tab", { name: "匯入還原" }));
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    fireEvent.change(fileInput, {
+      target: {
+        files: [
+          new File(["{}"], "watchedit.json", { type: "application/json" }),
+        ],
+      },
+    });
+
+    await user.click(await screen.findByRole("button", { name: "確認還原" }));
+
+    expect(backupService.restoreBackup).toHaveBeenCalled();
+    expect(await screen.findByText("備份還原成功")).toBeInTheDocument();
+  });
+
+  it("confirms auto-backup restore with an inline dialog", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(false);
+    (backupService.getAutoBackupList as jest.Mock).mockReturnValue([
+      { date: "2024/01/10 10:00", size: 2048 },
+    ]);
+
+    renderComponent();
+    await user.click(screen.getByRole("tab", { name: "自動備份" }));
+    await user.click(screen.getByRole("button", { name: "還原" }));
+
+    expect(await screen.findByRole("alertdialog", {
+      name: "還原自動備份",
+    })).toBeInTheDocument();
+    expect(confirmSpy).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "確認還原" }));
+
+    expect(backupService.restoreFromAutoBackup).toHaveBeenCalledWith(
+      "2024/01/10 10:00"
+    );
+    expect(await screen.findByText("從自動備份還原成功")).toBeInTheDocument();
+
+    confirmSpy.mockRestore();
+  });
+});

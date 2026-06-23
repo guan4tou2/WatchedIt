@@ -42,7 +42,7 @@ class TagService:
             return None
 
         # 更新欄位
-        update_data = tag_data.dict(exclude_unset=True)
+        update_data = tag_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(tag, field, value)
 

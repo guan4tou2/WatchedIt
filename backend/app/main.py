@@ -17,10 +17,15 @@ app = FastAPI(
     title="WatchedIt API", description="看過了 - 作品記錄 Web App API", version="1.0.0"
 )
 
+
+def parse_allowed_origins(value: str) -> list[str]:
+    return [origin.strip() for origin in value.split(",") if origin.strip()]
+
+
 # 設定 CORS - 從環境變數讀取允許的來源
-ALLOWED_ORIGINS = os.getenv(
-    "ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
-).split(",")
+ALLOWED_ORIGINS = parse_allowed_origins(
+    os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+)
 
 app.add_middleware(
     CORSMiddleware,

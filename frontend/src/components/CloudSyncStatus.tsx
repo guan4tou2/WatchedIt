@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,15 @@ import {
   CheckCircle,
 } from "lucide-react";
 
+type SyncFeedback = {
+  type: "success" | "error";
+  message: string;
+};
+
 export default function CloudSyncStatus() {
+  const t = useTranslations("CloudSyncStatus");
+  const locale = useLocale();
+  const [feedback, setFeedback] = useState<SyncFeedback | null>(null);
   const {
     isSyncing,
     lastSync,
@@ -23,18 +32,39 @@ export default function CloudSyncStatus() {
     hasConfig
   } = useCloudSync();
 
+  const errorFeedbackMessage = error
+    ? t("messages.error", { error })
+    : null;
+
+  useEffect(() => {
+    if (!errorFeedbackMessage) {
+      return;
+    }
+
+    setFeedback((current) =>
+      current?.type === "error" && current.message === errorFeedbackMessage
+        ? current
+        : { type: "error", message: errorFeedbackMessage }
+    );
+  }, [errorFeedbackMessage]);
+
   const handleSyncClick = async () => {
-    const success = await handleSync();
-    if (success) {
-      alert("同步成功！");
-    } else if (error) {
-      // Error handled by hook state, but alert might be wanted
-      alert(`同步失敗: ${error}`);
+    setFeedback(null);
+    const result = await handleSync();
+    if (result.success) {
+      setFeedback({ type: "success", message: t("messages.success") });
+    } else {
+      setFeedback({
+        type: "error",
+        message: result.error
+          ? t("messages.error", { error: result.error })
+          : errorFeedbackMessage ?? t("messages.errorFallback"),
+      });
     }
   };
 
   if (!hasConfig) {
-    return null; // 如果沒有配置雲端，不顯示此組件
+    return null;
   }
 
   return (
@@ -42,10 +72,10 @@ export default function CloudSyncStatus() {
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <Cloud className="w-5 h-5" />
-          <span>雲端同步</span>
+          <span>{t("title")}</span>
           {shouldSync && (
             <Badge variant="destructive" className="ml-2">
-              需要同步
+              {t("badges.needsSync")}
             </Badge>
           )}
         </CardTitle>
@@ -55,10 +85,10 @@ export default function CloudSyncStatus() {
           <div className="flex items-center space-x-2">
             <Clock className="w-4 h-4 note-text" />
             <span className="text-sm description-text">
-              最後同步:{" "}
+              {t("labels.lastSync")}{" "}
               {lastSync
-                ? new Date(lastSync).toLocaleString("zh-TW")
-                : "從未同步"}
+                ? new Date(lastSync).toLocaleString(locale)
+                : t("labels.neverSynced")}
             </span>
           </div>
           <Button
@@ -70,21 +100,35 @@ export default function CloudSyncStatus() {
             <RefreshCw
               className={`w-4 h-4 mr-2 ${isSyncing ? "animate-spin" : ""}`}
             />
-            {isSyncing ? "同步中..." : "立即同步"}
+            {isSyncing ? t("buttons.syncing") : t("buttons.syncNow")}
           </Button>
         </div>
+
+        {feedback && (
+          <div
+            role={feedback.type === "error" ? "alert" : "status"}
+            aria-live={feedback.type === "error" ? "assertive" : "polite"}
+            className={`rounded-md border px-3 py-2 text-sm ${
+              feedback.type === "error"
+                ? "border-red-200 bg-red-50 text-red-700"
+                : "border-green-200 bg-green-50 text-green-700"
+            }`}
+          >
+            {feedback.message}
+          </div>
+        )}
 
         {shouldSync && (
           <div className="flex items-center space-x-2 text-orange-600 text-sm">
             <AlertTriangle className="w-4 h-4" />
-            <span>建議進行同步以確保數據最新</span>
+            <span>{t("messages.needsSync")}</span>
           </div>
         )}
 
         {!shouldSync && lastSync && (
           <div className="flex items-center space-x-2 text-green-600 text-sm">
             <CheckCircle className="w-4 h-4" />
-            <span>數據已是最新狀態</span>
+            <span>{t("messages.upToDate")}</span>
           </div>
         )}
       </CardContent>

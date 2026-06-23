@@ -8,6 +8,16 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Plus,
   Edit,
   Trash2,
@@ -40,6 +50,8 @@ export default function WorkTypeManager({
     episodeTypes: EpisodeType[];
     defaultEpisodeType: EpisodeType;
   } | null>(null);
+  const [typeToDelete, setTypeToDelete] = useState<WorkType | null>(null);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [availableEpisodeTypes, setAvailableEpisodeTypes] = useState<
     CustomEpisodeType[]
   >([]);
@@ -67,6 +79,11 @@ export default function WorkTypeManager({
       console.error("載入集數類型失敗:", error);
     }
   };
+
+  useEffect(() => {
+    loadWorkTypes();
+    loadEpisodeTypes();
+  }, [loadWorkTypes]);
 
   const showMessage = (type: "success" | "error", text: string) => {
     setMessage({ type, text });
@@ -252,26 +269,28 @@ export default function WorkTypeManager({
       return;
     }
 
-    if (confirm(`確定要刪除類型「${type.name}」嗎？`)) {
+    setTypeToDelete(type);
+  };
+
+  const confirmDeleteType = () => {
+    if (!typeToDelete) return;
+
+    try {
+      workTypeStorage.delete(typeToDelete.id);
+
+      // 同時刪除集數類型對應
       try {
-        workTypeStorage.delete(type.id);
-
-        // 同時刪除集數類型對應
-        try {
-          workTypeEpisodeMappingStorage.delete(type.name);
-        } catch (error) {
-          console.error("刪除集數類型對應失敗:", error);
-        }
-
-        showMessage("success", `成功刪除類型「${type.name}」`);
-        loadWorkTypes();
+        workTypeEpisodeMappingStorage.delete(typeToDelete.name);
       } catch (error) {
-        console.error("刪除作品類型失敗:", error);
-        showMessage(
-          "error",
-          error instanceof Error ? error.message : "刪除失敗"
-        );
+        console.error("刪除集數類型對應失敗:", error);
       }
+
+      showMessage("success", `成功刪除類型「${typeToDelete.name}」`);
+      setTypeToDelete(null);
+      loadWorkTypes();
+    } catch (error) {
+      console.error("刪除作品類型失敗:", error);
+      showMessage("error", error instanceof Error ? error.message : "刪除失敗");
     }
   };
 
@@ -286,25 +305,26 @@ export default function WorkTypeManager({
   };
 
   const handleResetToDefault = () => {
-    if (
-      confirm("確定要重置為預設類型嗎？這將清除所有自訂類型和集數類型對應。")
-    ) {
+    setResetDialogOpen(true);
+  };
+
+  const confirmResetToDefault = () => {
+    try {
+      workTypeStorage.resetToDefault();
+
+      // 同時重置集數類型對應
       try {
-        workTypeStorage.resetToDefault();
-
-        // 同時重置集數類型對應
-        try {
-          workTypeEpisodeMappingStorage.resetToDefault();
-        } catch (error) {
-          console.error("重置集數類型對應失敗:", error);
-        }
-
-        showMessage("success", "已重置為預設類型");
-        loadWorkTypes();
+        workTypeEpisodeMappingStorage.resetToDefault();
       } catch (error) {
-        console.error("重置作品類型失敗:", error);
-        showMessage("error", "重置失敗");
+        console.error("重置集數類型對應失敗:", error);
       }
+
+      setResetDialogOpen(false);
+      showMessage("success", "已重置為預設類型");
+      loadWorkTypes();
+    } catch (error) {
+      console.error("重置作品類型失敗:", error);
+      showMessage("error", "重置失敗");
     }
   };
 
@@ -571,6 +591,7 @@ export default function WorkTypeManager({
                     onClick={() => handleEditType(type)}
                     variant="outline"
                     size="sm"
+                    aria-label={`編輯${type.name}`}
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
@@ -579,6 +600,7 @@ export default function WorkTypeManager({
                       onClick={() => handleDeleteType(type)}
                       variant="outline"
                       size="sm"
+                      aria-label={`刪除${type.name}`}
                       className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -590,6 +612,50 @@ export default function WorkTypeManager({
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={Boolean(typeToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setTypeToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>刪除作品類型</AlertDialogTitle>
+            <AlertDialogDescription>
+              {typeToDelete
+                ? `將刪除「${typeToDelete.name}」及其集數類型對應，且無法復原。`
+                : "此操作無法復原。"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteType}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              確認刪除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>重置作品類型</AlertDialogTitle>
+            <AlertDialogDescription>
+              將清除所有自訂作品類型與集數類型對應，並恢復預設設定。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmResetToDefault}>
+              確認重置
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

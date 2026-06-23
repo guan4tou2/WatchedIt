@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from ..db.database import get_db
@@ -10,7 +10,7 @@ from ..services.work_service import WorkService
 router = APIRouter(prefix="/works", tags=["works"])
 
 
-@router.post("/", response_model=WorkResponse)
+@router.post("/", response_model=WorkResponse, status_code=status.HTTP_201_CREATED)
 async def create_work(work: WorkCreate, db: Session = Depends(get_db)):
     """建立新作品"""
     work_service = WorkService(db)
@@ -41,6 +41,14 @@ async def get_works(
     )
 
 
+@router.get("/stats", include_in_schema=False)
+@router.get("/stats/overview")
+async def get_stats(db: Session = Depends(get_db)):
+    """取得統計資訊"""
+    work_service = WorkService(db)
+    return work_service.get_stats()
+
+
 @router.get("/{work_id}", response_model=WorkResponse)
 async def get_work(work_id: str, db: Session = Depends(get_db)):
     """取得單一作品"""
@@ -67,10 +75,3 @@ async def delete_work(work_id: str, db: Session = Depends(get_db)):
     if not success:
         raise HTTPException(status_code=404, detail="作品不存在")
     return {"message": "作品已刪除"}
-
-
-@router.get("/stats/overview")
-async def get_stats(db: Session = Depends(get_db)):
-    """取得統計資訊"""
-    work_service = WorkService(db)
-    return work_service.get_stats()

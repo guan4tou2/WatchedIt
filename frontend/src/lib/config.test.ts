@@ -27,6 +27,13 @@ describe("Config Tests", () => {
     expect(url).toBe("https://api.example.com");
   });
 
+  test("應該正規化環境變數中的 API URL", () => {
+    process.env.NEXT_PUBLIC_API_URL = " https://api.example.com/ ";
+
+    expect(getApiBaseUrl()).toBe("https://api.example.com");
+    expect(getApiUrl("works")).toBe("https://api.example.com/works");
+  });
+
   test("在開發環境中應該使用 localhost:8000", () => {
     process.env.NODE_ENV = "development";
     const url = getApiBaseUrl();

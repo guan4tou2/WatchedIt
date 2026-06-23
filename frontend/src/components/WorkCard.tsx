@@ -65,35 +65,57 @@ export default function WorkCard({
     const statusLabel = statusKey ? workStatusT(statusKey) : work.status;
     const typeLabel = typeKey ? workTypeT(typeKey) : work.type;
 
+    const openDetails = () => {
+        router.push(`/works/detail?id=${work.id}`);
+    };
+
+    const handleKeyboardActivate = (
+        event: React.KeyboardEvent,
+        action: () => void
+    ) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            action();
+        }
+    };
+
     return (
         <Card
-            className={`hover:shadow-lg transition-all card-hover ${isBatchMode ? "cursor-pointer" : "cursor-pointer"
-                } ${isSelected ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20" : ""
+            className={`hover:shadow-lg transition-all card-hover ${isSelected ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20" : ""
                 }`}
-            onClick={() => {
-                if (isBatchMode) {
-                    onToggleSelection(work.id);
-                } else {
-                    router.push(`/works/detail?id=${work.id}`);
-                }
-            }}
         >
             <CardHeader className="pb-3">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-2 sm:space-y-0">
-                    <div className="flex items-start space-x-2 flex-1">
-                        {isBatchMode && (
-                            <div className="flex items-center mt-1">
+                    {isBatchMode ? (
+                        <button
+                            type="button"
+                            role="checkbox"
+                            aria-checked={isSelected}
+                            aria-label={work.title}
+                            onClick={() => onToggleSelection(work.id)}
+                            onKeyDown={(event) =>
+                                handleKeyboardActivate(event, () =>
+                                    onToggleSelection(work.id)
+                                )
+                            }
+                            className="flex flex-1 items-start space-x-2 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        >
+                            <span className="flex items-center mt-1">
                                 {isSelected ? (
                                     <CheckSquare className="w-4 h-4 text-blue-500" />
                                 ) : (
                                     <Square className="w-4 h-4 text-gray-400" />
                                 )}
-                            </div>
-                        )}
+                            </span>
+                            <CardTitle className="text-base sm:text-lg line-clamp-2 flex-1">
+                                {work.title}
+                            </CardTitle>
+                        </button>
+                    ) : (
                         <CardTitle className="text-base sm:text-lg line-clamp-2 flex-1">
                             {work.title}
                         </CardTitle>
-                    </div>
+                    )}
                     <div className="flex items-center space-x-2">
                         {!isBatchMode && (
                             <Button
@@ -116,7 +138,19 @@ export default function WorkCard({
                             </Button>
                         )}
                         {!isBatchMode && (
-                            <ArrowRight className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" />
+                            <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                aria-label={workCardButtonsT("openDetails")}
+                                onClick={openDetails}
+                                onKeyDown={(event) =>
+                                    handleKeyboardActivate(event, openDetails)
+                                }
+                                className="h-9 w-9"
+                            >
+                                <ArrowRight className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" />
+                            </Button>
                         )}
                     </div>
                 </div>

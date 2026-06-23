@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tag } from "@/types";
 import { Plus, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface TagSelectorProps {
   availableTags: Tag[];
@@ -20,6 +21,7 @@ export default function TagSelector({
   disabled = false,
 }: TagSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations("TagSelector");
 
   const handleTagToggle = (tag: Tag) => {
     const isSelected = selectedTags.some((t) => t.id === tag.id);
@@ -46,7 +48,7 @@ export default function TagSelector({
 
   return (
     <div className="space-y-2">
-      <label className="form-label">標籤</label>
+      <label className="form-label">{t("label")}</label>
 
       {/* 已選擇的標籤 */}
       {selectedTags.length > 0 && (
@@ -56,7 +58,9 @@ export default function TagSelector({
               <span>{tag.name}</span>
               {!disabled && (
                 <button
+                  type="button"
                   onClick={() => handleRemoveTag(tag.id)}
+                  aria-label={t("buttons.remove", { name: tag.name })}
                   className="ml-1 hover:bg-black hover:bg-opacity-10 rounded-full p-0.5"
                 >
                   <X className="w-3 h-3" />
@@ -78,14 +82,16 @@ export default function TagSelector({
             className="w-full justify-start"
           >
             <Plus className="w-4 h-4 mr-2" />
-            {selectedTags.length === 0 ? "選擇標籤" : "管理標籤"}
+            {selectedTags.length === 0
+              ? t("buttons.select")
+              : t("buttons.manage")}
           </Button>
 
           {isOpen && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-white dropdown-bg border rounded-md shadow-lg z-10 max-h-48 overflow-y-auto">
               {unselectedTags.length === 0 ? (
                 <div className="p-3 text-sm empty-state text-center">
-                  所有標籤都已選擇
+                  {t("empty")}
                 </div>
               ) : (
                 <div className="p-2 space-y-1">

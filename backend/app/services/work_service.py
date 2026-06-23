@@ -18,11 +18,33 @@ class WorkService:
     def __init__(self, db: Session):
         self.db = db
 
+    def _validate_tag_ids(self, tag_ids: Optional[List[int]]) -> List[int]:
+        """Return de-duplicated tag IDs after confirming every tag exists."""
+        if not tag_ids:
+            return []
+
+        unique_tag_ids = list(dict.fromkeys(tag_ids))
+        existing_tag_ids = {
+            tag_id
+            for (tag_id,) in self.db.query(Tag.id)
+            .filter(Tag.id.in_(unique_tag_ids))
+            .all()
+        }
+        missing_tag_ids = [
+            tag_id for tag_id in unique_tag_ids if tag_id not in existing_tag_ids
+        ]
+        if missing_tag_ids:
+            raise TagNotFoundException(missing_tag_ids[0])
+
+        return unique_tag_ids
+
     def create_work(self, work_data: WorkCreate) -> WorkResponse:
         """建立新作品"""
         logger.info(f"Creating work: {work_data.title}")
         
         try:
+            tag_ids = self._validate_tag_ids(work_data.tag_ids)
+
             # 建立作品
             work = Work(
                 title=work_data.title,
@@ -43,14 +65,8 @@ class WorkService:
             self.db.refresh(work)
 
             # 處理標籤關聯
-            if work_data.tag_ids:
-                for tag_id in work_data.tag_ids:
-                    # 驗證標籤是否存在
-                    tag = self.db.query(Tag).filter(Tag.id == tag_id).first()
-                    if not tag:
-                        logger.warning(f"Tag {tag_id} not found, skipping")
-                        continue
-                    
+            if tag_ids:
+                for tag_id in tag_ids:
                     work_tag = WorkTag(work_id=work.id, tag_id=tag_id)
                     self.db.add(work_tag)
                 self.db.commit()
@@ -120,19 +136,22 @@ class WorkService:
             return None
 
         # 更新欄位
-        update_data = work_data.dict(exclude_unset=True)
+        update_data = work_data.model_dump(exclude_unset=True)
         tag_ids = update_data.pop("tag_ids", None)
+        validated_tag_ids = (
+            self._validate_tag_ids(tag_ids) if tag_ids is not None else None
+        )
 
         for field, value in update_data.items():
             setattr(work, field, value)
 
         # 處理標籤更新
-        if tag_ids is not None:
+        if validated_tag_ids is not None:
             # 刪除現有標籤關聯
             self.db.query(WorkTag).filter(WorkTag.work_id == work_id).delete()
 
             # 新增標籤關聯
-            for tag_id in tag_ids:
+            for tag_id in validated_tag_ids:
                 work_tag = WorkTag(work_id=work_id, tag_id=tag_id)
                 self.db.add(work_tag)
 

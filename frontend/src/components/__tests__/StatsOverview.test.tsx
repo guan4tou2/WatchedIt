@@ -37,9 +37,11 @@ const mockStats: Stats = {
 };
 
 describe("StatsOverview", () => {
-    it("renders nothing when stats is null", () => {
+    it("renders loading skeletons when stats is null", () => {
         const { container } = render(<StatsOverview stats={null} />);
-        expect(container).toBeEmptyDOMElement();
+        expect(container).not.toBeEmptyDOMElement();
+        expect(container.querySelectorAll(".animate-pulse")).toHaveLength(12);
+        expect(screen.queryByText("totalWorks")).not.toBeInTheDocument();
     });
 
     it("renders total works count correctly", () => {

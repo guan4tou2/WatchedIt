@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..db.init_db import get_db
+from ..db.database import get_db
 from ..models import CloudBackup
 
 router = APIRouter()
@@ -34,6 +34,11 @@ async def health_check():
 async def upload_backup(data: BackupData, db: Session = Depends(get_db)):
     """上傳備份數據"""
     try:
+        backup_date = datetime.fromisoformat(data.backupDate.replace("Z", "+00:00"))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="backupDate 格式無效")
+
+    try:
         # 檢查是否已存在該設備的備份
         existing_backup = (
             db.query(CloudBackup).filter(CloudBackup.device_id == data.deviceId).first()
@@ -43,9 +48,7 @@ async def upload_backup(data: BackupData, db: Session = Depends(get_db)):
             # 更新現有備份
             existing_backup.works = data.works
             existing_backup.tags = data.tags
-            existing_backup.backup_date = datetime.fromisoformat(
-                data.backupDate.replace("Z", "+00:00")
-            )
+            existing_backup.backup_date = backup_date
             existing_backup.version = data.version
             existing_backup.last_updated = datetime.now()
         else:
@@ -54,9 +57,7 @@ async def upload_backup(data: BackupData, db: Session = Depends(get_db)):
                 device_id=data.deviceId,
                 works=data.works,
                 tags=data.tags,
-                backup_date=datetime.fromisoformat(
-                    data.backupDate.replace("Z", "+00:00")
-                ),
+                backup_date=backup_date,
                 version=data.version,
             )
             db.add(backup)
@@ -66,8 +67,8 @@ async def upload_backup(data: BackupData, db: Session = Depends(get_db)):
         return {
             "success": True,
             "message": "備份上傳成功",
-            "works": data.works,
-            "tags": data.tags,
+            "worksCount": len(data.works),
+            "tagsCount": len(data.tags),
         }
     except Exception as e:
         db.rollback()

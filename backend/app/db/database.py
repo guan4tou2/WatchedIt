@@ -1,13 +1,26 @@
+import os
+
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+
+def get_database_url() -> str:
+    return os.getenv("DATABASE_URL", "sqlite:///./watchedit.db")
+
+
+def get_connect_args(database_url: str) -> dict[str, bool]:
+    if database_url.startswith("sqlite"):
+        return {"check_same_thread": False}
+    return {}
+
 
 # 資料庫檔案路徑
-DATABASE_URL = "sqlite:///./watchedit.db"
+DATABASE_URL = get_database_url()
+SQL_ECHO = os.getenv("SQL_ECHO", "false").lower() == "true"
 
 # 建立引擎
 engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}, echo=True
+    DATABASE_URL, connect_args=get_connect_args(DATABASE_URL), echo=SQL_ECHO
 )
 
 # 建立 SessionLocal 類別

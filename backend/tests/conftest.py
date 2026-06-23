@@ -52,6 +52,19 @@ async def client():
     app.dependency_overrides.clear()
 
 
+@pytest.fixture(scope="function")
+def db():
+    """Create a database session for service-layer tests."""
+    Base.metadata.create_all(bind=engine)
+    session = TestingSessionLocal()
+
+    try:
+        yield session
+    finally:
+        session.close()
+        Base.metadata.drop_all(bind=engine)
+
+
 @pytest.fixture
 def sample_work_data():
     """Sample work data for testing."""

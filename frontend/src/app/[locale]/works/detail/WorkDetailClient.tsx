@@ -6,6 +6,16 @@ import { useRouter } from "@/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Work, Episode, WorkUpdate } from "@/types";
 import { useWorkStore } from "@/store/useWorkStore";
 import EpisodeManager from "@/components/EpisodeManager";
@@ -48,6 +58,8 @@ export default function WorkDetailClient() {
   const [isEditing, setIsEditing] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSavingWork, setIsSavingWork] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const t = useTranslations("WorkDetail");
   const commonT = useTranslations("Common");
   const workStatusT = useTranslations("Work.status");
@@ -77,15 +89,11 @@ export default function WorkDetailClient() {
     if (!work) return;
 
     try {
-      console.log("處理集數變更:", episodes);
-
       const updatedWork = {
         ...work,
         episodes,
         date_updated: new Date().toISOString(),
       };
-
-      console.log("更新作品:", updatedWork);
 
       setWork(updatedWork);
       await updateWork(work.id, { episodes });
@@ -98,7 +106,7 @@ export default function WorkDetailClient() {
     }
   };
 
-  const handleWorkUpdate = (updatedData: WorkUpdate) => {
+  const handleWorkUpdate = async (updatedData: WorkUpdate) => {
     if (!work) return;
 
     const updatedWork = {
@@ -107,18 +115,24 @@ export default function WorkDetailClient() {
       date_updated: new Date().toISOString(),
     };
 
-    setWork(updatedWork);
-    updateWork(work.id, updatedData);
-    setShowEditForm(false);
+    setIsSavingWork(true);
+    try {
+      await updateWork(work.id, updatedData);
+      setWork(updatedWork);
+      setShowEditForm(false);
+    } catch (error) {
+      console.error("更新作品失敗:", error);
+    } finally {
+      setIsSavingWork(false);
+    }
   };
 
   const handleDelete = async () => {
     if (!work) return;
 
-    if (confirm(t("confirmDelete", { defaultMessage: "確定要刪除這個作品嗎？" }))) {
-      await deleteWork(work.id);
-      router.push("/");
-    }
+    await deleteWork(work.id);
+    setDeleteDialogOpen(false);
+    router.push("/");
   };
 
   if (loading || isLoading) {
@@ -181,7 +195,7 @@ export default function WorkDetailClient() {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleDelete}
+            onClick={() => setDeleteDialogOpen(true)}
             className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
           >
             <Trash2 className="w-4 h-4 mr-2" />
@@ -189,6 +203,33 @@ export default function WorkDetailClient() {
           </Button>
         </div>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("deleteDialog.title", { defaultMessage: "刪除作品" })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("deleteDialog.description", {
+                name: work.title,
+                defaultMessage: `此操作會永久刪除「${work.title}」，且無法復原。`,
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {commonT("cancel", { defaultMessage: "取消" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("deleteDialog.confirm", { defaultMessage: "確認刪除" })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* 主要資訊 */}
@@ -326,6 +367,7 @@ export default function WorkDetailClient() {
                     onCancel={() => setShowEditForm(false)}
                     isOpen={true}
                     inline={true}
+                    isSaving={isSavingWork}
                   />
                 </div>
               )}

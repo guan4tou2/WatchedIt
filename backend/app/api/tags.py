@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..db.database import get_db
@@ -10,7 +10,7 @@ from ..services.tag_service import TagService
 router = APIRouter(prefix="/tags", tags=["tags"])
 
 
-@router.post("/", response_model=TagResponse)
+@router.post("/", response_model=TagResponse, status_code=status.HTTP_201_CREATED)
 async def create_tag(tag: TagCreate, db: Session = Depends(get_db)):
     """建立新標籤"""
     tag_service = TagService(db)

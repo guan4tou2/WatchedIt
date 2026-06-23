@@ -9,6 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import WorkTypeManager from "@/components/WorkTypeManager";
 import CustomEpisodeTypeManager from "@/components/CustomEpisodeTypeManager";
 import PlatformInfo from "@/components/PlatformInfo";
@@ -64,6 +74,9 @@ interface Settings {
   pwaOfflineMode: boolean;
 }
 
+const normalizeCloudEndpoint = (endpoint: string): string =>
+  endpoint.trim().replace(/\/+$/, "");
+
 export default function SettingsPage() {
   const router = useRouter();
   const settingsT = useTranslations("Settings");
@@ -98,6 +111,7 @@ export default function SettingsPage() {
     text: string;
   } | null>(null);
   const [helpGuideOpen, setHelpGuideOpen] = useState(false);
+  const [clearDataDialogOpen, setClearDataDialogOpen] = useState(false);
 
   // PWA 相關狀態
   const [pwaInfo, setPwaInfo] = useState({
@@ -163,18 +177,33 @@ export default function SettingsPage() {
 
   const saveSettings = () => {
     try {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("watchedit_settings", JSON.stringify(settings));
-      }
+      let settingsToSave = settings;
 
       // 如果切換到雲端模式，設定雲端配置
       if (settings.storageMode === "cloud" && settings.cloudEndpoint) {
-        const cloudConfig: CloudConfig = {
-          endpoint: settings.cloudEndpoint,
-          apiKey: settings.cloudApiKey || undefined,
+        const endpoint = normalizeCloudEndpoint(settings.cloudEndpoint);
+        settingsToSave = {
+          ...settings,
+          cloudEndpoint: endpoint,
         };
-        cloudStorage.setConfig(cloudConfig);
+
+        if (endpoint) {
+          const cloudConfig: CloudConfig = {
+            endpoint,
+            apiKey: settings.cloudApiKey || undefined,
+          };
+          cloudStorage.setConfig(cloudConfig);
+        }
       }
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "watchedit_settings",
+          JSON.stringify(settingsToSave)
+        );
+      }
+
+      setSettings(settingsToSave);
 
       setMessage({
         type: "success",
@@ -274,39 +303,32 @@ export default function SettingsPage() {
   };
 
   const clearData = async () => {
-    if (
-      confirm(
-        t(
-          "data.clearConfirm",
-          "確定要清除所有資料嗎？此操作無法復原！"
-        )
-      )
-    ) {
-      try {
-        await dbUtils.clearAll();
+    try {
+      await dbUtils.clearAll();
 
-        // 更新 store 狀態
-        await updateWorks([]);
-        await updateTags([]);
+      // 更新 store 狀態
+      await updateWorks([]);
+      await updateTags([]);
 
-        setMessage({
-          type: "success",
-          text: t("messages.clearSuccess", "資料已清除"),
-        });
-        setTimeout(() => setMessage(null), 3000);
-      } catch (error) {
-        console.error("清除資料失敗:", error);
-        setMessage({
-          type: "error",
-          text: t("messages.clearError", "清除資料失敗"),
-        });
-        setTimeout(() => setMessage(null), 3000);
-      }
+      setMessage({
+        type: "success",
+        text: t("messages.clearSuccess", "資料已清除"),
+      });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      console.error("清除資料失敗:", error);
+      setMessage({
+        type: "error",
+        text: t("messages.clearError", "清除資料失敗"),
+      });
+      setTimeout(() => setMessage(null), 3000);
     }
   };
 
   const testCloudConnection = async () => {
-    if (!settings.cloudEndpoint) {
+    const endpoint = normalizeCloudEndpoint(settings.cloudEndpoint);
+
+    if (!endpoint) {
       setMessage({
         type: "error",
         text: t("messages.enterEndpoint", "請先輸入雲端端點"),
@@ -317,19 +339,20 @@ export default function SettingsPage() {
 
     setIsLoading(true);
     try {
-      const result = await cloudStorage.testConnection(settings.cloudEndpoint);
+      const result = await cloudStorage.testConnection(endpoint);
 
       if (result.success) {
         // 測試成功時自動儲存設定
         const updatedSettings = {
           ...settings,
           storageMode: "cloud" as const,
+          cloudEndpoint: endpoint,
         };
         setSettings(updatedSettings);
 
         // 設定雲端配置
         const cloudConfig: CloudConfig = {
-          endpoint: settings.cloudEndpoint,
+          endpoint,
           apiKey: settings.cloudApiKey || undefined,
         };
         cloudStorage.setConfig(cloudConfig);
@@ -365,7 +388,9 @@ export default function SettingsPage() {
   };
 
   const syncToCloud = async () => {
-    if (!settings.cloudEndpoint) {
+    const endpoint = normalizeCloudEndpoint(settings.cloudEndpoint);
+
+    if (!endpoint) {
       setMessage({
         type: "error",
         text: t("messages.configureEndpoint", "請先設定雲端端點"),
@@ -376,6 +401,14 @@ export default function SettingsPage() {
 
     setIsLoading(true);
     try {
+      cloudStorage.setConfig({
+        endpoint,
+        apiKey: settings.cloudApiKey || undefined,
+      });
+      if (settings.cloudEndpoint !== endpoint) {
+        setSettings({ ...settings, cloudEndpoint: endpoint });
+      }
+
       // 使用 uploadData 直接上傳數據到雲端
       const result = await cloudStorage.uploadData(works, tags);
 
@@ -403,7 +436,9 @@ export default function SettingsPage() {
   };
 
   const downloadFromCloud = async () => {
-    if (!settings.cloudEndpoint) {
+    const endpoint = normalizeCloudEndpoint(settings.cloudEndpoint);
+
+    if (!endpoint) {
       setMessage({
         type: "error",
         text: t("messages.configureEndpoint", "請先設定雲端端點"),
@@ -414,6 +449,14 @@ export default function SettingsPage() {
 
     setIsLoading(true);
     try {
+      cloudStorage.setConfig({
+        endpoint,
+        apiKey: settings.cloudApiKey || undefined,
+      });
+      if (settings.cloudEndpoint !== endpoint) {
+        setSettings({ ...settings, cloudEndpoint: endpoint });
+      }
+
       const result = await cloudStorage.downloadData();
 
       if (result.success && result.data) {
@@ -813,18 +856,24 @@ export default function SettingsPage() {
                   </div>
                 )}
 
-                <div className="flex space-x-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={requestNotificationPermission}
                     disabled={pwaInfo.notificationPermission === "granted"}
+                    className="w-full justify-start sm:justify-center"
                   >
                     <Bell className="w-4 h-4 mr-2" />
                     {t("pwa.actions.requestNotification", "請求通知權限")}
                   </Button>
 
-                  <Button variant="outline" size="sm" onClick={checkForUpdate}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={checkForUpdate}
+                    className="w-full justify-start sm:justify-center"
+                  >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     {t("pwa.actions.checkUpdate", "檢查更新")}
                   </Button>
@@ -843,6 +892,7 @@ export default function SettingsPage() {
                         ),
                       });
                     }}
+                    className="w-full justify-start sm:justify-center"
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     {t("pwa.actions.resetPrompt", "重置安裝提示")}
@@ -1168,7 +1218,7 @@ export default function SettingsPage() {
 
               <Button
                 variant="destructive"
-                onClick={clearData}
+                onClick={() => setClearDataDialogOpen(true)}
                 disabled={isLoading}
               >
                 <Trash2 className="w-4 h-4 mr-2" />
@@ -1345,6 +1395,39 @@ export default function SettingsPage() {
       <div className="mt-6">
         <PlatformInfo />
       </div>
+
+      <AlertDialog
+        open={clearDataDialogOpen}
+        onOpenChange={setClearDataDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("data.clearDialog.title", "清除所有資料")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                "data.clearDialog.description",
+                "此操作將永久清除所有作品、標籤與本機資料，且無法復原。"
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>
+              {commonT("cancel", { defaultMessage: "取消" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isLoading}
+              onClick={async () => {
+                await clearData();
+                setClearDataDialogOpen(false);
+              }}
+            >
+              {t("data.clearDialog.confirm", "確認清除")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* 教學說明 */}
       <HelpGuide

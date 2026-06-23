@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String
+from sqlalchemy import JSON, Boolean, Column, DateTime, Float, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -18,7 +18,7 @@ class Work(Base):
     progress = Column(JSON)  # 進度資訊，如集數、總集數等
     date_added = Column(DateTime(timezone=True), server_default=func.now())
     date_updated = Column(DateTime(timezone=True), onupdate=func.now())
-    rating = Column(Integer)  # 1-5 星評分
+    rating = Column(Float)  # 0-10 評分
     review = Column(String)  # 短評
     note = Column(String)  # 備註
     source = Column(String)  # 來源

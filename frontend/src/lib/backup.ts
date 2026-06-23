@@ -19,6 +19,15 @@ export interface BackupData {
 // 備份格式類型
 export type BackupFormat = "json" | "csv";
 
+const VALID_WORK_STATUSES: Work["status"][] = [
+  "進行中",
+  "已完結",
+  "暫停",
+  "放棄",
+  "未播出",
+  "已取消",
+];
+
 // 備份服務類別
 export class BackupService {
   private static instance: BackupService;
@@ -164,8 +173,6 @@ export class BackupService {
       if (backupData.works && backupData.works.length > 0) {
         await workStorage.setAll(backupData.works);
       }
-
-      console.log("備份還原成功");
     } catch (error) {
       console.error("還原備份失敗:", error);
       throw new Error("還原備份失敗");
@@ -186,12 +193,77 @@ export class BackupService {
       throw new Error("備份資料缺少作品或標籤資料");
     }
 
+    backupData.tags.forEach((tag: any, index: number) => {
+      if (
+        !Number.isFinite(tag?.id) ||
+        !this.isNonEmptyString(tag?.name) ||
+        !this.isNonEmptyString(tag?.color)
+      ) {
+        throw new Error(`備份標籤資料無效: 第 ${index + 1} 筆`);
+      }
+    });
+
+    backupData.works.forEach((work: any, index: number) => {
+      this.validateWorkData(work, index);
+    });
+
     // 檢查版本相容性
     if (backupData.version !== this.VERSION) {
       console.warn(
         `備份版本 (${backupData.version}) 與當前版本 (${this.VERSION}) 不同`
       );
     }
+  }
+
+  private isNonEmptyString(value: unknown): value is string {
+    return typeof value === "string" && value.trim().length > 0;
+  }
+
+  private validateWorkData(work: any, index: number): void {
+    if (
+      !this.isNonEmptyString(work?.id) ||
+      !this.isNonEmptyString(work?.title) ||
+      !this.isNonEmptyString(work?.type) ||
+      !VALID_WORK_STATUSES.includes(work?.status) ||
+      !this.isNonEmptyString(work?.date_added) ||
+      !Array.isArray(work?.episodes) ||
+      !Array.isArray(work?.tags)
+    ) {
+      throw new Error(`備份作品資料無效: 第 ${index + 1} 筆`);
+    }
+
+    if (
+      work.rating !== undefined &&
+      (!Number.isFinite(work.rating) || work.rating < 0 || work.rating > 10)
+    ) {
+      throw new Error(`備份作品評分無效: 第 ${index + 1} 筆`);
+    }
+
+    work.episodes.forEach((episode: any, episodeIndex: number) => {
+      if (
+        !this.isNonEmptyString(episode?.id) ||
+        !Number.isFinite(episode?.number) ||
+        !this.isNonEmptyString(episode?.type) ||
+        !Number.isFinite(episode?.season) ||
+        typeof episode?.watched !== "boolean"
+      ) {
+        throw new Error(
+          `備份集數資料無效: 第 ${index + 1} 個作品，第 ${
+            episodeIndex + 1
+          } 集`
+        );
+      }
+    });
+  }
+
+  private escapeCSVValue(value: string | number | boolean | null | undefined): string {
+    const text = value == null ? "" : String(value);
+
+    if (/[",\n]/.test(text)) {
+      return `"${text.replace(/"/g, '""')}"`;
+    }
+
+    return text;
   }
 
   // 轉換為 CSV 格式
@@ -217,7 +289,11 @@ export class BackupService {
     lines.push("Tags");
     lines.push("ID,Name,Color");
     backupData.tags.forEach((tag) => {
-      lines.push(`${tag.id},"${tag.name}",${tag.color}`);
+      lines.push(
+        [tag.id, tag.name, tag.color]
+          .map((value) => this.escapeCSVValue(value))
+          .join(",")
+      );
     });
     lines.push("");
 
@@ -229,20 +305,20 @@ export class BackupService {
     backupData.works.forEach((work) => {
       const row = [
         work.id,
-        `"${work.title}"`,
+        work.title,
         work.type,
         work.status,
         work.year || "",
         work.rating || "",
-        `"${work.review || ""}"`,
-        `"${work.note || ""}"`,
+        work.review || "",
+        work.note || "",
         work.source || "",
         work.reminder_enabled ? "true" : "false",
         work.reminder_frequency || "",
         work.date_added,
         work.date_updated || "",
       ];
-      lines.push(row.join(","));
+      lines.push(row.map((value) => this.escapeCSVValue(value)).join(","));
     });
     lines.push("");
 
@@ -257,15 +333,15 @@ export class BackupService {
           work.id,
           episode.id,
           episode.number,
-          `"${episode.title || ""}"`,
-          `"${episode.description || ""}"`,
+          episode.title || "",
+          episode.description || "",
           episode.type,
           episode.season,
           episode.watched ? "true" : "false",
           episode.date_watched || "",
-          `"${episode.note || ""}"`,
+          episode.note || "",
         ];
-        lines.push(row.join(","));
+        lines.push(row.map((value) => this.escapeCSVValue(value)).join(","));
       });
     });
 
@@ -308,11 +384,11 @@ export class BackupService {
       }
 
       if (currentSection === "tags" && !trimmedLine.startsWith("ID,")) {
-        const [id, name, color] = trimmedLine.split(",");
+        const [id, name, color] = this.parseCSVLine(trimmedLine);
         if (id && name && color) {
           backupData.tags.push({
             id: parseInt(id),
-            name: name.replace(/"/g, ""),
+            name,
             color: color,
           });
         }
@@ -321,13 +397,13 @@ export class BackupService {
         if (parts.length >= 13) {
           const work: Work = {
             id: parts[0],
-            title: parts[1].replace(/"/g, ""),
+            title: parts[1],
             type: parts[2],
             status: parts[3] as any,
             year: parts[4] ? parseInt(parts[4]) : undefined,
-            rating: parts[5] ? parseInt(parts[5]) : undefined,
-            review: parts[6].replace(/"/g, ""),
-            note: parts[7].replace(/"/g, ""),
+            rating: parts[5] ? parseFloat(parts[5]) : undefined,
+            review: parts[6],
+            note: parts[7],
             source: parts[8],
             reminder_enabled: parts[9] === "true",
             reminder_frequency:
@@ -353,13 +429,13 @@ export class BackupService {
             const episode: any = {
               id: parts[1],
               number: parseInt(parts[2]),
-              title: parts[3].replace(/"/g, ""),
-              description: parts[4].replace(/"/g, ""),
+              title: parts[3],
+              description: parts[4],
               type: parts[5],
               season: parseInt(parts[6]),
               watched: parts[7] === "true",
               date_watched: parts[8] || undefined,
-              note: parts[9].replace(/"/g, ""),
+              note: parts[9],
             };
             work.episodes.push(episode);
           }
@@ -397,7 +473,12 @@ export class BackupService {
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
       if (char === '"') {
-        inQuotes = !inQuotes;
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
       } else if (char === "," && !inQuotes) {
         result.push(current);
         current = "";
@@ -471,6 +552,7 @@ export class BackupService {
       this.cleanupOldAutoBackups();
     } catch (error) {
       console.error("自動備份失敗:", error);
+      throw new Error("自動備份失敗");
     }
   }
 

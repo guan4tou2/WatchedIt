@@ -38,6 +38,7 @@ const testMessages = {
         buttons: {
             quickAddFull: "新增集數",
             quickAddShort: "新增",
+            openDetails: "開啟詳情",
         },
         labels: {
             unknownYear: "未知年份",
@@ -161,28 +162,56 @@ describe("WorkCard", () => {
         );
     });
 
-    it("should navigate to detail page when clicked in normal mode", () => {
+    it("should navigate to detail page from the explicit details action", () => {
         renderComponent();
 
-        const card = screen.getByText("Test Anime Title").closest(".cursor-pointer");
-        fireEvent.click(card!);
+        fireEvent.click(screen.getByRole("button", { name: "openDetails" }));
 
         expect(pushMock).toHaveBeenCalledWith("/works/detail?id=1");
+    });
+
+    it("should navigate to detail page with keyboard from the details action", () => {
+        renderComponent();
+
+        const detailsButton = screen.getByRole("button", { name: "openDetails" });
+        detailsButton.focus();
+        fireEvent.keyDown(detailsButton, { key: "Enter" });
+
+        expect(pushMock).toHaveBeenCalledWith("/works/detail?id=1");
+    });
+
+    it("should not expose the whole card as an interactive control in normal mode", () => {
+        renderComponent();
+
+        expect(
+            screen.queryByRole("button", { name: "Test Anime Title" })
+        ).not.toBeInTheDocument();
     });
 
     it("should show checkbox when in batch mode", () => {
         renderComponent({ ...defaultProps, isBatchMode: true });
 
-        // Should show unchecked square icon
-        const card = screen.getByText("Test Anime Title").closest(".cursor-pointer");
-        expect(card).toBeInTheDocument();
+        expect(
+            screen.getByRole("checkbox", { name: "Test Anime Title" })
+        ).toBeInTheDocument();
     });
 
     it("should call onToggleSelection when clicked in batch mode", () => {
         renderComponent({ ...defaultProps, isBatchMode: true });
 
-        const card = screen.getByText("Test Anime Title").closest(".cursor-pointer");
-        fireEvent.click(card!);
+        fireEvent.click(screen.getByRole("checkbox", { name: "Test Anime Title" }));
+
+        expect(defaultProps.onToggleSelection).toHaveBeenCalledWith("1");
+    });
+
+    it("should toggle selection with keyboard in batch mode", () => {
+        renderComponent({ ...defaultProps, isBatchMode: true });
+
+        const selectionControl = screen.getByRole("checkbox", {
+            name: "Test Anime Title",
+        });
+        selectionControl.focus();
+        fireEvent.keyDown(selectionControl, { key: " " });
 
         expect(defaultProps.onToggleSelection).toHaveBeenCalledWith("1");
     });

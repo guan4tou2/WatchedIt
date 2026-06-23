@@ -5,11 +5,70 @@ import "@testing-library/jest-dom";
 import AnimeDetailModal from "../AnimeDetailModal";
 import { AniListMedia } from "@/lib/anilist";
 
+const mockTranslations: Record<string, string> = {
+  "AnimeDetailModal.title": "Anime details",
+  "AnimeDetailModal.unknown": "Unknown",
+  "AnimeDetailModal.units.episodes": "{count} episodes",
+  "AnimeDetailModal.units.minutes": "{count} min",
+  "AnimeDetailModal.units.score": "{score} pts",
+  "AnimeDetailModal.sections.airDates": "Air dates",
+  "AnimeDetailModal.sections.genres": "Genres",
+  "AnimeDetailModal.sections.description": "Synopsis",
+  "AnimeDetailModal.sections.aliases": "Other titles",
+  "AnimeDetailModal.sections.country": "Country of origin",
+  "AnimeDetailModal.labels.start": "Start:",
+  "AnimeDetailModal.labels.end": "End:",
+  "AnimeDetailModal.labels.addingWork": "Will add:",
+  "AnimeDetailModal.labels.autoCreateEpisodes": "Automatically create {count} episodes",
+  "AnimeDetailModal.buttons.cancel": "Cancel",
+  "AnimeDetailModal.buttons.addWork": "Add work",
+  "AnimeDetailModal.buttons.adding": "Adding...",
+  "AnimeDetailModal.buttons.close": "Close",
+  "AnimeDetailModal.messages.addSuccess": "Work added successfully.",
+  "AnimeDetailModal.messages.addError": "Failed to add work",
+  "AnimeDetailModal.messages.genericError": "Something went wrong while adding this work. Please try again.",
+  "AnimeDetailModal.status.finished": "Finished",
+  "AnimeDetailModal.status.releasing": "Releasing",
+  "AnimeDetailModal.status.notYetReleased": "Not yet released",
+  "AnimeDetailModal.status.cancelled": "Cancelled",
+  "AnimeDetailModal.status.hiatus": "Hiatus",
+  "AnimeDetailModal.format.tv": "TV",
+  "AnimeDetailModal.format.movie": "Movie",
+  "AnimeDetailModal.format.ova": "OVA",
+  "AnimeDetailModal.format.special": "Special",
+  "AnimeDetailModal.format.ona": "ONA",
+  "AnimeDetailModal.format.music": "Music",
+  "AnimeDetailModal.season.winter": "Winter",
+  "AnimeDetailModal.seasonYear": "{year} {season}",
+  "AnimeDetailModal.moreAliases": "+{count} more",
+};
+
+jest.mock("next-intl", () => ({
+  useTranslations:
+    (namespace: string) =>
+    (key: string, values?: Record<string, string | number>) => {
+      const template = mockTranslations[`${namespace}.${key}`] ?? `${namespace}.${key}`;
+
+      return Object.entries(values ?? {}).reduce(
+        (message, [name, value]) =>
+          message.replace(new RegExp(`{${name}}`, "g"), String(value)),
+        template
+      );
+    },
+}));
+
 // Mock useWorkStore
 const mockCreateWork = jest.fn();
 jest.mock("../../store/useWorkStore", () => ({
   useWorkStore: () => ({
     createWork: mockCreateWork,
+  }),
+}));
+
+const mockShowToast = jest.fn();
+jest.mock("@/components/ui/toast", () => ({
+  useToast: () => ({
+    showToast: mockShowToast,
   }),
 }));
 
@@ -57,45 +116,46 @@ describe("AnimeDetailModal", () => {
   it("應該渲染動畫詳情", () => {
     render(<AnimeDetailModal {...defaultProps} />);
 
-    expect(screen.getByRole("heading", { name: "動畫詳情" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Anime details" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "測試動畫" })).toBeInTheDocument();
     expect(screen.getByText("Test Anime English")).toBeInTheDocument();
-    expect(screen.getByText("已完結")).toBeInTheDocument();
-    expect(screen.getByText("電視動畫")).toBeInTheDocument();
-    expect(screen.getByText("12 集")).toBeInTheDocument();
-    expect(screen.getByText("24 分鐘")).toBeInTheDocument();
+    expect(screen.getByText("Finished")).toBeInTheDocument();
+    expect(screen.getByText("TV")).toBeInTheDocument();
+    expect(screen.getByText("12 episodes")).toBeInTheDocument();
+    expect(screen.getByText("24 min")).toBeInTheDocument();
     expect(screen.getByText("8.5/10")).toBeInTheDocument();
+    expect(screen.getByText("(85 pts)")).toBeInTheDocument();
   });
 
   it("當 isOpen 為 false 時不應該渲染", () => {
     render(<AnimeDetailModal {...defaultProps} isOpen={false} />);
 
-    expect(screen.queryByRole("heading", { name: "動畫詳情" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Anime details" })).not.toBeInTheDocument();
   });
 
   it("當 anime 為 null 時不應該渲染", () => {
     render(<AnimeDetailModal {...defaultProps} anime={null} />);
 
-    expect(screen.queryByRole("heading", { name: "動畫詳情" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Anime details" })).not.toBeInTheDocument();
   });
 
   it("應該顯示正確的狀態顏色", () => {
     render(<AnimeDetailModal {...defaultProps} />);
 
-    const statusElement = screen.getByText("已完結");
+    const statusElement = screen.getByText("Finished");
     expect(statusElement).toHaveClass("bg-green-100", "text-green-800");
   });
 
   it("應該顯示正確的格式", () => {
     render(<AnimeDetailModal {...defaultProps} />);
 
-    expect(screen.getByText("電視動畫")).toBeInTheDocument();
+    expect(screen.getByText("TV")).toBeInTheDocument();
   });
 
   it("應該顯示正確的季節和年份", () => {
     render(<AnimeDetailModal {...defaultProps} />);
 
-    expect(screen.getByText("2024年冬季")).toBeInTheDocument();
+    expect(screen.getByText("2024 Winter")).toBeInTheDocument();
   });
 
   it("應該顯示正確的日期格式", () => {
@@ -128,7 +188,7 @@ describe("AnimeDetailModal", () => {
     const user = userEvent.setup();
     render(<AnimeDetailModal {...defaultProps} />);
 
-    const closeButton = screen.getByRole("button", { name: /close/i });
+    const closeButton = screen.getByRole("button", { name: "Close" });
     await user.click(closeButton);
 
     expect(defaultProps.onClose).toHaveBeenCalled();
@@ -136,11 +196,11 @@ describe("AnimeDetailModal", () => {
 
   it("點擊確認按鈕應該創建作品並關閉彈窗", async () => {
     const user = userEvent.setup();
-    mockCreateWork.mockReturnValue({ id: "1", title: "測試動畫" });
+    mockCreateWork.mockResolvedValue({ id: "1", title: "測試動畫" });
 
     render(<AnimeDetailModal {...defaultProps} />);
 
-    const confirmButton = screen.getByRole("button", { name: /新增作品/i });
+    const confirmButton = screen.getByRole("button", { name: "Add work" });
     await user.click(confirmButton);
 
     expect(mockCreateWork).toHaveBeenCalledWith(
@@ -151,23 +211,44 @@ describe("AnimeDetailModal", () => {
         source: "AniList",
       })
     );
-    expect(defaultProps.onClose).toHaveBeenCalled();
+    await waitFor(() => expect(defaultProps.onClose).toHaveBeenCalled());
+    expect(mockShowToast).toHaveBeenCalledWith("Work added successfully.", "success");
   });
 
   it("當創建作品失敗時應該顯示錯誤訊息", async () => {
     const user = userEvent.setup();
     const errorMessage = "作品已存在";
-    mockCreateWork.mockImplementation(() => {
-      throw new Error(errorMessage);
-    });
+    mockCreateWork.mockRejectedValue(new Error(errorMessage));
 
     render(<AnimeDetailModal {...defaultProps} />);
 
-    const confirmButton = screen.getByRole("button", { name: /新增作品/i });
+    const confirmButton = screen.getByRole("button", { name: "Add work" });
     await user.click(confirmButton);
 
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
     expect(defaultProps.onClose).not.toHaveBeenCalled();
+    expect(mockShowToast).toHaveBeenCalledWith("Failed to add work", "error");
+  });
+
+  it("新增中應該停用提交、取消和關閉操作", async () => {
+    const user = userEvent.setup();
+    let resolveCreateWork: (value: { id: string; title: string }) => void = () => {};
+    mockCreateWork.mockReturnValue(
+      new Promise((resolve) => {
+        resolveCreateWork = resolve;
+      })
+    );
+
+    render(<AnimeDetailModal {...defaultProps} />);
+
+    await user.click(screen.getByRole("button", { name: "Add work" }));
+
+    expect(screen.getByRole("button", { name: "Adding..." })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Close" })).toBeDisabled();
+
+    resolveCreateWork({ id: "1", title: "測試動畫" });
+    await waitFor(() => expect(defaultProps.onClose).toHaveBeenCalled());
   });
 
   it("當沒有集數時應該不顯示集數標籤", () => {
@@ -178,7 +259,7 @@ describe("AnimeDetailModal", () => {
 
     render(<AnimeDetailModal {...defaultProps} anime={animeWithoutEpisodes} />);
 
-    expect(screen.queryByText(/集/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/episodes/)).not.toBeInTheDocument();
   });
 
   it("當沒有評分時應該不顯示評分", () => {
@@ -210,10 +291,10 @@ describe("AnimeDetailModal", () => {
 
   it("應該處理不同的狀態", () => {
     const statuses = [
-      { status: "RELEASING", expected: "連載中" },
-      { status: "NOT_YET_RELEASED", expected: "未播出" },
-      { status: "CANCELLED", expected: "已取消" },
-      { status: "HIATUS", expected: "暫停" },
+      { status: "RELEASING", expected: "Releasing" },
+      { status: "NOT_YET_RELEASED", expected: "Not yet released" },
+      { status: "CANCELLED", expected: "Cancelled" },
+      { status: "HIATUS", expected: "Hiatus" },
     ];
 
     statuses.forEach(({ status, expected }) => {
@@ -222,18 +303,19 @@ describe("AnimeDetailModal", () => {
         status: status as any,
       };
 
-      render(<AnimeDetailModal {...defaultProps} anime={animeWithStatus} />);
+      const { unmount } = render(<AnimeDetailModal {...defaultProps} anime={animeWithStatus} />);
       expect(screen.getByText(expected)).toBeInTheDocument();
+      unmount();
     });
   });
 
   it("應該處理不同的格式", () => {
     const formats = [
-      { format: "MOVIE", expected: "電影" },
+      { format: "MOVIE", expected: "Movie" },
       { format: "OVA", expected: "OVA" },
-      { format: "SPECIAL", expected: "特別篇" },
-      { format: "ONA", expected: "網路動畫" },
-      { format: "MUSIC", expected: "音樂動畫" },
+      { format: "SPECIAL", expected: "Special" },
+      { format: "ONA", expected: "ONA" },
+      { format: "MUSIC", expected: "Music" },
     ];
 
     formats.forEach(({ format, expected }) => {
@@ -242,8 +324,9 @@ describe("AnimeDetailModal", () => {
         format: format as any,
       };
 
-      render(<AnimeDetailModal {...defaultProps} anime={animeWithFormat} />);
+      const { unmount } = render(<AnimeDetailModal {...defaultProps} anime={animeWithFormat} />);
       expect(screen.getByText(expected)).toBeInTheDocument();
+      unmount();
     });
   });
 });

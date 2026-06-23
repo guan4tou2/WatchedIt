@@ -3,8 +3,16 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { workStorage, tagStorage, dbUtils } from "@/lib/indexedDB";
 import { WorkCreate } from "@/types";
 
@@ -14,6 +22,7 @@ export default function TestIndexedDBPage() {
   const [dbInfo, setDbInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string>("");
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -92,18 +101,21 @@ export default function TestIndexedDBPage() {
   };
 
   const testClearAll = async () => {
-    if (confirm("確定要清空所有數據嗎？")) {
-      setIsLoading(true);
-      try {
-        await dbUtils.clearAll();
-        await loadData();
-        setMessage("清空數據成功");
-      } catch (error) {
-        console.error("清空數據失敗:", error);
-        setMessage("清空數據失敗");
-      } finally {
-        setIsLoading(false);
-      }
+    setClearDialogOpen(true);
+  };
+
+  const confirmClearAll = async () => {
+    setIsLoading(true);
+    try {
+      await dbUtils.clearAll();
+      await loadData();
+      setMessage("清空數據成功");
+      setClearDialogOpen(false);
+    } catch (error) {
+      console.error("清空數據失敗:", error);
+      setMessage("清空數據失敗");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -136,7 +148,10 @@ export default function TestIndexedDBPage() {
       <h1 className="text-3xl font-bold mb-6">IndexedDB 測試</h1>
 
       {message && (
-        <div className="mb-4 p-4 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 rounded-md">
+        <div
+          role="status"
+          className="mb-4 p-4 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 rounded-md"
+        >
           {message}
         </div>
       )}
@@ -235,6 +250,27 @@ export default function TestIndexedDBPage() {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>清空所有數據</AlertDialogTitle>
+            <AlertDialogDescription>
+              將清空 IndexedDB 測試資料中的所有作品與標籤，且無法復原。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmClearAll}
+              disabled={isLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              確認清空
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

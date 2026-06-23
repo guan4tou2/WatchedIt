@@ -17,11 +17,8 @@ import {
   Settings,
   Plus,
   Menu,
-  CheckSquare,
-  Square,
-  Edit3,
-  Trash2,
   AlertTriangle,
+  CheckCircle,
 } from "lucide-react";
 import QuickAddEpisode from "@/components/QuickAddEpisode";
 import AniListSearch from "@/components/AniListSearch";
@@ -38,6 +35,7 @@ import StatsOverview from "@/components/StatsOverview";
 import DataReminder from "@/components/DataReminder";
 import WorkList from "@/components/WorkList";
 import SyncIndicator from "@/components/SyncIndicator";
+import BatchActionBar from "@/components/BatchActionBar";
 import { useWorkFilters } from "@/hooks/useWorkFilters";
 import { useBatchOperations } from "@/hooks/useBatchOperations";
 
@@ -121,6 +119,10 @@ export default function HomePage() {
     hasIndexedDBData: boolean;
   } | null>(null);
   const [isMigrating, setIsMigrating] = useState(false);
+  const [migrationMessage, setMigrationMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   // Data Reminder State
   const [showDataReminder, setShowDataReminder] = useState(() => {
@@ -154,6 +156,7 @@ export default function HomePage() {
 
   const handleMigration = async () => {
     setIsMigrating(true);
+    setMigrationMessage(null);
     try {
       const result = await migrateFromLocalStorage();
       if (result.success) {
@@ -162,13 +165,19 @@ export default function HomePage() {
         await fetchWorks();
         await fetchStats();
         await checkMigrationStatus();
-        alert(result.message);
+        setMigrationMessage({ type: "success", text: result.message });
       } else {
-        alert(`遷移失敗: ${result.message}`);
+        setMigrationMessage({
+          type: "error",
+          text: `遷移失敗: ${result.message}`,
+        });
       }
     } catch (error) {
       console.error("遷移失敗:", error);
-      alert("遷移失敗，請檢查控制台錯誤信息");
+      setMigrationMessage({
+        type: "error",
+        text: "遷移失敗，請檢查控制台錯誤信息",
+      });
     } finally {
       setIsMigrating(false);
     }
@@ -332,6 +341,9 @@ export default function HomePage() {
             size="sm"
             onClick={() => setShowMobileMenu(!showMobileMenu)}
             className="active:scale-95 transition-transform"
+            aria-label={homeActionsT(showMobileMenu ? "closeMenu" : "openMenu")}
+            aria-expanded={showMobileMenu}
+            aria-controls="mobile-navigation"
           >
             <Menu className="w-4 h-4" />
           </Button>
@@ -340,7 +352,12 @@ export default function HomePage() {
 
       {/* Mobile Menu */}
       {showMobileMenu && (
-        <div className="md:hidden mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg border shadow-lg animate-fade-in-up">
+        <div
+          id="mobile-navigation"
+          role="navigation"
+          aria-label={homeActionsT("mainMenu")}
+          className="md:hidden mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg border shadow-lg animate-fade-in-up"
+        >
           <div className="flex flex-col space-y-2">
             <ThemeToggle />
             <Button
@@ -427,74 +444,45 @@ export default function HomePage() {
         </div>
       )}
 
+      {migrationMessage && (
+        <div
+          role={migrationMessage.type === "success" ? "status" : "alert"}
+          aria-label="資料遷移狀態"
+          className={`mb-6 flex items-center gap-2 rounded border px-4 py-3 text-sm ${
+            migrationMessage.type === "success"
+              ? "border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-200"
+              : "border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200"
+          }`}
+        >
+          {migrationMessage.type === "success" ? (
+            <CheckCircle className="h-4 w-4 flex-shrink-0" aria-hidden />
+          ) : (
+            <AlertTriangle className="h-4 w-4 flex-shrink-0" aria-hidden />
+          )}
+          <span>{migrationMessage.text}</span>
+        </div>
+      )}
+
       {/* Works List Header */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
             <h2 className="text-lg sm:text-xl font-semibold dark:text-foreground/98">
               {homeLabelsT(hasActiveFilters ? "searchResults" : "recentWorks")}
             </h2>
 
             {/* Batch Actions */}
             {filteredWorks.length > 0 && (
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant={isBatchMode ? "default" : "outline"}
-                  size="sm"
-                  onClick={toggleBatchMode}
-                  className="active:scale-95 transition-transform"
-                >
-                  {isBatchMode ? (
-                    <>
-                      <CheckSquare className="w-4 h-4 mr-1" />
-                      {homeActionsT("batchMode")}
-                    </>
-                  ) : (
-                    <>
-                      <Square className="w-4 h-4 mr-1" />
-                      {homeActionsT("batchSelect")}
-                    </>
-                  )}
-                </Button>
-
-                {isBatchMode && (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => selectAllWorks(filteredWorks)}
-                    >
-                      {homeActionsT("selectAll")}
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={clearSelection}>
-                      {homeActionsT("clearSelection")}
-                    </Button>
-                    {selectedWorkIds.size > 0 && (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={() => setShowBatchEditModal(true)}
-                        >
-                          <Edit3 className="w-4 h-4 mr-1" />
-                          {homeActionsT("batchEditCount", {
-                            count: selectedWorkIds.size,
-                          })}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => setShowBatchDeleteModal(true)}
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          {homeActionsT("batchDeleteCount", {
-                            count: selectedWorkIds.size,
-                          })}
-                        </Button>
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
+              <BatchActionBar
+                isBatchMode={isBatchMode}
+                filteredCount={filteredWorks.length}
+                selectedCount={selectedWorkIds.size}
+                onToggleBatchMode={toggleBatchMode}
+                onSelectAll={() => selectAllWorks(filteredWorks)}
+                onClearSelection={clearSelection}
+                onBatchEdit={() => setShowBatchEditModal(true)}
+                onBatchDelete={() => setShowBatchDeleteModal(true)}
+              />
             )}
           </div>
 
@@ -609,4 +597,3 @@ export default function HomePage() {
     </div>
   );
 }
-

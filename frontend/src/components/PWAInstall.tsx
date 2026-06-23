@@ -4,8 +4,14 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { X, Download } from "lucide-react";
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
 export default function PWAInstall() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
   useEffect(() => {
@@ -23,7 +29,7 @@ export default function PWAInstall() {
     // 監聽 beforeinstallprompt 事件
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
 
       // 只有在首次使用時才顯示安裝提示
       if (!hasShownInstallPrompt) {
@@ -37,7 +43,6 @@ export default function PWAInstall() {
       setDeferredPrompt(null);
       // 標記已安裝
       localStorage.setItem("watchedit_pwa_installed", "true");
-      console.log("PWA was installed");
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -59,11 +64,8 @@ export default function PWAInstall() {
     const { outcome } = await deferredPrompt.userChoice;
 
     if (outcome === "accepted") {
-      console.log("User accepted the install prompt");
       // 標記已安裝
       localStorage.setItem("watchedit_pwa_installed", "true");
-    } else {
-      console.log("User dismissed the install prompt");
     }
 
     // 標記已顯示過安裝提示
@@ -81,20 +83,20 @@ export default function PWAInstall() {
   if (!showInstallPrompt) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 bg-white dropdown-bg border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 z-50">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+    <div className="mx-4 mb-4 mt-4 rounded-lg border border-gray-200 bg-white p-3 shadow-lg dropdown-bg dark:border-gray-700 sm:fixed sm:bottom-4 sm:left-1/2 sm:z-50 sm:mx-0 sm:mt-0 sm:w-[min(640px,calc(100vw-2rem))] sm:-translate-x-1/2 sm:p-4">
+      <div className="flex items-start gap-3">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-500">
             <Download className="w-5 h-5 text-white" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h3 className="font-medium title-text">安裝 WatchedIt</h3>
             <p className="text-sm description-text">
               將應用程式安裝到主畫面，享受更好的使用體驗
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-shrink-0 items-center gap-2">
           <Button
             onClick={handleInstallClick}
             size="sm"
@@ -107,6 +109,7 @@ export default function PWAInstall() {
             variant="ghost"
             size="sm"
             className="note-text hover:text-gray-700 dark:hover:text-gray-300"
+            aria-label="關閉安裝提示"
           >
             <X className="w-4 h-4" />
           </Button>

@@ -5,6 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Episode, EpisodeType, CustomEpisodeType } from "@/types";
 import { workTypeEpisodeMappingStorage } from "@/lib/workTypeEpisodeMapping";
 import { customEpisodeTypeStorage } from "@/lib/customEpisodeTypes";
@@ -49,6 +59,8 @@ export default function EpisodeManager({
 
   // 批量管理狀態
   const [isBatchMode, setIsBatchMode] = useState(false);
+  const [batchDeleteDialogOpen, setBatchDeleteDialogOpen] = useState(false);
+  const [episodeToDelete, setEpisodeToDelete] = useState<Episode | null>(null);
   const [selectedEpisodeIds, setSelectedEpisodeIds] = useState<Set<string>>(
     new Set()
   );
@@ -177,11 +189,7 @@ export default function EpisodeManager({
         watched: false,
       };
 
-      console.log("新增集數:", episode);
-
       const updatedEpisodes = [...episodes, episode];
-      console.log("更新後的集數列表:", updatedEpisodes);
-
       onEpisodesChange(updatedEpisodes);
 
       // 重置表單，自動計算下一集數
@@ -202,12 +210,9 @@ export default function EpisodeManager({
 
   const handleUpdateEpisode = (episode: Episode) => {
     try {
-      console.log("更新集數:", episode);
-
       const updatedEpisodes = episodes.map((ep) =>
         ep.id === episode.id ? episode : ep
       );
-      console.log("更新後的集數列表:", updatedEpisodes);
 
       onEpisodesChange(updatedEpisodes);
       setEditingEpisode(null);
@@ -217,13 +222,20 @@ export default function EpisodeManager({
   };
 
   const handleDeleteEpisode = (episodeId: string) => {
-    try {
-      console.log("刪除集數:", episodeId);
+    const episode = episodes.find((ep) => ep.id === episodeId);
+    if (!episode) return;
 
-      const updatedEpisodes = episodes.filter((ep) => ep.id !== episodeId);
-      console.log("更新後的集數列表:", updatedEpisodes);
+    setEpisodeToDelete(episode);
+  };
+
+  const confirmDeleteEpisode = () => {
+    if (!episodeToDelete) return;
+
+    try {
+      const updatedEpisodes = episodes.filter((ep) => ep.id !== episodeToDelete.id);
 
       onEpisodesChange(updatedEpisodes);
+      setEpisodeToDelete(null);
     } catch (error) {
       console.error("刪除集數失敗:", error);
     }
@@ -305,15 +317,19 @@ export default function EpisodeManager({
   };
 
   const batchDeleteEpisodes = () => {
-    if (confirm(`確定要刪除選中的 ${selectedEpisodeIds.size} 個集數嗎？`)) {
-      const updatedEpisodes = episodes.filter(
-        (ep) => !selectedEpisodeIds.has(ep.id)
-      );
-      onEpisodesChange(updatedEpisodes);
-      setSelectedEpisodeIds(new Set());
-      // 操作完成後自動退出批量模式
-      setIsBatchMode(false);
-    }
+    if (selectedEpisodeIds.size === 0) return;
+    setBatchDeleteDialogOpen(true);
+  };
+
+  const confirmBatchDeleteEpisodes = () => {
+    const updatedEpisodes = episodes.filter(
+      (ep) => !selectedEpisodeIds.has(ep.id)
+    );
+    onEpisodesChange(updatedEpisodes);
+    setSelectedEpisodeIds(new Set());
+    setBatchDeleteDialogOpen(false);
+    // 操作完成後自動退出批量模式
+    setIsBatchMode(false);
   };
 
   return (
@@ -381,6 +397,7 @@ export default function EpisodeManager({
                 size="sm"
                 variant="outline"
                 onClick={batchDeleteEpisodes}
+                disabled={selectedEpisodeIds.size === 0}
                 className="text-red-600 dark:text-red-400"
               >
                 <Trash2 className="w-3 h-3 mr-1" />
@@ -578,6 +595,7 @@ export default function EpisodeManager({
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => setEditingEpisode(episode)}
+                                aria-label={`編輯第${episode.season}季第${episode.number}集`}
                               >
                                 <Edit className="w-3 h-3" />
                               </Button>
@@ -585,6 +603,7 @@ export default function EpisodeManager({
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => handleDeleteEpisode(episode.id)}
+                                aria-label={`刪除第${episode.season}季第${episode.number}集`}
                                 className="text-red-600 dark:text-red-400 hover:text-red-700"
                               >
                                 <Trash2 className="w-3 h-3" />
@@ -725,6 +744,56 @@ export default function EpisodeManager({
           )}
         </div>
       </CardContent>
+
+      <AlertDialog
+        open={Boolean(episodeToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setEpisodeToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>刪除集數</AlertDialogTitle>
+            <AlertDialogDescription>
+              {episodeToDelete
+                ? `將刪除第${episodeToDelete.season}季第${episodeToDelete.number}集${episodeToDelete.title ? `「${episodeToDelete.title}」` : ""}，且無法復原。`
+                : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteEpisode}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              確認刪除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={batchDeleteDialogOpen}
+        onOpenChange={setBatchDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>刪除集數</AlertDialogTitle>
+            <AlertDialogDescription>
+              將刪除已選擇的 {selectedEpisodeIds.size} 個集數，且無法復原。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBatchDeleteEpisodes}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              確認刪除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

@@ -7,6 +7,10 @@ export default function TestConfigPage() {
   const [apiBaseUrl, setApiBaseUrl] = useState<string>("");
   const [apiUrl, setApiUrl] = useState<string>("");
   const [windowOrigin, setWindowOrigin] = useState<string>("");
+  const [connectionResult, setConnectionResult] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     setApiBaseUrl(getApiBaseUrl());
@@ -15,6 +19,24 @@ export default function TestConfigPage() {
       typeof window !== "undefined" ? window.location.origin : "N/A"
     );
   }, []);
+
+  const testApiConnection = async () => {
+    setConnectionResult(null);
+    try {
+      const response = await fetch("/api/search/anime?query=test");
+      await response.json();
+      setConnectionResult({
+        type: "success",
+        text: `API 連接成功！回應狀態: ${response.status}`,
+      });
+    } catch (error) {
+      setConnectionResult({
+        type: "error",
+        text: `API 連接失敗: ${error}`,
+      });
+      console.error("API 錯誤:", error);
+    }
+  };
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -75,18 +97,21 @@ export default function TestConfigPage() {
 
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">測試 API 連接</h2>
+          {connectionResult && (
+            <div
+              role={connectionResult.type === "success" ? "status" : "alert"}
+              aria-label="API 連接結果"
+              className={`mb-4 rounded border px-4 py-3 text-sm ${
+                connectionResult.type === "success"
+                  ? "border-green-200 bg-green-50 text-green-800"
+                  : "border-red-200 bg-red-50 text-red-800"
+              }`}
+            >
+              {connectionResult.text}
+            </div>
+          )}
           <button
-            onClick={async () => {
-              try {
-                const response = await fetch("/api/search/anime?query=test");
-                const data = await response.json();
-                alert(`API 連接成功！回應狀態: ${response.status}`);
-                console.log("API 回應:", data);
-              } catch (error) {
-                alert(`API 連接失敗: ${error}`);
-                console.error("API 錯誤:", error);
-              }
-            }}
+            onClick={testApiConnection}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
             測試 API 連接

@@ -61,6 +61,7 @@ describe("AniListService", () => {
     });
 
     it("當搜尋失敗時應該拋出錯誤", async () => {
+      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
@@ -70,14 +71,19 @@ describe("AniListService", () => {
       await expect(anilistService.searchAnime("test")).rejects.toThrow(
         "HTTP error! status: 500"
       );
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
     });
 
     it("當網絡錯誤時應該拋出錯誤", async () => {
+      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
       mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
       await expect(anilistService.searchAnime("test")).rejects.toThrow(
         "Network error"
       );
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
     });
   });
 

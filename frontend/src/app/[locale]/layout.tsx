@@ -1,16 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
 import "../globals.css";
 import PWAInstall from "@/components/PWAInstall";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { pwaService } from "@/lib/pwa";
 import SPARedirect from "@/components/SPARedirect";
 import { Suspense } from "react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-
-const inter = Inter({ subsets: ["latin"] });
 
 // 移除硬編碼的路徑前綴,讓 Vercel 自動處理
 const basePath = "";
@@ -77,7 +73,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={inter.className}>
+      <body>
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider>
             <Suspense fallback={<div>Loading...</div>}>
@@ -98,23 +94,7 @@ export default async function RootLayout({
                   const swPath = '/sw.js';
                   
                   navigator.serviceWorker.register(swPath)
-                    .then(function(registration) {
-                      console.log('SW registered: ', registration);
-                    })
-                    .catch(function(registrationError) {
-                      console.log('SW registration failed: ', registrationError);
-                    });
-                });
-              }
-              
-              // 改善 Service Worker 通訊錯誤處理
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.addEventListener('message', function(event) {
-                  console.log('SW message received:', event.data);
-                });
-                
-                navigator.serviceWorker.addEventListener('error', function(event) {
-                  console.error('SW error:', event.error);
+                    .catch(function() {});
                 });
               }
             `,

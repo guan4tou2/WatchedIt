@@ -45,6 +45,7 @@ describe("localStorage", () => {
 
     describe("create", () => {
       it("應該成功創建新作品", () => {
+        const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
         const work = workStorage.create(mockWork);
 
         expect(work.id).toBeDefined();
@@ -54,6 +55,7 @@ describe("localStorage", () => {
         expect(work.episodes).toEqual([]);
         expect(work.reminder_enabled).toBe(false);
         expect(mockLocalStorage.setItem).toHaveBeenCalled();
+        expect(logSpy).not.toHaveBeenCalled();
       });
 
       it("應該為新作品生成唯一ID", () => {
@@ -156,7 +158,7 @@ describe("localStorage", () => {
             type: "動畫",
             status: "進行中",
             episodes: [],
-            aniListId: 123,
+            note: "AniList ID: 123",
           },
           {
             id: "2",
@@ -164,7 +166,7 @@ describe("localStorage", () => {
             type: "電影",
             status: "已完結",
             episodes: [],
-            aniListId: 456,
+            note: "AniList ID: 456",
           },
         ];
 
@@ -183,7 +185,7 @@ describe("localStorage", () => {
             type: "動畫",
             status: "進行中",
             episodes: [],
-            aniListId: 123,
+            note: "AniList ID: 123",
           },
         ];
 

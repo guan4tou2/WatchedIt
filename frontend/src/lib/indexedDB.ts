@@ -280,6 +280,9 @@ export const workStorage = {
   // 刪除作品
   async delete(id: string): Promise<boolean> {
     try {
+      const existingWork = await dbManager.get<Work>(STORES.WORKS, id);
+      if (!existingWork) return false;
+
       await dbManager.delete(STORES.WORKS, id);
       return true;
     } catch (error) {
@@ -493,6 +496,9 @@ export const tagStorage = {
   // 刪除標籤
   async delete(id: number): Promise<boolean> {
     try {
+      const existingTag = await dbManager.get<Tag>(STORES.TAGS, id);
+      if (!existingTag) return false;
+
       await dbManager.delete(STORES.TAGS, id);
       return true;
     } catch (error) {

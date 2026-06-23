@@ -1,5 +1,6 @@
 from httpx import AsyncClient
 from sqlalchemy.orm import Session
+from app.schemas.work import WorkCreate, WorkUpdate
 
 
 class TestWorksAPI:
@@ -15,7 +16,7 @@ class TestWorksAPI:
         assert data["type"] == sample_work_data["type"]
         assert data["status"] == sample_work_data["status"]
         assert "id" in data
-        assert "date_created" in data
+        assert "date_added" in data
 
     async def test_create_work_invalid_data(self, client: AsyncClient):
         """測試創建作品時無效數據"""
@@ -36,9 +37,9 @@ class TestWorksAPI:
         assert response.status_code == 200
         data = response.json()
 
-        assert isinstance(data, list)
-        assert len(data) >= 1
-        assert data[0]["title"] == sample_work_data["title"]
+        assert "works" in data
+        assert data["total"] >= 1
+        assert data["works"][0]["title"] == sample_work_data["title"]
 
     async def test_get_work_by_id(self, client: AsyncClient, sample_work_data: dict):
         """測試根據 ID 獲取作品"""
@@ -85,7 +86,7 @@ class TestWorksAPI:
         work_id = create_response.json()["id"]
 
         response = await client.delete(f"/works/{work_id}")
-        assert response.status_code == 204
+        assert response.status_code == 200
 
         # 確認作品已被刪除
         get_response = await client.get(f"/works/{work_id}")
@@ -119,8 +120,8 @@ class TestWorksService:
         """測試服務層創建作品"""
         from app.services.work_service import WorkService
 
-        work_service = WorkService()
-        work = work_service.create_work(db, sample_work_data)
+        work_service = WorkService(db)
+        work = work_service.create_work(WorkCreate(**sample_work_data))
 
         assert work.title == sample_work_data["title"]
         assert work.type == sample_work_data["type"]
@@ -131,27 +132,27 @@ class TestWorksService:
         """測試服務層獲取作品列表"""
         from app.services.work_service import WorkService
 
-        work_service = WorkService()
+        work_service = WorkService(db)
 
         # 創建作品
-        work_service.create_work(db, sample_work_data)
+        work_service.create_work(WorkCreate(**sample_work_data))
 
         # 獲取作品列表
-        works = work_service.get_works(db)
-        assert len(works) >= 1
-        assert works[0].title == sample_work_data["title"]
+        works = work_service.get_works()
+        assert works.total >= 1
+        assert works.works[0].title == sample_work_data["title"]
 
     def test_get_work_by_id_service(self, db: Session, sample_work_data: dict):
         """測試服務層根據 ID 獲取作品"""
         from app.services.work_service import WorkService
 
-        work_service = WorkService()
+        work_service = WorkService(db)
 
         # 創建作品
-        created_work = work_service.create_work(db, sample_work_data)
+        created_work = work_service.create_work(WorkCreate(**sample_work_data))
 
         # 根據 ID 獲取作品
-        work = work_service.get_work_by_id(db, created_work.id)
+        work = work_service.get_work(created_work.id)
         assert work is not None
         assert work.title == sample_work_data["title"]
 
@@ -159,14 +160,16 @@ class TestWorksService:
         """測試服務層更新作品"""
         from app.services.work_service import WorkService
 
-        work_service = WorkService()
+        work_service = WorkService(db)
 
         # 創建作品
-        created_work = work_service.create_work(db, sample_work_data)
+        created_work = work_service.create_work(WorkCreate(**sample_work_data))
 
         # 更新作品
         update_data = {"title": "更新後的標題"}
-        updated_work = work_service.update_work(db, created_work.id, update_data)
+        updated_work = work_service.update_work(
+            created_work.id, WorkUpdate(**update_data)
+        )
 
         assert updated_work.title == "更新後的標題"
 
@@ -174,31 +177,36 @@ class TestWorksService:
         """測試服務層刪除作品"""
         from app.services.work_service import WorkService
 
-        work_service = WorkService()
+        work_service = WorkService(db)
 
         # 創建作品
-        created_work = work_service.create_work(db, sample_work_data)
+        created_work = work_service.create_work(WorkCreate(**sample_work_data))
 
         # 刪除作品
-        result = work_service.delete_work(db, created_work.id)
+        result = work_service.delete_work(created_work.id)
         assert result is True
 
         # 確認作品已被刪除
-        work = work_service.get_work_by_id(db, created_work.id)
-        assert work is None
+        from app.exceptions import WorkNotFoundException
+
+        try:
+            work_service.get_work(created_work.id)
+            assert False, "Expected WorkNotFoundException"
+        except WorkNotFoundException:
+            pass
 
     def test_get_stats_service(self, db: Session, sample_work_data: dict):
         """測試服務層獲取統計"""
         from app.services.work_service import WorkService
 
-        work_service = WorkService()
+        work_service = WorkService(db)
 
         # 創建一些作品
-        work_service.create_work(db, sample_work_data)
-        work_service.create_work(db, {**sample_work_data, "title": "作品2"})
+        work_service.create_work(WorkCreate(**sample_work_data))
+        work_service.create_work(WorkCreate(**{**sample_work_data, "title": "作品2"}))
 
         # 獲取統計
-        stats = work_service.get_stats(db)
+        stats = work_service.get_stats()
 
         assert stats["total_works"] >= 2
         assert "type_stats" in stats

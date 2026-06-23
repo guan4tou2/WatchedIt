@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TagCreate(BaseModel):
@@ -14,9 +14,8 @@ class TagUpdate(BaseModel):
 
 
 class TagResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     color: str
-
-    class Config:
-        from_attributes = True

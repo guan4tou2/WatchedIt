@@ -58,6 +58,7 @@ const PROGRESS_KEY_MAP: Record<string, string> = {
   高進度: "highProgress",
   低進度: "lowProgress",
   "高進度 (80%+)": "highProgress",
+  "低進度 (<20%)": "lowProgress",
   "低進度 (20%+)": "lowProgress",
 };
 
@@ -632,7 +633,7 @@ export default function SearchFilter({
                       <option value="低進度">
                         {t(
                           "details.basic.progressOptions.low",
-                          { defaultMessage: "低進度 (20%+)" }
+                          { defaultMessage: "低進度 (<20%)" }
                         )}
                       </option>
                     </select>
